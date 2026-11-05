@@ -361,7 +361,9 @@ impl ProcFs {
     pub fn listeners(&self) -> HashMap<u64, Listener> {
         [("net/tcp", "tcp"), ("net/tcp6", "tcp6")]
             .into_iter()
-            .flat_map(|(f, proto)| parse_net_listeners(&fs::read_to_string(self.root.join(f)).unwrap_or_default(), proto))
+            .flat_map(|(f, proto)| {
+                parse_net_listeners(&fs::read_to_string(self.root.join(f)).unwrap_or_default(), proto)
+            })
             .map(|l| (l.inode, l))
             .collect()
     }
@@ -519,12 +521,20 @@ mod tests {
             vec![Listener { inode: 555, addr: "127.0.0.1".into(), port: 3000, proto: "tcp" }]
         );
         let tcp6 = "header\n   0: 00000000000000000000000001000000:0050 00000000000000000000000000000000:0000 0A 0 0 0 0 0 777 1\n";
-        assert_eq!(parse_net_listeners(tcp6, "tcp6")[0], Listener { inode: 777, addr: "::1".into(), port: 80, proto: "tcp6" });
+        assert_eq!(
+            parse_net_listeners(tcp6, "tcp6")[0],
+            Listener { inode: 777, addr: "::1".into(), port: 80, proto: "tcp6" }
+        );
         assert_eq!(parse_hex_addr("ABC"), None);
         assert_eq!(parse_hex_addr("0102"), None);
-        let m = parse_meminfo("MemTotal: 100 kB\nMemAvailable: 40 kB\nSwapTotal: 10 kB\nSwapFree: 5 kB\nbad\nOther: 1 kB\n");
+        let m = parse_meminfo(
+            "MemTotal: 100 kB\nMemAvailable: 40 kB\nSwapTotal: 10 kB\nSwapFree: 5 kB\nbad\nOther: 1 kB\n",
+        );
         assert_eq!(m, MemInfo { total: 100.0 * KB, available: 40.0 * KB, swap_total: 10.0 * KB, swap_free: 5.0 * KB });
-        assert_eq!(parse_psi("some avg10=1.50 avg60=0.00 avg300=0.00 total=1\nfull avg10=0.25 avg60=0 avg300=0 total=0\n"), (1.5, 0.25));
+        assert_eq!(
+            parse_psi("some avg10=1.50 avg60=0.00 avg300=0.00 total=1\nfull avg10=0.25 avg60=0 avg300=0 total=0\n"),
+            (1.5, 0.25)
+        );
         assert_eq!(parse_psi(""), (0.0, 0.0));
         assert_eq!(parse_loadavg("0.52 0.40 0.30 1/200 999"), 0.52);
         assert_eq!(parse_loadavg(""), 0.0);

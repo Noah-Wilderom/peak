@@ -1,4 +1,4 @@
-import { TICK_MS, type Proc, type Sample } from "@/lib/types"
+import { TICK_MS, type MetricKey, type Proc, type Sample } from "@/lib/types"
 
 export type RangeKey = "30s" | "1m" | "5m" | "15m" | "1h" | "all"
 
@@ -144,21 +144,21 @@ export function byteUnit(max: number) {
 
 // ─── statistics ──────────────────────────────────────────────────────────────
 
-export function average(samples: Sample[], key: keyof Sample) {
+export function average(samples: Sample[], key: MetricKey) {
   if (!samples.length) return 0
   let sum = 0
   for (const s of samples) sum += s[key]
   return sum / samples.length
 }
 
-export function maxOf(samples: Sample[], key: keyof Sample) {
+export function maxOf(samples: Sample[], key: MetricKey) {
   let m = 0
   for (const s of samples) if (s[key] > m) m = s[key]
   return m
 }
 
 /** Value of `key` roughly `ms` before the latest sample. */
-export function valueAgo(samples: Sample[], key: keyof Sample, ms: number) {
+export function valueAgo(samples: Sample[], key: MetricKey, ms: number) {
   const last = samples.at(-1)
   if (!last) return 0
   for (let i = samples.length - 1; i >= 0; i--) {
@@ -180,7 +180,7 @@ export function stddev(values: number[]) {
 }
 
 /** Least-squares slope of `key` in units per millisecond, plus R². */
-export function trend(samples: Sample[], key: keyof Sample) {
+export function trend(samples: Sample[], key: MetricKey) {
   const n = samples.length
   if (n < 10) return { slope: 0, r2: 0 }
   const t0 = samples[0].t

@@ -27,3 +27,17 @@ also run in CI — see `.github/workflows/test.yml`.
 
 Outside Tauri (plain `bun run dev` in a browser) the UI runs against a simulated
 monitor (`src/lib/mock.ts`); inside the desktop app it uses the Rust backend.
+
+## Wayland known issues
+
+Run with this command to avoid a crash on Wayland:
+
+```bash
+
+__NV_DISABLE_EXPLICIT_SYNC=1 bun run tauri dev
+```
+
+## Docs
+
+- [Handoff: current state and next steps](docs/HANDOFF.md)
+- [Remote monitoring research (planned feature)](docs/remote-monitoring-research.md)

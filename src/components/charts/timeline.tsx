@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react"
 import type { MouseHandlerDataParam } from "recharts"
-import { TICK_MS, type Proc, type Sample } from "@/lib/types"
+import { TICK_MS, type MetricKey, type Proc, type Sample } from "@/lib/types"
 import { byteUnit, niceTicks, timeTicks, viewData, type AxisMode, type View } from "@/lib/series"
 import { formatClock, formatOffset } from "@/lib/format"
 import { useTimeDomain, useTweened } from "@/hooks/use-smooth"
@@ -106,7 +106,7 @@ export function useEasedYAxis(max: number, opts: { bytes?: boolean; count?: numb
 }
 
 /** Max of `keys` (summed if `stack`) over the samples within [from, to]. */
-export function visibleMax(data: Sample[], from: number, to: number, keys: (keyof Sample)[], stack = false) {
+export function visibleMax(data: Sample[], from: number, to: number, keys: (MetricKey)[], stack = false) {
   let m = 0
   for (const d of data) {
     if (d.t < from || d.t > to) continue

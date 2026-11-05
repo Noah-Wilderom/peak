@@ -33,6 +33,32 @@ export interface Sample {
   alloc: number
   /** Minor page faults per second. */
   faults: number
+  // Newer backends also report these (optional so older data still loads).
+  threads?: number
+  files?: number
+  sockets?: number
+  pipes?: number
+  /** Node event-loop / Python interpreter delay, p99 ms. */
+  loopLag?: number
+  kids?: { pid: number; rss: number; cpu: number }[]
+}
+
+/** Numeric metrics every sample has (excludes the optional newer fields). */
+export type MetricKey = {
+  [K in keyof Sample]-?: undefined extends Sample[K] ? never : Sample[K] extends number ? K : never
+}[keyof Sample]
+
+/** Machine-wide context sampled alongside processes. */
+export interface SystemSample {
+  t: number
+  memTotal: number
+  memAvailable: number
+  swapTotal: number
+  swapFree: number
+  psiSome: number
+  psiFull: number
+  load1: number
+  cpu: number
 }
 
 export interface GcEvent {
@@ -120,6 +146,8 @@ export interface Proc {
   snapshots: HeapSnapshot[]
   logs: LogLine[]
   children: ChildProc[]
+  childNames?: Record<string, string>
+  ports?: { port: number; proto: string; addr: string; pid: number }[]
 }
 
 export interface SystemInfo {
@@ -136,6 +164,8 @@ export interface State {
   system: SystemInfo
   /** False until the backend has sent its first full state. */
   ready: boolean
+  /** Recent machine-wide samples (Tauri backend only). */
+  machine?: SystemSample[]
   error?: string
 }
 

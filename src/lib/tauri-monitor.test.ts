@@ -91,7 +91,7 @@ describe("TauriMonitor", () => {
     const got: unknown[] = []
     const off = m.onEvent((e) => got.push(e))
     off()
-    m.onTick([])
+    m.onTick({ procs: [], system: null })
     expect(got).toEqual([])
     expect(events).toEqual([])
   })
@@ -116,12 +116,22 @@ describe("TauriMonitor", () => {
     const { m, emit, events } = setup([a, b])
     m.subscribe(vi.fn())
     await flush()
-    emit("peak://tick", [delta(a, { samples: [sample(5000, 9)] })])
+    emit("peak://tick", { procs: [delta(a, { samples: [sample(5000, 9)] })], system: null })
     expect(m.getSnapshot().procs[0].samples.at(-1)!.t).toBe(5000)
-    emit("peak://tick", [delta(a, { status: "exited" }), delta(b, { status: "crashed" })])
+    emit("peak://tick", { procs: [delta(a, { status: "exited" }), delta(b, { status: "crashed" })], system: null })
     expect(events.map((e) => e.type)).toEqual(["exited", "crashed"])
-    emit("peak://tick", [delta(a, { status: "exited" })])
+    emit("peak://tick", { procs: [delta(a, { status: "exited" })], system: null })
     expect(events).toHaveLength(2)
+  })
+
+  it("keeps a bounded machine history", async () => {
+    const { m, emit } = setup([])
+    m.subscribe(vi.fn())
+    await flush()
+    const sys = { t: 1, memTotal: 8, memAvailable: 4, swapTotal: 0, swapFree: 0, psiSome: 0, psiFull: 0, load1: 1, cpu: 50 }
+    emit("peak://tick", { procs: [], system: sys })
+    emit("peak://tick", { procs: [], system: { ...sys, t: 2 } })
+    expect(m.getSnapshot().machine!.map((s) => s.t)).toEqual([1, 2])
   })
 
   it("freezes while paused", async () => {
@@ -130,7 +140,7 @@ describe("TauriMonitor", () => {
     m.subscribe(vi.fn())
     await flush()
     m.setPaused(true)
-    emit("peak://tick", [delta(a, { samples: [sample(9000, 1)] })])
+    emit("peak://tick", { procs: [delta(a, { samples: [sample(9000, 1)] })], system: null })
     expect(m.getSnapshot().procs[0].samples.at(-1)!.t).toBe(1500)
     m.select("a")
     m.setPaused(false)

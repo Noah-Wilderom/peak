@@ -339,7 +339,12 @@ mod tests {
     #[test]
     fn agent_heap_shapes_composition_and_alloc() {
         let mut s = TreeSampler::new(100);
-        let a = AgentHeap { heap_used: 40.0 * 1048576.0, heap_total: 60.0 * 1048576.0, external: 5.0 * 1048576.0, loop_lag: None };
+        let a = AgentHeap {
+            heap_used: 40.0 * 1048576.0,
+            heap_total: 60.0 * 1048576.0,
+            external: 5.0 * 1048576.0,
+            loop_lag: None,
+        };
         s.sample(0, &[raw(1, 0, 0, 100.0, 0)], Some(a), 0.0);
         let a2 = AgentHeap { heap_used: 30.0 * 1048576.0, ..a };
         let r = s.sample(1000, &[raw(1, 0, 0, 100.0, 0)], Some(a2), 20.0 * 1048576.0);

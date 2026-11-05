@@ -10,7 +10,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use crate::model::*;
 use crate::procfs::{self, ProcFs};
 use crate::runner::{self, ExitInfo};
-use crate::sampler::{AgentHeap, TreeSampler};
+use crate::sampler::{AgentHeap, SystemSampler, TreeSampler};
 
 pub type Shared = Arc<Mutex<Monitor>>;
 
@@ -71,6 +71,7 @@ impl AgentEnv {
 #[derive(Debug, Default)]
 struct AgentState {
     heap: Option<AgentHeap>,
+    lag: Option<f64>,
 }
 
 #[derive(Debug)]
@@ -86,9 +87,65 @@ struct Tracked {
     dirty: bool,
     agents: HashMap<u32, AgentState>,
     gc_freed: f64,
+    cpu_sum: f64,
+}
+
+/// Everything new about one run since the last tick, for the database.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RunWrite {
+    /// The run without its (large) history arrays.
+    pub meta: Proc,
+    pub avg_cpu: f64,
+    pub samples: Vec<Sample>,
+    pub logs: Vec<LogLine>,
+    pub gc: Vec<GcEvent>,
+}
+
+/// A copy of `p` without samples/logs/gc/snapshots/profiles, without cloning them.
+pub fn meta_of(p: &mut Proc) -> Proc {
+    let samples = std::mem::take(&mut p.samples);
+    let logs = std::mem::take(&mut p.logs);
+    let gc = std::mem::take(&mut p.gc);
+    let snapshots = std::mem::take(&mut p.snapshots);
+    let profiles = std::mem::take(&mut p.cpu_profiles);
+    let meta = p.clone();
+    p.samples = samples;
+    p.logs = logs;
+    p.gc = gc;
+    p.snapshots = snapshots;
+    p.cpu_profiles = profiles;
+    meta
 }
 
 impl Tracked {
+    fn new(proc: Proc, origin: Origin, clk_tck: u64, root_start: Option<u64>) -> Tracked {
+        Tracked {
+            proc,
+            origin,
+            sampler: TreeSampler::new(clk_tck),
+            stop_requested: false,
+            root_start,
+            new_samples: vec![],
+            new_logs: vec![],
+            new_gc: vec![],
+            dirty: false,
+            agents: HashMap::new(),
+            gc_freed: 0.0,
+            cpu_sum: 0.0,
+        }
+    }
+
+    fn write_for(&mut self, d: &ProcDelta) -> RunWrite {
+        let n = self.proc.samples.len().max(1) as f64;
+        RunWrite {
+            meta: meta_of(&mut self.proc),
+            avg_cpu: self.cpu_sum / n,
+            samples: d.samples.clone(),
+            logs: d.logs.clone(),
+            gc: d.gc.clone(),
+        }
+    }
+
     fn delta(&mut self) -> ProcDelta {
         self.dirty = false;
         let p = &self.proc;
@@ -112,6 +169,8 @@ impl Tracked {
             counters: p.counters.clone(),
             peak: p.peak.clone(),
             children: p.children.clone(),
+            child_names: p.child_names.clone(),
+            ports: p.ports.clone(),
             has_gc: p.has_gc,
             profiling: p.profiling,
         }
@@ -145,6 +204,8 @@ pub struct Monitor {
     home: Option<String>,
     self_pid: u32,
     self_uid: u32,
+    system: SystemSampler,
+    writes: Vec<RunWrite>,
 }
 
 impl Monitor {
@@ -162,6 +223,8 @@ impl Monitor {
             self_pid: std::process::id(),
             // SAFETY: getuid has no preconditions.
             self_uid: unsafe { libc::getuid() },
+            system: SystemSampler::default(),
+            writes: vec![],
         }
     }
 
@@ -246,31 +309,19 @@ impl Monitor {
             snapshots: vec![],
             logs: vec![],
             children: vec![],
+            child_names: Default::default(),
+            ports: vec![],
+            cpu_profiles: vec![],
         };
-        self.procs.insert(
-            0,
-            Tracked {
-                proc,
-                origin,
-                sampler: TreeSampler::new(self.clk_tck),
-                stop_requested: false,
-                root_start: stat.map(|s| s.starttime),
-                new_samples: vec![],
-                new_logs: vec![],
-                new_gc: vec![],
-                dirty: false,
-                agents: HashMap::new(),
-                gc_freed: 0.0,
-            },
-        );
+        self.procs.insert(0, Tracked::new(proc, origin, self.clk_tck, stat.map(|s| s.starttime)));
         // Take a first sample right away — the UI always expects one.
         let fs = self.fs.clone();
         let tr = &mut self.procs[0];
         match fs.read(pid) {
-            Some(root) => sample_tree(tr, &fs, &fs.parents(), root, t),
+            Some(root) => sample_tree(tr, &fs, &fs.parents(), &fs.listeners(), root, t),
             None => push_bounded(&mut tr.proc.samples, Sample { t, ..Default::default() }, MAX_SAMPLES),
         }
-        tr.new_samples.clear();
+        // The first sample stays queued so it is persisted; the UI skips duplicates by timestamp.
         tr.proc.clone()
     }
 
@@ -302,9 +353,10 @@ impl Monitor {
 
     /// Sample every running process once. Returns deltas for processes that
     /// changed since the previous tick.
-    pub fn tick(&mut self, t: u64) -> Vec<ProcDelta> {
+    pub fn tick(&mut self, t: u64) -> TickPayload {
         let parents = self.fs.parents();
         let fs = self.fs.clone();
+        let listeners = fs.listeners();
         let mut out = vec![];
         for tr in &mut self.procs {
             if tr.proc.status == Status::Running {
@@ -319,14 +371,39 @@ impl Monitor {
                         tr.dirty = true;
                     }
                     None => {} // the waiter (or `peak run`) will report the exit
-                    Some(root) => sample_tree(tr, &fs, &parents, root, t),
+                    Some(root) => sample_tree(tr, &fs, &parents, &listeners, root, t),
                 }
             }
             if tr.has_news() {
-                out.push(tr.delta());
+                let d = tr.delta();
+                self.writes.push(tr.write_for(&d));
+                out.push(d);
             }
         }
-        out
+        TickPayload { procs: out, system: Some(self.system.sample(t, &fs)) }
+    }
+
+    /// Pending database writes accumulated by `tick`.
+    pub fn take_writes(&mut self) -> Vec<RunWrite> {
+        std::mem::take(&mut self.writes)
+    }
+
+    /// Bring a stored run back into the session (read-only until restarted).
+    pub fn insert_historical(&mut self, mut proc: Proc) -> Proc {
+        if let Some(p) = self.get(&proc.id) {
+            return p.clone();
+        }
+        if proc.status == Status::Running {
+            proc.status = Status::Exited;
+        }
+        self.procs.insert(0, Tracked::new(proc.clone(), Origin::Attached, self.clk_tck, None));
+        proc
+    }
+
+    pub fn add_cpu_profile(&mut self, id: &str, profile: CpuProfile) {
+        if let Some(tr) = self.tracked(id) {
+            tr.proc.cpu_profiles.push(profile);
+        }
     }
 
     /// Ask a process to stop. Returns the pid to escalate on if it lingers.
@@ -430,6 +507,12 @@ impl Monitor {
         }
     }
 
+    pub fn agent_lag(&mut self, token: &str, pid: u32, lag: f64) {
+        if let Some(tr) = self.tracked(token) {
+            tr.agents.entry(pid).or_default().lag = Some(lag);
+        }
+    }
+
     pub fn agent_gc(&mut self, token: &str, ev: GcEvent) {
         if let Some(tr) = self.tracked(token) {
             tr.gc_freed += ev.freed;
@@ -454,12 +537,35 @@ impl Monitor {
 }
 
 /// Read the rest of the tree under `root` and record one sample.
-fn sample_tree(tr: &mut Tracked, fs: &ProcFs, parents: &HashMap<u32, u32>, root: procfs::RawProc, t: u64) {
+fn sample_tree(
+    tr: &mut Tracked,
+    fs: &ProcFs,
+    parents: &HashMap<u32, u32>,
+    listeners: &HashMap<u64, procfs::Listener>,
+    root: procfs::RawProc,
+    t: u64,
+) {
     let mut tree = vec![root];
     tree.extend(procfs::descendants(parents, tr.proc.pid).into_iter().filter_map(|pid| fs.read(pid)));
-    let heap = tr.primary_agent().and_then(|pid| tr.agents.get(&pid)?.heap);
+    let mut ports: Vec<Port> = tree
+        .iter()
+        .flat_map(|r| {
+            r.socket_inodes.iter().filter_map(|i| listeners.get(i)).map(|l| Port {
+                port: l.port,
+                proto: l.proto.to_string(),
+                addr: l.addr.clone(),
+                pid: r.stat.pid,
+            })
+        })
+        .collect();
+    ports.sort_by(|a, b| (a.port, &a.proto).cmp(&(b.port, &b.proto)));
+    ports.dedup_by(|a, b| a.port == b.port && a.proto == b.proto);
+    let agent = tr.primary_agent().and_then(|pid| tr.agents.get(&pid));
+    let heap = agent.and_then(|a| a.heap);
+    let lag = agent.and_then(|a| a.lag.or(a.heap.and_then(|h| h.loop_lag)));
     let freed = std::mem::take(&mut tr.gc_freed);
-    let ts = tr.sampler.sample(t, &tree, heap, freed);
+    let mut ts = tr.sampler.sample(t, &tree, heap, freed);
+    ts.sample.loop_lag = lag;
     let p = &mut tr.proc;
     if ts.sample.rss >= p.peak.rss {
         p.peak = ts.sample.clone();
@@ -470,7 +576,12 @@ fn sample_tree(tr: &mut Tracked, fs: &ProcFs, parents: &HashMap<u32, u32>, root:
     p.fds = ts.fds;
     p.nice = ts.nice;
     p.ppid = ts.ppid;
+    for c in &ts.children {
+        p.child_names.entry(c.pid).or_insert_with(|| c.name.clone());
+    }
     p.children = ts.children;
+    p.ports = ports;
+    tr.cpu_sum += ts.sample.cpu;
     p.counters = tr.sampler.counters.clone();
     if let Some(exe) = fs.exe(p.pid).filter(|e| *e != p.exe) {
         p.exe = exe;
@@ -639,7 +750,7 @@ mod tests {
         // The transition is reported once, then nothing more.
         let mut g = m.lock().unwrap();
         g.tick(now_ms());
-        assert!(g.tick(now_ms()).is_empty());
+        assert!(g.tick(now_ms()).procs.is_empty());
     }
 
     #[test]
@@ -647,9 +758,9 @@ mod tests {
         let m = monitor();
         let p = capture(&m, "sleep 5 & sleep 5; wait", "/tmp").unwrap();
         thread::sleep(Duration::from_millis(150));
-        let mut deltas = m.lock().unwrap().tick(now_ms());
+        let mut deltas = m.lock().unwrap().tick(now_ms()).procs;
         thread::sleep(Duration::from_millis(100));
-        deltas.extend(m.lock().unwrap().tick(now_ms()));
+        deltas.extend(m.lock().unwrap().tick(now_ms()).procs);
         let d = deltas.iter().find(|d| d.id == p.id).unwrap();
         assert_eq!(d.status, Status::Running);
         let proc = m.lock().unwrap().get(&p.id).unwrap().clone();
@@ -663,6 +774,55 @@ mod tests {
         assert_eq!(done.status, Status::Exited, "{done:?}");
         assert!(stop(&m, &p.id, Duration::ZERO).is_err());
         assert!(stop(&m, "nope", Duration::ZERO).is_err());
+    }
+
+    #[test]
+    fn finds_listening_ports_and_child_names() {
+        let m = monitor();
+        let script = "import socket,time; s=socket.socket(); s.bind(('127.0.0.1',0)); s.listen(); print(s.getsockname()[1], flush=True); time.sleep(30)";
+        let p = capture(&m, &format!("python3 -c \"{script}\" & wait"), "/tmp").unwrap();
+        let port: u16 = (0..200)
+            .find_map(|_| {
+                thread::sleep(Duration::from_millis(20));
+                let g = m.lock().unwrap();
+                g.get(&p.id).unwrap().logs.iter().find_map(|l| l.text.parse::<u16>().ok())
+            })
+            .expect("server printed its port");
+        let proc = wait_for(&m, &p.id, |p| p.ports.iter().any(|x| x.port == port));
+        let found = proc.ports.iter().find(|x| x.port == port).unwrap();
+        assert_eq!((found.proto.as_str(), found.addr.as_str()), ("tcp", "127.0.0.1"));
+        assert!(proc.child_names.values().any(|n| n.starts_with("python")), "{:?}", proc.child_names);
+        assert!(proc.samples.last().unwrap().kids.iter().any(|k| k.rss > 0.0));
+        stop(&m, &p.id, Duration::from_millis(200)).unwrap();
+        wait_for(&m, &p.id, |p| p.status != Status::Running);
+    }
+
+    #[test]
+    fn restores_historical_runs_and_profiles() {
+        let m = monitor();
+        let mut g = m.lock().unwrap();
+        let id = g.new_id();
+        let mut p = g.insert(id.clone(), Origin::External, 999_999, "old run", "/tmp", 5);
+        g.on_exit(&id, ExitInfo { code: Some(0), signal: None }, 6);
+        g.remove(&id);
+        p.status = Status::Running; // e.g. stored while peak crashed
+        let restored = g.insert_historical(p.clone());
+        assert_eq!(restored.status, Status::Exited);
+        assert_eq!(g.insert_historical(p).id, id, "inserting twice keeps the existing entry");
+        let root = AllocFrame { name: "(root)".into(), file: None, self_bytes: 1.0, children: vec![] };
+        g.add_cpu_profile(&id, CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, root: root.clone() });
+        g.add_cpu_profile("nope", CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, root });
+        assert_eq!(g.get(&id).unwrap().cpu_profiles.len(), 1);
+        assert!(g.take_writes().iter().all(|w| w.meta.samples.is_empty()));
+        // Ticks persist writes for changed runs and sample the system.
+        let pid = std::process::id();
+        let live = g.new_id();
+        g.insert(live.clone(), Origin::External, pid, "me", "/tmp", now_ms());
+        let payload = g.tick(now_ms());
+        assert!(payload.system.unwrap().mem_total > 0.0);
+        let w = g.take_writes();
+        assert!(w.iter().any(|w| w.meta.id == live && !w.samples.is_empty()));
+        assert!(g.take_writes().is_empty());
     }
 
     #[test]
@@ -799,16 +959,19 @@ mod tests {
         let pr = g.get(&p.id).unwrap();
         assert!(pr.profiling && pr.has_gc);
         assert_eq!(pr.runtime, Runtime::Node);
-        g.agent_heap(&p.id, 100, AgentHeap { heap_used: 1.0, heap_total: 2.0, external: 0.0 });
-        g.agent_heap(&p.id, 200, AgentHeap { heap_used: 5.0, heap_total: 9.0, external: 0.0 });
+        g.agent_heap(&p.id, 100, AgentHeap { heap_used: 1.0, heap_total: 2.0, external: 0.0, loop_lag: None });
+        g.agent_heap(&p.id, 200, AgentHeap { heap_used: 5.0, heap_total: 9.0, external: 0.0, loop_lag: Some(2.0) });
         g.agent_heap("nope", 1, AgentHeap::default());
         assert_eq!(g.primary_agent(&p.id), Some(200));
         assert_eq!(g.primary_agent("nope"), None);
+        g.agent_lag(&p.id, 200, 9.0);
+        g.agent_lag("nope", 1, 1.0);
         g.agent_gc(&p.id, GcEvent { t: 1, kind: GcKind::Minor, pause_ms: 1.0, freed: 10.0 });
         g.agent_gc("nope", GcEvent { t: 1, kind: GcKind::Minor, pause_ms: 1.0, freed: 10.0 });
         let d = g.tick(now_ms());
-        let d = d.iter().find(|d| d.id == p.id).unwrap();
+        let d = d.procs.iter().find(|d| d.id == p.id).unwrap();
         assert_eq!(d.gc.len(), 1);
+        assert_eq!(d.samples.last().unwrap().loop_lag, Some(9.0), "explicit lag wins over the heap report");
         assert!(d.profiling);
         g.agent_bye(&p.id, 200);
         assert!(g.get(&p.id).unwrap().profiling);

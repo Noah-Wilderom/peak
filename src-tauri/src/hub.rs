@@ -41,6 +41,13 @@ pub enum Inbound {
         heap_used: f64,
         heap_total: f64,
         external: f64,
+        #[serde(default)]
+        loop_lag: Option<f64>,
+    },
+    /// Runtime responsiveness only (agents without heap stats, e.g. Python).
+    #[serde(rename_all = "camelCase")]
+    Lag {
+        loop_lag: f64,
     },
     #[serde(rename_all = "camelCase")]
     Gc {
@@ -200,9 +207,11 @@ impl Hub {
 
     fn on_agent(&self, token: &str, pid: u32, msg: Inbound) {
         match msg {
-            Inbound::Heap { heap_used, heap_total, external } => {
-                self.monitor.lock().unwrap().agent_heap(token, pid, AgentHeap { heap_used, heap_total, external });
+            Inbound::Heap { heap_used, heap_total, external, loop_lag } => {
+                let heap = AgentHeap { heap_used, heap_total, external, loop_lag };
+                self.monitor.lock().unwrap().agent_heap(token, pid, heap);
             }
+            Inbound::Lag { loop_lag } => self.monitor.lock().unwrap().agent_lag(token, pid, loop_lag),
             Inbound::Gc { kind, pause_ms, freed, t } => {
                 let ev = GcEvent { t: t.unwrap_or_else(now_ms), kind, pause_ms, freed };
                 self.monitor.lock().unwrap().agent_gc(token, ev);
@@ -259,13 +268,29 @@ impl Hub {
 
     /// Send a command to one agent and wait for its reply.
     pub fn request(&self, token: &str, pid: u32, cmd: &str, timeout: Duration) -> Result<Value, String> {
+        self.request_with(token, pid, cmd, json!({}), timeout)
+    }
+
+    /// Like `request`, merging `params` into the command message.
+    pub fn request_with(
+        &self,
+        token: &str,
+        pid: u32,
+        cmd: &str,
+        params: Value,
+        timeout: Duration,
+    ) -> Result<Value, String> {
         let req_id = self.next_req.fetch_add(1, Ordering::Relaxed);
+        let mut msg = json!({ "cmd": cmd, "reqId": req_id });
+        if let (Some(m), Some(p)) = (msg.as_object_mut(), params.as_object()) {
+            m.extend(p.clone());
+        }
         let (tx, rx) = mpsc::channel();
         self.pending.lock().unwrap().insert(req_id, tx);
         let sent = {
             let mut agents = self.agents.lock().unwrap();
             match agents.get_mut(&(token.to_string(), pid)) {
-                Some(s) => writeln!(s, "{}", json!({ "cmd": cmd, "reqId": req_id })).map_err(|e| e.to_string()),
+                Some(s) => writeln!(s, "{msg}").map_err(|e| e.to_string()),
                 None => Err("agent is not connected".into()),
             }
         };
@@ -295,6 +320,15 @@ impl Hub {
         let pid = self.primary(id)?;
         self.request(id, pid, "gc", timeout).map(|_| ())
     }
+
+    /// Sample the primary agent's CPU for `ms` milliseconds.
+    pub fn cpu_profile(&self, id: &str, ms: u64) -> Result<CpuProfile, String> {
+        let pid = self.primary(id)?;
+        let data = self.request_with(id, pid, "cpuprofile", json!({ "ms": ms }), Duration::from_millis(ms + 15_000))?;
+        let profile = cpu_profile_from_agent(data, now_ms())?;
+        self.monitor.lock().unwrap().add_cpu_profile(id, profile.clone());
+        Ok(profile)
+    }
 }
 
 #[derive(Deserialize)]
@@ -303,6 +337,19 @@ struct AgentSnapshot {
     heap_used: f64,
     entries: Vec<HeapEntry>,
     sites: Option<AllocFrame>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AgentCpuProfile {
+    duration_ms: f64,
+    root: AllocFrame,
+}
+
+/// Validate an agent's CPU profile payload and stamp it.
+pub fn cpu_profile_from_agent(data: Value, t: u64) -> Result<CpuProfile, String> {
+    let p: AgentCpuProfile = serde_json::from_value(data).map_err(|e| format!("bad cpu profile from agent: {e}"))?;
+    Ok(CpuProfile { id: format!("c_{t:x}_{}", random_hex(3)), t, duration_ms: p.duration_ms, root: p.root })
 }
 
 /// Validate an agent's snapshot payload and stamp it.
@@ -412,7 +459,8 @@ mod tests {
 
         let (mut a, mut a_r) = connect(&hub);
         writeln!(a, r#"{{"type":"hello","token":"{id}","pid":4242,"runtime":"node"}}"#).unwrap();
-        writeln!(a, r#"{{"type":"heap","heapUsed":100,"heapTotal":200,"external":5}}"#).unwrap();
+        writeln!(a, r#"{{"type":"heap","heapUsed":100,"heapTotal":200,"external":5,"loopLag":3.5}}"#).unwrap();
+        writeln!(a, r#"{{"type":"lag","loopLag":7.0}}"#).unwrap();
         writeln!(a, r#"{{"type":"gc","kind":"minor","pauseMs":1.5,"freed":64,"t":99}}"#).unwrap();
         writeln!(a, "garbage").unwrap();
         // Messages that aren't agent messages, and replies nobody waits for, are ignored.

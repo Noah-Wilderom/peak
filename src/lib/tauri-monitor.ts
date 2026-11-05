@@ -14,6 +14,7 @@ import {
   type Sample,
   type State,
   type SystemInfo,
+  type SystemSample,
 } from "@/lib/types"
 
 const MAX_LOGS = 2000
@@ -42,6 +43,14 @@ export interface ProcDelta {
   children: ChildProc[]
   hasGc: boolean
   profiling: boolean
+  childNames?: Proc["childNames"]
+  ports?: Proc["ports"]
+}
+
+/** What the backend emits on `peak://tick`. */
+export interface TickPayload {
+  procs: ProcDelta[]
+  system: SystemSample | null
 }
 
 export interface FullState {
@@ -95,6 +104,8 @@ export function applyDelta(p: Proc, d: ProcDelta): Proc {
     children: d.children,
     hasGc: d.hasGc,
     profiling: d.profiling,
+    childNames: d.childNames,
+    ports: d.ports,
   }
 }
 
@@ -160,7 +171,7 @@ export class TauriMonitor implements MonitorApi {
     if (this.started) return
     this.started = true
     try {
-      await this.on<ProcDelta[]>("peak://tick", (e) => this.onTick(e.payload))
+      await this.on<TickPayload>("peak://tick", (e) => this.onTick(e.payload))
       await this.on<Proc>("peak://proc", (e) => this.upsert(e.payload, true))
       const full = await this.call<FullState>("get_state")
       this.set({
@@ -174,7 +185,8 @@ export class TauriMonitor implements MonitorApi {
     }
   }
 
-  onTick(deltas: ProcDelta[]) {
+  onTick({ procs: deltas, system }: TickPayload) {
+    if (system) this.state = { ...this.state, machine: append(this.state.machine ?? [], [system], MAX_SAMPLES) }
     const byId = new Map(deltas.map((d) => [d.id, d]))
     const events: MonitorEvent[] = []
     const procs = this.current().map((p) => {
