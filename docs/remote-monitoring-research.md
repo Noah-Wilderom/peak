@@ -35,6 +35,8 @@ The backend already has useful boundaries, but assumes one local Linux environme
 
 **Container totals and process-tree measurements are different series.** Docker stats and Kubernetes resource metrics cannot fill every existing Peak chart field. Missing heap, GC, descriptors, or per-process I/O should remain unavailable rather than being fabricated from container totals. Docker documents container CPU/memory/I/O statistics; Kubernetes documents CPU/memory resource metrics for nodes and pods. ([Docker stats](https://docs.docker.com/reference/cli/docker/container/stats/), [Kubernetes resource metrics](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/))
 
+For container capacity, add cgroup-aware metadata rather than treating `/proc/meminfo` as the container's memory limit. On cgroup v2, `memory.max` records the hard memory limit and `cpu.max` records CPU bandwidth quota/period; account for unlimited values, ancestor constraints, CPU affinity and cgroup v1 hosts. Keep Peak's current CPU convention (100% = one core) explicit, with quota utilization as a separate value. A process tree is also not a container membership list: independently exec'd or reparented processes may sit outside the selected root's descendants. ([Linux cgroup v2](https://docs.kernel.org/admin-guide/cgroup-v2.html), [current CPU convention](../src/lib/types.ts))
+
 ### SSH hosts
 
 OpenSSH already provides encrypted remote command execution, configured identities, jump hosts, host-key checking, and forwarding. Prefer invoking the user's installed `ssh` initially, retaining their existing configuration. Use `-T` for the collector protocol and keep stdin open for requests; PTY terminal behavior is unnecessary for structured data. OpenSSH returns the remote command's status, or 255 on an SSH error, so a transport failure must not automatically become the monitored program's crash. ([OpenSSH manual](https://man.openbsd.org/ssh))
@@ -71,6 +73,8 @@ Minimal images require an explicit alternative:
 
 A node collector/DaemonSet could eventually cover many pods, but introduces host process visibility, container/PID attribution, node deployment, and broader permissions. It is a different operational product from an on-demand desktop connection; defer it until continuous fleet monitoring is a requirement.
 
+Ephemeral containers cannot be changed or removed after addition, and are not automatically restarted. Ending the collector process therefore does not remove its entry from the pod; explain this persistence before offering that deployment path. ([Ephemeral containers](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/))
+
 ### Kubernetes permissions
 
 Keep permissions tied to the selected features, preferably through namespaced Roles:
@@ -80,11 +84,11 @@ Keep permissions tied to the selected features, preferably through namespaced Ro
 | Browse pods | `get/list/watch` on `pods` |
 | Container logs | `get` on `pods/log` |
 | Resource overview | Relevant `get/list` permissions in `metrics.k8s.io`, when installed |
-| Run the helper/commands | `pods/exec`; POST uses `create`, GET uses `get`, depending on the client's streaming transport |
+| Run the helper/commands | `pods/exec`: plan for `create`; some client/cluster combinations also require `get` for WebSocket upgrade |
 | Forward to a collector listener | Corresponding `pods/portforward` connection permissions |
 | Add a debugging container | Explicit update/patch access to `pods/ephemeralcontainers`, plus applicable admission policy |
 
-Kubernetes represents subresources separately in RBAC; HTTP methods map to authorization verbs. Verify the actual client's requirements against the target cluster instead of requesting a wildcard role. Exec access is command execution even if Peak uses it only to observe processes. ([RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/), [authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/), [Pod connection endpoints](https://kubernetes.io/docs/reference/kubernetes-api/core/pod-v1/))
+Kubernetes represents subresources separately in RBAC; HTTP methods map to authorization verbs. WebSocket GET upgrades can additionally require `create` when `AuthorizePodWebsocketUpgradeCreatePermission` is enabled, including exec and port-forward. Verify the actual client/cluster requirements instead of requesting a wildcard role. Exec access is command execution even if Peak uses it only to observe processes. ([RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/), [authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/), [WebSocket authorization feature](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/))
 
 ## Shared architecture
 
@@ -131,3 +135,5 @@ These are implementation requirements inferred from the current model and remote
 5. **Launch, control and profiling.** Add remote command specifications, verified stop/escalation, output capture, runtime script distribution and profile requests. Define disconnect behavior for owned commands explicitly; durable jobs require a supervisor or persistent collector, not an assumption about exec-session survival.
 
 Use installed CLIs first to reuse authentication and configuration. Move selected Docker/Kubernetes operations to native API clients only when dependency packaging, streaming overhead, or scale justifies the extra implementation work. The first proof should demonstrate the same process and charts over SSH with a reliable disconnect/reconnect path; that validates the foundation shared by all three integrations.
+
+Rust client candidates for a later phase are [Bollard](https://docs.rs/bollard/latest/bollard/) for Docker (including optional SSH transport) and [kube](https://docs.rs/kube/latest/kube/api/struct.Api.html) for Kubernetes listing/watching, exec, logs and port-forwarding. Their transport support does not by itself establish parity with the user's existing CLI configuration and authentication; validate that before replacing a working CLI provider.
