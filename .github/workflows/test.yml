@@ -1,0 +1,81 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend (typecheck, tests, coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      # Coverage thresholds (100%) are enforced in vitest.config.ts.
+      - run: bun run test:coverage
+      - run: bun run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: coverage/lcov.info
+
+  backend:
+    name: Backend (fmt, clippy, tests, coverage)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - name: System libraries for Tauri
+        working-directory: .
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev build-essential
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt, llvm-tools-preview
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      # tauri::generate_context! embeds the built frontend, so build it first.
+      - uses: oven-sh/setup-bun@v2
+      - name: Build frontend
+        working-directory: .
+        run: bun install --frozen-lockfile && bun run build
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      # Core modules are covered by tests; lib.rs/main.rs are thin Tauri glue.
+      - run: cargo llvm-cov --ignore-filename-regex '(lib|main)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+      - run: cargo llvm-cov report --ignore-filename-regex '(lib|main)\.rs$' --summary-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: src-tauri/lcov.info
+
+  agents:
+    name: Runtime agents (Node + Python)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: node --test src-tauri/agents/tests/
+      - run: python -m unittest discover -s src-tauri/agents/tests -v

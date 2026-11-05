@@ -1,0 +1,93 @@
+version: '3'
+
+vars:
+  PEAK_BIN: '{{.PEAK_BIN | default "../src-tauri/target/debug/peak"}}'
+  DEMO: '{{.DEMO | default "memory"}}'
+  DURATION: '{{.DURATION | default "60s"}}'
+  PPROF_ADDR: '{{.PPROF_ADDR | default "127.0.0.1:6060"}}'
+  PROFILE_SECONDS: '{{.PROFILE_SECONDS | default "10"}}'
+
+tasks:
+  build:
+    desc: Build all Go demos before monitoring (keeps compiler activity out of the graphs)
+    cmds:
+      - mkdir -p bin
+      - go build -o bin/cpu ./cmd/cpu
+      - go build -o bin/memory ./cmd/memory
+      - go build -o bin/io ./cmd/io
+
+  check:
+    desc: Check Go formatting, vet, and the Peak agent protocol with the race detector
+    cmds:
+      - test -z "$(gofmt -l cmd internal)"
+      - go vet ./...
+      - go test -race ./...
+
+  cpu:
+    desc: Capture CPU bursts and concurrent hashing workers in Peak
+    cmds:
+      - task: capture
+        vars: {DEMO: cpu}
+
+  memory:
+    desc: Capture bounded cache growth and temporary allocations in Peak's profiler
+    cmds:
+      - task: capture
+        vars: {DEMO: memory}
+
+  io:
+    desc: Capture repeated file writes, reads, and file descriptors in Peak
+    cmds:
+      - task: capture
+        vars: {DEMO: io}
+
+  capture:
+    internal: true
+    deps: [build]
+    requires:
+      vars:
+        - name: DEMO
+          enum: [cpu, memory, io]
+    preconditions:
+      - sh: 'test -x {{.PEAK_BIN | shellQuote}}'
+        msg: 'Build the local CLI with task peak:build, or set PEAK_BIN to your installed peak executable.'
+    cmds:
+      - '{{.PEAK_BIN | shellQuote}} run -- ./bin/{{.DEMO}} -duration {{.DURATION | shellQuote}} {{.CLI_ARGS}}'
+
+  run:
+    desc: Run a demo without Peak (DEMO=cpu|memory|io, flags after --)
+    deps: [build]
+    requires:
+      vars:
+        - name: DEMO
+          enum: [cpu, memory, io]
+    cmds:
+      - './bin/{{.DEMO}} -duration {{.DURATION | shellQuote}} {{.CLI_ARGS}}'
+
+  profile:
+    desc: Capture a demo in Peak and enable its native Go pprof endpoint
+    cmds:
+      - task: capture
+        vars:
+          CLI_ARGS: '-pprof {{.PPROF_ADDR | shellQuote}} {{.CLI_ARGS}}'
+
+  pprof:cpu:
+    desc: Save a native Go CPU profile from a running examples:profile demo
+    cmds:
+      - mkdir -p profiles
+      - 'curl --fail --silent --show-error --max-time {{add (atoi .PROFILE_SECONDS) 10}} --output profiles/cpu.pb.gz "http://{{.PPROF_ADDR}}/debug/pprof/profile?seconds={{.PROFILE_SECONDS}}"'
+      - go tool pprof -top profiles/cpu.pb.gz
+
+  pprof:heap:
+    desc: Save a native Go heap profile after GC from a running examples:profile demo
+    cmds:
+      - mkdir -p profiles
+      - 'curl --fail --silent --show-error --max-time 15 --output profiles/heap.pb.gz "http://{{.PPROF_ADDR}}/debug/pprof/heap?gc=1"'
+      - go tool pprof -top profiles/heap.pb.gz
+
+  pprof:goroutines:
+    desc: Save a native Go goroutine profile from a running examples:profile demo
+    cmds:
+      - mkdir -p profiles
+      - 'curl --fail --silent --show-error --max-time 15 --output profiles/goroutines.pb.gz "http://{{.PPROF_ADDR}}/debug/pprof/goroutine"'
+      - go tool pprof -top profiles/goroutines.pb.gz

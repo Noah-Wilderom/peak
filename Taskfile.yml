@@ -1,0 +1,21 @@
+version: '3'
+
+includes:
+  examples:
+    taskfile: ./examples/Taskfile.yml
+    dir: ./examples
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  dev:
+    desc: Start the Peak desktop app in development mode
+    cmds:
+      - bun run tauri dev
+
+  peak:build:
+    desc: Build the local Peak desktop app and CLI
+    cmds:
+      - cargo build --manifest-path src-tauri/Cargo.toml
