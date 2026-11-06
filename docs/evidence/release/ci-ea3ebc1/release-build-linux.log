@@ -1,0 +1,17 @@
+# commit ea3ebc1 Release / Build (linux): success. job 128200579112
+  node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+signature ok: timestamp:1794005619	file:peak_0.1.0_amd64.AppImage	version:0.1.0
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+  PEAK_SMOKE_PLATFORM: linux
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit ea3ebc153e6e07128bbd3dbc10b15e1486d7a582)
+collector: x86_64: /home/runner/.local/share/peak/collectors/x86_64-57c0bed234884cd7/peak-collector (0.1.0 protocol 1) 
+ok   names its bundled collector x86_64: /home/runner/.local/share/peak/collectors/x86_64-57c0bed234884cd7/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmlby3q for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place VEUlu0
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794005666511-err
+ok   the app recorded real samples and the exit samples 9, max rss 135020544, exit 7
+SMOKE OK

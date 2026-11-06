@@ -18,6 +18,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: node scripts/release/version.mjs check
+      - run: node scripts/release/collect-check.mjs
       - run: bun run typecheck
       # Coverage thresholds (100%) are enforced in vitest.config.ts.
       - run: bun run test:coverage

@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 22:46 UTC
-- **State:** first packaged release **in progress**. On `676efdc`: production packages, independent signatures, native tests and the Tests gates all pass. **The Windows upgrade cause is found and fixed in the uncommitted tree, not yet proven.** Nothing is running in the background.
+- **Last update:** 2026-11-06 23:17 UTC
+- **State:** first packaged release **in progress**. On `ea3ebc1`, everything required passes on native CI except one thing: the Windows real-button upgrade. A fix for it is uncommitted. No public destination exists yet. No background work is running.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,13 +12,45 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: not complete. The Windows upgrade hasn't worked yet, its native tests haven't passed, and there's no public destination.**
+**Status: not complete. Two things remain: the Windows real-button upgrade, and a public destination.**
 
-**Blockers, in order.**
+### Where it stands: `ea3ebc1`
 
-1. **The repository is private, so nothing can reach users.** Anonymous clients can't read a private repository's release assets, so the updater and `install.sh` would get 404s. **Decision needed: make `Noah-Wilderom/peak` public, or publish to a separate public releases repository.** The endpoint is compiled in, so this comes before the first tag. Details: `docs/RELEASING.md`.
-2. **Native CI needs another round.** See "Next action".
-3. **OS trust isn't set up.** Without Apple Developer ID and notarization, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Whether to buy these or ship with the warnings is the user's call; the release works either way, and `docs/RELEASING.md` says exactly how.
+Update proof 42307541013, Release 42307541017, Tests 42307541018. Summaries in `docs/evidence/release/ci-ea3ebc1/`.
+
+| Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Production package, updater signature checked independently | **Pass** | **Pass** | **Pass** | **Pass** |
+| Install, app, separate CLI, real samples, exit code | **Pass** | **Pass** | **Pass** | **Pass** |
+| Real signed upgrade and relaunch; history kept; CLI workload survives | **Pass** | **Pass** | **Pass** | **Pass** |
+| Offline, no update, HTTP 500, malformed feed, missing, truncated, tampered, wrong key | **Pass** | **Pass** | **Pass** | **Pass** |
+| Real buttons: consent, progress, failure message, settings kept | **Pass** | **Fail, fix waiting** | Not possible | Not possible |
+| Native core tests | Covered by **Tests** | **Pass** | **Pass** | **Pass** |
+
+**Tests** passes: backend gate at **99.14% lines** on CI (7933 lines, 68 uncovered, gate unchanged at 99), frontend at 100%, both agent versions.
+
+**What each Windows story turned out to be.**
+- **Established:** the upgrade failed because `collect.mjs` shipped a 9.0.0 installer under the 9.0.1 name, and the updater refused it. With the fix, the upgrade passes. The controls are in `scripts/release/collect-check.mjs`, now in **Tests**, with results in `docs/evidence/release/9-artifact-selection.log`.
+- **Unknown:** the first timeout on `187f415`. Its error wasn't captured. It has the same symptom, so it was probably the same cause.
+- **Not established:** that a running `peak-cli.exe` blocks the installer. The upgrade passed with a CLI workload running, but the rename hook was in place, so that run can't say what would happen without it. The next run logs whether the hook moved the file. It stays either way, as it does no harm.
+
+**Windows buttons: not proven, and that's the only failing job.** `msedgedriver` couldn't attach, and then the debugging port never opened when asked through the environment. Both depend on the same environment variable, so my reading is that Tauri's own browser arguments replace it. That's an inference. This job's builds now set the port in their config instead, and the job logs ports and processes if it still fails. Until this passes, the following are proven on Windows only by the timed proof build, or not at all: restart consent naming the commands, the failure message on screen, and settings surviving.
+
+**Added since `ea3ebc1`, uncommitted, not yet run on CI:**
+- The Windows button fix above.
+- `smoke.mjs` now checks that the Node and Python runtime agents really report from inside the program. Passed locally on Linux. Until it runs natively, the README's "Yes" for agents on Windows and macOS only rests on Node programs running normally with the agent loaded.
+- `collect-check.mjs` in **Tests**.
+
+The app itself hasn't changed since `676efdc`: only scripts, workflows and docs.
+
+**Blockers to delivery.**
+
+1. **The repository is private, so nothing can reach users.** Anonymous clients can't read a private repository's release assets, so the updater and `install.sh` would get 404s. The user has been asked: public source, or a public releases-only repository. The endpoint is compiled in, so this comes before the first tag. Details: `docs/RELEASING.md`.
+2. **The Windows button job.** See "Next action".
+
+**Not a blocker, but the user's call:** OS trust. Nothing is notarized or code-signed by an OS vendor. Without Apple Developer ID, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Updater signatures are separate and always on.
+
+### How it got here
 
 **Third native CI, on `676efdc`** (Update proof 42303290111, Release 42303290122, Tests 42303290139; summaries in `docs/evidence/release/ci-676efdc/`):
 
@@ -32,9 +64,9 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Tests** passes: backend gate at the unchanged 99%, frontend gate at 100%, and both agent versions. Note on the backend figure: the gate passed over the whole workspace, but the report step printed 98.98% because it only covered the root package, leaving out `peak-core`. CI's own coverage file works out at 99.47% across both, by a different line count than the gate's. The step now prints the gate's own figure.
 
-**Windows upgrade: cause established from the app's own error.** "The update was signed for version 9.0.0 but the update endpoint announced version 9.0.1." `scripts/release/collect.mjs` took the first installer in the bundle folder, which keeps earlier versions. On Windows that listed 9.0.0 first, so 9.0.0 was copied under the 9.0.1 name. **Peak's updater was right to refuse it**; the fault was the test build's packaging. It was also a release risk, had a bundle folder ever kept an old version. The script now only takes the file for this version, and fails unless the signature says that version. Tested locally on a fake folder holding both versions, with a stale-only folder and a mismatched signature: both refuse. The earlier `187f415` timeout probably had this cause, though that run's error wasn't captured. **The installer-lock theory remains unproven either way;** the next run exercises it, since a `peak-cli` workload is running during the upgrade.
+**Windows upgrade: cause established from the app's own error, and confirmed by the pass on `ea3ebc1`.** "The update was signed for version 9.0.0 but the update endpoint announced version 9.0.1." `scripts/release/collect.mjs` took the first installer in the bundle folder, which keeps earlier versions. On Windows that listed 9.0.0 first, so 9.0.0 was copied under the 9.0.1 name. **Peak's updater was right to refuse it**; the fault was the test build's packaging. It was also a release risk, had a bundle folder ever kept an old version. The script now only takes the file for this version, and fails unless the signature says that version. Tested locally on a fake folder holding both versions, with a stale-only folder and a mismatched signature: both refuse. The earlier `187f415` timeout probably had this cause, though that run's error wasn't captured.
 
-**Windows buttons:** `msedgedriver` couldn't attach ("DevToolsActivePort file doesn't exist"). `update-ui.mjs` now drives the real window on Windows through WebView2's debugging protocol, enabled only for that test by an environment variable. Same page, same button clicks, no driver. Unproven until it runs.
+**Windows buttons:** `msedgedriver` couldn't attach ("DevToolsActivePort file doesn't exist"). `update-ui.mjs` moved to WebView2's debugging protocol, enabled by an environment variable. That didn't work either; see above.
 
 Only the release scripts, the test harness, the workflows and docs changed after `676efdc`, so the app under test is unchanged, and the local gate logs stand.
 
@@ -108,7 +140,7 @@ Local gates on this tree: backend 99.01% lines (gate 99), frontend 100% with 294
 - At `/mnt/HC_Volume_107248377/.peak-sysroot/rel-root/home/tester/rc/`. The signature passes the independent check and a different file fails it. `smoke.mjs` passes on this AppImage.
 - The two-version proofs use a throwaway key. The production key has never signed anything above 0.1.0, so no valid update exists for anyone to replay.
 
-**Windows and macOS.** What exists: a native sampling backend (`native.rs`), process stopping via `taskkill` on Windows, per-OS data directories, discovery without Linux namespaces, a console `peak-cli.exe`, a user PATH entry from the installer, Node and Python agent paths fixed for Windows, the login shell's PATH on macOS, and Linux collectors for both architectures embedded and linked with Rust's own linker (that link was proven on Linux for x86_64 and aarch64). The README's table says what each platform lacks: handle counts and listening ports, among others, are shown as not tracked rather than as zero.
+**What exists for Windows and macOS:** a native sampling backend (`native.rs`), process stopping via `taskkill` on Windows, per-OS data directories, discovery without Linux namespaces, a console `peak-cli.exe`, a user PATH entry from the installer, Node and Python agent paths fixed for Windows, the login shell's PATH on macOS, and Linux collectors for both architectures embedded and linked with Rust's own linker (that link was proven on Linux for x86_64 and aarch64). The README's table says what each platform lacks: handle counts and listening ports, among others, are shown as not tracked rather than as zero.
 
 **Limits that will remain.**
 - No WebDriver exists for macOS webviews, so the macOS proof uses builds that press the update buttons on a timer (`VITE_PEAK_E2E_AUTOUPDATE`, absent from release builds). Same plugin and flow, but no eye on the UI beyond a screenshot.
@@ -451,7 +483,7 @@ checkout; nothing was lost. No further limit since.
 ## Next action
 
 **PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-676efdc/`.
+1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-ea3ebc1/`, `docs/evidence/release/9-artifact-selection.log` and `scripts/release/collect-check.mjs`.
 2. Send me back here. Nothing of mine is running or waiting until then.
 
 **Still needed from the user, without blocking CI:** where to publish (public source or a public releases-only repository; the update URL is compiled in, so before the first tag), and whether to buy OS trust.

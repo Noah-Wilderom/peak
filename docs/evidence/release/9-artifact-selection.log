@@ -1,0 +1,8 @@
+# recorded 2026-11-06T23:16:06Z. Controls for the bug behind the Windows upgrade failure.
+ok   takes this version when an older one sorts first
+ok   refuses when only an older version is there
+ok   refuses a file signed for another version
+ok   refuses a missing signature
+ok   refuses a Linux set missing its .deb
+ALL OK
+exit=0

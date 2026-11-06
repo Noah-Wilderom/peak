@@ -6,14 +6,18 @@ import { IS_WINDOWS, PLATFORM, join, readFileSync, readdirSync, writeFileSync } 
 const bun = IS_WINDOWS ? "bun.exe" : "bun"
 const sh = (c, env = {}) => execSync(c, { stdio: "inherit", shell: IS_WINDOWS ? "bash" : "/bin/sh", env: { ...process.env, ...env } })
 
-export function buildPair({ work, BASE, NEXT, PORT, autoUpdate }) {
+export function buildPair({ work, BASE, NEXT, PORT, autoUpdate, windowArgs }) {
   const target = process.env.PEAK_PROOF_TARGET
   const keyFile = join(work, "throwaway.key")
   const password = "proof-only"
   const generate = (file) => execFileSync(bun, ["x", "tauri", "signer", "generate", "--ci", "-w", file, "-p", password], { stdio: "ignore" })
   generate(keyFile)
   const overlayFile = join(work, "overlay.json")
+  // Arrays replace rather than merge in a config overlay, so the whole window goes in.
+  const conf = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8"))
+  const app = windowArgs ? { app: { windows: conf.app.windows.map((w) => ({ ...w, additionalBrowserArgs: windowArgs })) } } : {}
   writeFileSync(overlayFile, JSON.stringify({
+    ...app,
     plugins: { updater: { pubkey: readFileSync(`${keyFile}.pub`, "utf8").trim(), endpoints: [`http://127.0.0.1:${PORT}/latest.json`], dangerousInsecureTransportProtocol: true } },
   }))
   const original = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8")).version

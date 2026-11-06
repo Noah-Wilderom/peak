@@ -2,23 +2,29 @@
 // The update flow as a person sees it, through the real window and its real buttons, on real
 // packaged builds. Run under dbus and xvfb-run, with tauri-driver at $PEAK_TAURI_DRIVER.
 //   PEAK_SMOKE_PLATFORM=linux update-ui.mjs <output dir>
-import { spawn } from "node:child_process"
+import { spawn, spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
 import { createServer } from "node:http"
-import { IS_WINDOWS, PLATFORM, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
+import { IS_WINDOWS, PLATFORM, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, shot as shotDesktop, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
 import { buildPair } from "../smoke/build-pair.mjs"
 import { DatabaseSync } from "node:sqlite"
 
 const out = process.argv[2]
 mkdirSync(out, { recursive: true })
 const [BASE, NEXT, PORT] = ["9.0.0", "9.0.1", 18766]
+const CDP_PORT_NUMBER = 9223
 const HELD = IS_WINDOWS ? "ping -n 300 127.0.0.1" : "sleep 300"
 const HELD_SEEN = new RegExp(HELD.replace(/\./g, "\\."))
 const work = mkdtempSync(join(tmpdir(), "peak-ui-"))
-const { baseDir, artifactName, artifactBytes, goodSig, key } = buildPair({ work, BASE, NEXT, PORT, autoUpdate: false })
+const { baseDir, artifactName, artifactBytes, goodSig, key } = buildPair({
+  work, BASE, NEXT, PORT, autoUpdate: false,
+  // Only in this test's builds. Tauri's own browser arguments replace whatever the environment
+  // asks for, so the debugging port has to be named here. These are its defaults, plus the port.
+  windowArgs: IS_WINDOWS ? `--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port=${CDP_PORT_NUMBER}` : undefined,
+})
 const problems = []
 const DRIVER = "http://127.0.0.1:4444"
-const CDP_PORT = 9223
+const CDP_PORT = CDP_PORT_NUMBER
 let session = null
 let cdp = null
 let cdpId = 0
@@ -77,11 +83,18 @@ const shot = async (name) => {
 }
 async function open() {
   if (IS_WINDOWS) {
-    launch({ WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${CDP_PORT}` })
+    launch()
     const target = await waitFor("the window's debugging port", async () => {
       const pages = await fetch(`http://127.0.0.1:${CDP_PORT}/json`).then((r) => r.json()).catch(() => [])
       return pages.find((p) => p.type === "page")
-    }, 60_000)
+    }, 60_000).catch((e) => {
+      // What was going on, for whoever reads this log.
+      log(`apps: ${JSON.stringify(liveApps().map((i) => i.pid))}`)
+      log(spawnSync("netstat", ["-ano", "-p", "TCP"], { encoding: "utf8" }).stdout.split("\n").filter((l) => l.includes("LISTENING")).join("\n"))
+      log(spawnSync("tasklist", { encoding: "utf8" }).stdout.split("\n").filter((l) => /peak|WebView2/i.test(l)).join("\n"))
+      shotDesktop(out, "port-timeout")
+      throw e
+    })
     cdp = new WebSocket(target.webSocketDebuggerUrl)
     await new Promise((res, rej) => {
       cdp.addEventListener("open", res, { once: true })

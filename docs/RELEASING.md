@@ -34,16 +34,17 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Package builds and signs | CI | CI | CI | CI |
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
-| Two-version signed update (`update-proof.mjs`) | CI | **Not yet: fix awaiting a run** | CI | CI |
+| Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | CI | **Not yet: fix awaiting a run** | Not possible: no WebDriver for macOS webviews | Not possible |
+| Update through real buttons (`update-ui.mjs`) | CI | **Not yet: fix awaiting a run** | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
+| Runtime agents report from inside the program (`smoke.mjs`) | Local | **Not yet** | **Not yet** | **Not yet** |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
-| Remote targets from this OS | Yes, earlier live suites | **Not run** | **Not run** | **Not run** |
+| Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
 | OS code signing and notarization | Not applicable | **None configured** | **Ad-hoc only** | **Ad-hoc only** |
 
-"CI" means a native GitHub runner on `676efdc`. Every later commit needs them again.
+"CI" means a native GitHub runner on `ea3ebc1`. Every later commit needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/` and `ci-676efdc/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/` and `ci-ea3ebc1/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
 ## Secrets
 

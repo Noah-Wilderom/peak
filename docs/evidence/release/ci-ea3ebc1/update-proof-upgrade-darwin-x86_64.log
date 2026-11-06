@@ -1,0 +1,23 @@
+# commit ea3ebc1 Update proof / Upgrade (darwin-x86_64): success. job 128200579283
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+  PEAK_SMOKE_PLATFORM: darwin-x86_64
+  PEAK_PROOF_TARGET: x86_64-apple-darwin
+ok   the base version is installed peak 9.0.0 (macOS app, commit ea3ebc153e6e07128bbd3dbc10b15e1486d7a582)
+ok   a run recorded before the update history-1794006671429-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 3, artifact 0
+ok   malformed: nothing installed, app alive feed 3, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 6, artifact 5
+ok   truncated: nothing installed, app alive feed 5, artifact 5
+ok   tampered: nothing installed, app alive feed 6, artifact 5
+ok   wrong-key: nothing installed, app alive feed 6, artifact 5
+ok   downloaded from the feed feed 1, artifact 1
+ok   the old app exited and a new one started 23632 -> 23747
+ok   the installed copy is the new version peak 9.0.1 (macOS app, commit ea3ebc153e6e07128bbd3dbc10b15e1486d7a582)
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 7
+ok   the new app monitors the CLI post-1794006800399-err
+ok   that workload finished with its own exit code exit 9
+PROOF OK

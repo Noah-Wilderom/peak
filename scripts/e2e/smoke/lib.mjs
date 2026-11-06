@@ -149,6 +149,18 @@ export function storedRun(id) {
   }
 }
 
+/** Every sample of a run, as the app stored them. */
+export function storedSamples(id) {
+  const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })
+  try {
+    const log = db.prepare("SELECT run_id FROM logs WHERE text LIKE ? LIMIT 1").get(`%${id}%`)
+    if (!log) return []
+    return db.prepare("SELECT data FROM samples WHERE run_id = ?").all(log.run_id).map((r) => JSON.parse(r.data))
+  } finally {
+    db.close()
+  }
+}
+
 /** What the app's proof mode recorded going wrong. */
 export function proofFailures() {
   const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })

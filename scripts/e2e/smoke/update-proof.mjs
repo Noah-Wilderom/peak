@@ -143,6 +143,8 @@ const end = await across.done
 check("that workload finished with its own exit code", end.code === 9, `exit ${end.code}`)
 await unserve()
 closeApps()
+// Whether a `peak-cli` that was running got moved aside for the installer (Windows).
+log(`installed files: ${readdirSync(dirname(paths().gui)).filter((f) => /peak-cli|^peak/.test(f)).join(" ")}`)
 
 writeFileSync(join(out, `update-proof-${PLATFORM}.json`), JSON.stringify(record, null, 2))
 log(process.exitCode ? "PROOF FAILED" : "PROOF OK")
