@@ -102,15 +102,19 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **`import sitecustomize` isn't reliable in tests.** Python imports that name at startup, and Ubuntu's Python ships its own. The agent tests load it by path.
 - **The collector is built by a nested cargo in `build.rs`.** It clears the outer build's settings, because coverage works through `RUSTC_WRAPPER`, which would otherwise break it. It builds into `target/embedded-collector`. Without CI's `PEAK_REQUIRE_COLLECTOR=1`, a debug build that can't embed one only warns, and its embedded-collector tests are compiled out.
 - **Targets aren't re-copied within a version.** The readiness check compares collector version and protocol, so while changing the collector without bumping them, a target keeps its old copy until that file is removed.
+- **`target/debug/peak` isn't a standalone app.** A plain debug build's window loads from the dev server, so it's blank without one; its CLI works. `tauri build` embeds the frontend. `scripts/verify-install.sh` checks the documented build and install steps.
 - **`rustfmt` reshapes code,** so scripted edits can silently miss. Check they applied.
 - **The notification plugin can't report delivery on Linux:** permission is always "granted" and errors are discarded.
 - **A drag across too little data is neither a zoom nor a click.** `useTimelineChart` checks how far the pointer moved.
+- **Short windows.** `1s` and `10s` live in `RANGES` with the rest. Sampling is still 500ms, so a 1s window holds 2 or 3 real samples. While the pointer is pressed, `TimelineProvider` holds every chart's range and data, or a live 1s drag couldn't land. On a live 1s chart a resting tooltip can blank briefly, because recharts tracks the array position, not the pointer. Details are in `DEVELOPMENT-STATUS.md`.
 
 ## Commands
 
 ```sh
 bun install
-bun run tauri dev            # desktop app (or: task dev)
+task dev                     # desktop app for development
+task peak:build              # optimized app at src-tauri/target/release/peak; PATH unchanged
+task peak:install            # that, copied to ~/.local/bin/peak or PEAK_INSTALL_DIR
 bun run dev                  # browser + mock monitor at http://localhost:1420
 src-tauri/target/debug/peak collector   # which collector this build copies to targets
 
@@ -129,8 +133,9 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 
 ## What's next
 
-All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. What remains is outside
-what this machine could validate:
+All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. The build/launch fix and the 1s
+and 10s chart windows are verified and uncommitted, waiting on PM acceptance and publishing (see
+[`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md)). What remains is outside what this machine could validate:
 
 1. Close the live gaps in [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md), starting with SSH to a real second machine.
 2. Build and validate arm64. The collector already travels inside the app binary, including in installers.

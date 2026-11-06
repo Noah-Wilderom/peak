@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatTimeLabel, useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
+import { useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
 import { MarkerStrip } from "@/components/charts/marker-strip"
 import { formatBytes } from "@/lib/format"
 import { MARKER_STYLE, timelineMarkers } from "@/lib/markers"
@@ -18,7 +18,7 @@ const config = {
 } satisfies ChartConfig
 
 export function MemoryChart({ height = 280 }: { height?: number }) {
-  const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
+  const { proc, data, from, to, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const peak = proc.peak
   const y = useEasedYAxis(Math.max(peak.rss, visibleMax(data, from, to, ["rss"])), { bytes: true })
   const markers = timelineMarkers(proc, from, to)
@@ -42,7 +42,7 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
           content={
             <ChartTooltipContent
               indicator="line"
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(value, name) => (
                 <div className="flex w-full items-center justify-between gap-6">
                   <span className="text-muted-foreground">{config[name as keyof typeof config]?.label}</span>
@@ -86,7 +86,7 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
           strokeWidth={2}
           fill="url(#fill-rss)"
           isAnimationActive={false}
-          dot={false}
+          dot={dot}
           activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--background)" }}
         />
         <Line
@@ -96,7 +96,7 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
           strokeWidth={2}
           strokeDasharray="5 3"
           isAnimationActive={false}
-          dot={false}
+          dot={dot}
           activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--background)" }}
         />
         {peak.t >= from && peak.t <= to && (

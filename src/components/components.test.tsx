@@ -285,7 +285,8 @@ describe("edge cases", () => {
         <MemoryTab totalMemory={1024} />
       </TimelineProvider>,
     )
-    expect(screen.getByText("Stable.")).toBeInTheDocument()
+    expect(screen.getByText("Too few samples.")).toBeInTheDocument()
+    expect(screen.getByText(/holds 0 of the 10 samples/)).toBeInTheDocument()
     render(<FlameGraph root={{ name: "(root)", self: 0, children: [{ name: "tiny", self: 0, children: [] }] }} />)
     render(<FlameGraph root={{ name: "(root)", self: 100, children: [{ name: "speck", file: "a.js:1", self: 1, children: [] }] }} />)
     expect(screen.queryByText("speck")).not.toBeInTheDocument() // too narrow to label

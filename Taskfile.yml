@@ -17,9 +17,23 @@ tasks:
       - bun run tauri dev
 
   peak:build:
-    desc: Build the local Peak desktop app and CLI
+    desc: Build the optimized Peak app and CLI at src-tauri/target/release/peak (doesn't change PATH)
     cmds:
-      - cargo build --manifest-path src-tauri/Cargo.toml
+      - bun install --frozen-lockfile
+      - bun run tauri build --no-bundle
+      - cmd: |
+          echo
+          echo "Built src-tauri/target/release/peak. It isn't on your PATH, so bare 'peak' won't work yet."
+          echo "  Open the app:     ./src-tauri/target/release/peak"
+          echo "  Use the CLI:      ./src-tauri/target/release/peak run -- <command>"
+          echo "  Install 'peak':   task peak:install"
+        silent: true
+
+  peak:install:
+    desc: Build Peak and install the peak command to ~/.local/bin (or PEAK_INSTALL_DIR)
+    cmds:
+      - task: peak:build
+      - sh scripts/install-peak.sh
 
   test:live:
     desc: Run live remote validation against disposable sshd, containers and k3s

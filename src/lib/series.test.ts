@@ -1,16 +1,19 @@
 import { describe, expect, it } from "vitest"
-import type { Proc, Sample } from "@/lib/types"
+import { TICK_MS, type Proc, type Sample } from "@/lib/types"
 import { sample } from "@/test/fixtures"
 import {
   average,
   bucketMsFor,
   byteUnit,
   histogram,
+  MIN_TREND_SAMPLES,
   maxOf,
   niceTicks,
   percentiles,
+  RANGES,
   rangeMs,
   stddev,
+  timeStep,
   timeTicks,
   trend,
   valueAgo,
@@ -64,6 +67,76 @@ describe("series", () => {
     expect(timeTicks(1_000, 31_000, "elapsed", 1_000)).toEqual([1_000, 6_000, 11_000, 16_000, 21_000, 26_000, 31_000])
     expect(timeTicks(1_500, 61_500, "clock", 0)).toEqual([10_000, 20_000, 30_000, 40_000, 50_000, 60_000])
     expect(timeTicks(0, 1e9, "clock", 0).length).toBeGreaterThan(0)
+  })
+
+  it("offers the short windows ahead of every earlier range", () => {
+    expect(RANGES.map((r) => [r.label, r.ms])).toEqual([
+      ["1s", 1_000],
+      ["10s", 10_000],
+      ["30s", 30_000],
+      ["1m", 60_000],
+      ["5m", 300_000],
+      ["15m", 900_000],
+      ["1h", 3_600_000],
+      ["All", Infinity],
+    ])
+  })
+
+  describe.each([
+    { range: "1s", ms: 1_000, inWindow: [98_500, 99_000, 99_500] },
+    { range: "10s", ms: 10_000, inWindow: Array.from({ length: 21 }, (_, i) => 89_500 + i * 500) },
+  ] as const)("the $range window", ({ range, ms, inWindow }) => {
+    const view = { kind: "live", range } as const
+
+    it("spans exactly its duration and shows every recorded sample, unmerged", () => {
+      expect(rangeMs(proc(samples), view)).toBe(ms)
+      expect(bucketMsFor(ms)).toBe(TICK_MS)
+      expect(visibleSamples(proc(samples), view).map((s) => s.t)).toEqual(inWindow)
+      const { data, span } = viewData(proc(samples), view)
+      expect(span).toBe(ms)
+      expect(data.map((s) => s.t)).toEqual(expect.arrayContaining([...inWindow]))
+      expect(data.find((s) => s.t === 99_500)!.rss).toBe(1199)
+      // Enough overflow for the line to leave the left edge while gliding.
+      expect(data[0].t).toBeLessThan(inWindow[0] - TICK_MS * 1.5)
+    })
+
+    it("holds the whole run when the run is shorter than the window", () => {
+      const short = samples.slice(0, 2)
+      expect(visibleSamples(proc(short), view).map((s) => s.t)).toEqual(short.map((s) => s.t))
+      expect(viewData(proc(short), view).data.map((s) => s.t)).toEqual(short.map((s) => s.t))
+    })
+  })
+
+  it("keeps a real sample beyond each edge when samples are further apart than the window", () => {
+    const sparse = [sample(0, 10), sample(5_000, 20), sample(10_000, 30), sample(15_000, 40)]
+    // Stored run, ending at its last sample: the line still reaches the left edge.
+    expect(viewData(proc(sparse), { kind: "live", range: "1s" }).data.map((s) => s.t)).toEqual([10_000, 15_000])
+    expect(viewData(proc(sparse), { kind: "live", range: "10s" }).data.map((s) => s.t)).toEqual([0, 5_000, 10_000, 15_000])
+    // A zoom between two samples is crossed by the line through them, nothing invented.
+    const zoom = viewData(proc(sparse), { kind: "fixed", from: 6_500, to: 7_500 }).data
+    expect(zoom.map((s) => [s.t, s.rss])).toEqual([[5_000, 20], [10_000, 30]])
+    // Past either end of the data there is nothing to run through.
+    expect(viewData(proc(sparse), { kind: "fixed", from: -60_000, to: -50_000 }).data).toEqual([])
+  })
+
+  it("steps ticks below a second only for windows that need it", () => {
+    expect(timeStep(1_000)).toBe(200)
+    expect(timeStep(500)).toBe(100)
+    expect(timeStep(2_500)).toBe(500)
+    expect(timeStep(6_000)).toBe(1_000)
+    expect(timeStep(10_000)).toBe(2_000)
+    expect(timeStep(30_000)).toBe(5_000)
+    expect(timeTicks(10_050, 11_050, "elapsed", 50)).toEqual([10_050, 10_250, 10_450, 10_650, 10_850, 11_050])
+    expect(timeTicks(10_050, 11_050, "clock", 0)).toEqual([10_200, 10_400, 10_600, 10_800, 11_000])
+    expect(timeTicks(1_000, 11_000, "elapsed", 1_000)).toEqual([1_000, 3_000, 5_000, 7_000, 9_000, 11_000])
+    // Scrolling never re-spaces them: the same instants stay ticks as the window moves.
+    expect(timeTicks(10_123, 11_123, "clock", 0)).toEqual([10_200, 10_400, 10_600, 10_800, 11_000])
+  })
+
+  it("needs enough samples for a trend", () => {
+    const rising = (n: number) => Array.from({ length: n }, (_, i) => sample(i * 500, 1000 + i * 100))
+    expect(trend(rising(MIN_TREND_SAMPLES - 1), "rss").slope).toBe(0)
+    expect(trend(rising(MIN_TREND_SAMPLES), "rss").slope).toBeGreaterThan(0)
   })
 
   it("builds nice value ticks", () => {

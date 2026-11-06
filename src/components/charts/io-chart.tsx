@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatTimeLabel, useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
+import { useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
 import { formatBytes, formatRate } from "@/lib/format"
 
 const config = {
@@ -16,7 +16,7 @@ const config = {
 } satisfies ChartConfig
 
 export function IoChart() {
-  const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
+  const { data, from, to, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const y = useEasedYAxis(visibleMax(data, from, to, ["read", "write"], true), { bytes: true, count: 3, min: 1024 })
 
   return (
@@ -31,7 +31,7 @@ export function IoChart() {
           content={
             <ChartTooltipContent
               indicator="line"
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(value, name) => (
                 <div className="flex w-full items-center justify-between gap-6">
                   <span className="text-muted-foreground">{config[name as keyof typeof config]?.label}</span>
@@ -42,8 +42,8 @@ export function IoChart() {
           }
         />
         <ChartLegend itemSorter={null} verticalAlign="top" align="right" content={<ChartLegendContent className="justify-end pb-3" />} />
-        <Area dataKey="read" stackId="io" type="step" stroke="var(--color-read)" strokeWidth={1.5} fill="var(--color-read)" fillOpacity={0.12} isAnimationActive={false} dot={false} />
-        <Area dataKey="write" stackId="io" type="step" stroke="var(--color-write)" strokeWidth={1.5} fill="var(--color-write)" fillOpacity={0.2} isAnimationActive={false} dot={false} />
+        <Area dataKey="read" stackId="io" type="step" stroke="var(--color-read)" strokeWidth={1.5} fill="var(--color-read)" fillOpacity={0.12} isAnimationActive={false} dot={dot} />
+        <Area dataKey="write" stackId="io" type="step" stroke="var(--color-write)" strokeWidth={1.5} fill="var(--color-write)" fillOpacity={0.2} isAnimationActive={false} dot={dot} />
         {selection && <ReferenceArea x1={selection.a} x2={selection.b} fill="var(--foreground)" fillOpacity={0.06} />}
       </AreaChart>
     </ChartContainer>

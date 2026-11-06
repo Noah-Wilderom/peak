@@ -135,16 +135,16 @@ const chooseTarget = async (label) => {
 }
 
 /** A real mouse gesture on the memory chart, through WebDriver. */
-async function mouseOnChart(fromX, toX) {
+async function mouseOnChart(fromX, toX, settle = 150) {
   const rect = await js("const s = [...document.querySelectorAll('main section')].find((x) => x.textContent.startsWith('Memory.')).querySelector('.recharts-wrapper').getBoundingClientRect(); return { x: s.x, y: s.y, w: s.width, h: s.height }")
   const at = (f) => ({ x: Math.round(rect.x + rect.w * f), y: Math.round(rect.y + rect.h * 0.5) })
   const steps = [
     { type: "pointerMove", duration: 0, ...at(fromX), origin: "viewport" },
     { type: "pause", duration: 400 },
     { type: "pointerDown", button: 0 },
-    { type: "pause", duration: 150 },
+    { type: "pause", duration: settle },
   ]
-  if (toX !== fromX) steps.push({ type: "pointerMove", duration: 200, ...at(toX), origin: "viewport" }, { type: "pause", duration: 150 })
+  if (toX !== fromX) steps.push({ type: "pointerMove", duration: 200, ...at(toX), origin: "viewport" }, { type: "pause", duration: settle })
   steps.push({ type: "pointerUp", button: 0 })
   await wd("POST", "/actions", { actions: [{ type: "pointer", id: "mouse", parameters: { pointerType: "mouse" }, actions: steps }] })
   await wd("DELETE", "/actions").catch(() => {})
@@ -227,6 +227,55 @@ try {
     await shot("d03b-chart-click")
   })
   await step("stop a local run: exits cleanly", async () => {
+    await click("^Stop$")
+    await see(/Stopped|Exited/)
+  })
+  await step("1s and 10s windows on real samples", async () => {
+    await capture("sleep 45")
+    await see(/sleep 45/)
+    await click("Overview")
+    await click("^T\\+$")
+    // Enough real samples to fill the 10s window.
+    await sleep(11000)
+    const AXES = `return [...document.querySelectorAll('main .recharts-wrapper')].map((w) => [...w.querySelectorAll('.recharts-xAxis-tick-labels text')].map((t) => t.textContent)).filter((l) => l.length)`
+    const axis = async () => {
+      const all = await js(AXES)
+      if (!all.length || all.some((l) => JSON.stringify(l) !== JSON.stringify(all[0]))) throw new Error(`charts disagree: ${JSON.stringify(all)}`)
+      return all[0]
+    }
+    const secs = (l) => { const [m, s] = l.split(":"); return +m * 60 + +s }
+    const chip = `return [...document.querySelectorAll('main button')].find((b) => /\\u2013/.test(b.innerText))?.innerText ?? ''`
+    for (const { range, span, tenths } of [{ range: "1s", span: 1, tenths: true }, { range: "10s", span: 10, tenths: false }]) {
+      await click(`^${range}$`)
+      await see(new RegExp(`Live . last ${range}`))
+      await sleep(800)
+      const a = await axis()
+      if (a.length < 4 || new Set(a).size !== a.length) throw new Error(`labels: ${a}`)
+      if (a.some((l) => /\./.test(l) !== tenths)) throw new Error(`precision: ${a}`)
+      if (secs(a.at(-1)) - secs(a[0]) > span) throw new Error(`wider than ${range}: ${a}`)
+      const d = await js("return document.querySelector('main .recharts-area-curve')?.getAttribute('d') ?? ''")
+      if (!d) throw new Error("no line from real samples")
+      await shot(`d03c-window-${range}`)
+      await sleep(span === 1 ? 1500 : 4500)
+      const b = await axis()
+      if (secs(b[0]) <= secs(a[0])) throw new Error(`didn't advance: ${a} -> ${b}`)
+      // Pointer events can land late under software rendering; try the drag a few times.
+      let zoom = ""
+      for (let i = 0; i < 4 && !zoom; i++) {
+        // The window under the pointer moves fast, so give each move a full redraw to land.
+        await mouseOnChart(0.15, 0.9, 700)
+        await sleep(800)
+        zoom = await js(chip)
+      }
+      if (!/\d\.\d – /.test(zoom)) throw new Error(`zoom: "${zoom}"`)
+      console.log(`     ${range} axis ${a.join(" ")}; zoom ${zoom.replace(/\s+/g, " ")}`)
+      await shot(`d03d-zoom-${range}`)
+      await js("[...document.querySelectorAll('main button')].find((b) => /\\u2013/.test(b.innerText)).click()")
+      await sleep(400)
+      // A click during a late drag can have opened the output.
+      await click("Overview")
+    }
+    await click("^1m$")
     await click("^Stop$")
     await see(/Stopped|Exited/)
   })

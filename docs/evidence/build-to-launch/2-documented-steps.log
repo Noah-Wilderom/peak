@@ -1,0 +1,65 @@
+started 2026-11-06T10:47:32Z
+
+=== preconditions
+  ok: peak is not on PATH
+  ok: no node_modules, no build
+
+=== $ task peak:build
+    Finished `release` profile [optimized] target(s) in 4m 00s
+       Built application at: src-tauri/target/release/peak
+Built src-tauri/target/release/peak. It isn't on your PATH, so bare 'peak' won't work yet.
+  Open the app:     ./src-tauri/target/release/peak
+  Use the CLI:      ./src-tauri/target/release/peak run -- <command>
+  Install 'peak':   task peak:install
+exit=0, took 322s
+  ok: the build succeeds
+  ok: it doesn't put peak on PATH, and says so
+  ok: the documented path works: peak run
+  ok: the documented path works: peak collector
+
+=== $ PEAK_INSTALL_DIR=<temp>/bin task peak:install   (not on PATH)
+Installed <work>/.tmp/bin/peak
+<work>/.tmp/bin isn't on your PATH, so bare 'peak' won't work yet. Either run it directly:
+  <work>/.tmp/bin/peak
+or add this line to your shell profile and open a new terminal:
+  export PATH="<work>/.tmp/bin:$PATH"
+  ok: it installs
+  ok: it says the directory isn't on PATH, and how to fix that
+  ok: peak still isn't a command: nothing was claimed or changed
+  ok: the direct path it prints works
+
+=== with the line it suggested applied, in a new shell
+<work>/.tmp/bin/peak
+on-path
+x86_64
+  ok: bare peak resolves and runs
+
+=== $ scripts/install-peak.sh, reinstalling with the directory on PATH
+Installed <work>/.tmp/bin/peak
+Run 'peak' to open the app, or 'peak run -- <command>' with the app open.
+  ok: no PATH warning when it's already there
+
+=== another peak earlier on PATH
+Installed <work>/.tmp/bin/peak
+Note: 'peak' currently runs <work>/.tmp/other/peak, which comes first on your PATH.
+  ok: it warns which one wins
+
+=== default destination, HOME pointing at a temp directory
+Installed <work>/.tmp/home/.local/bin/peak
+<work>/.tmp/home/.local/bin isn't on your PATH, so bare 'peak' won't work yet. Either run it directly:
+  <work>/.tmp/home/.local/bin/peak
+or add this line to your shell profile and open a new terminal:
+  export PATH="<work>/.tmp/home/.local/bin:$PATH"
+  ok: it goes to ~/.local/bin/peak
+  ok: the profile isn't edited
+  ok: no file is left beside it
+
+=== nothing built yet
+No build at <work>/.tmp/empty/src-tauri/target/release/peak. Run: task peak:build
+  ok: it refuses, and says what to run
+
+=== the real home
+  ok: shell profiles and ~/.local/bin/peak are unchanged
+installed binary, for a window test: /mnt/HC_Volume_107248377/.peak-sysroot/verify-install/.tmp/bin/peak
+ended 2026-11-06T10:56:16Z
+ALL STEPS AS DOCUMENTED

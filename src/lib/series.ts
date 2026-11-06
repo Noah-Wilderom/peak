@@ -1,8 +1,10 @@
 import { TICK_MS, type MetricKey, type Proc, type Sample } from "@/lib/types"
 
-export type RangeKey = "30s" | "1m" | "5m" | "15m" | "1h" | "all"
+export type RangeKey = "1s" | "10s" | "30s" | "1m" | "5m" | "15m" | "1h" | "all"
 
 export const RANGES: { value: RangeKey; label: string; ms: number }[] = [
+  { value: "1s", label: "1s", ms: 1_000 },
+  { value: "10s", label: "10s", ms: 10_000 },
   { value: "30s", label: "30s", ms: 30_000 },
   { value: "1m", label: "1m", ms: 60_000 },
   { value: "5m", label: "5m", ms: 300_000 },
@@ -34,8 +36,9 @@ export function bucketMsFor(span: number) {
 
 /**
  * Samples covering the view, bucketed by absolute time with per-field max so a
- * memory spike is never smoothed away. Includes one bucket of overflow on each
- * side so lines run cleanly off the clipped plot edges while scrolling.
+ * memory spike is never smoothed away. Includes overflow on each side so lines
+ * run cleanly off the clipped plot edges while scrolling: two buckets, and then
+ * the next real sample, so sparse data still crosses a window shorter than its gaps.
  */
 export function viewData(proc: Proc, view: View) {
   const span = rangeMs(proc, view)
@@ -45,11 +48,15 @@ export function viewData(proc: Proc, view: View) {
   const to = view.kind === "fixed" ? view.to + 2 * bucketMs : Infinity
 
   const samples = proc.samples
+  // A window past either end of the data has no line to run off it.
   let i = lowerBound(samples, from)
+  if (i > 0 && i < samples.length) i--
+  const upper = lowerBound(samples, to)
+  const end = upper === 0 ? 0 : Math.min(samples.length, upper + 1)
   const out: Sample[] = []
   let cur: Sample | null = null
   let curKey = -1
-  for (; i < samples.length && samples[i].t <= to; i++) {
+  for (; i < end; i++) {
     const x = samples[i]
     const key = Math.floor(x.t / bucketMs)
     if (key !== curKey) {
@@ -114,15 +121,19 @@ function lowerBound(samples: { t: number }[], t: number) {
 
 // ─── axis ticks ──────────────────────────────────────────────────────────────
 
-const TIME_STEPS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200].map((s) => s * 1000)
+const TIME_STEPS = [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200].map((s) => s * 1000)
+
+/** Spacing between axis ticks for a window this long. */
+export function timeStep(span: number, count = 6) {
+  return TIME_STEPS.find((s) => span / s <= count) ?? TIME_STEPS.at(-1)!
+}
 
 /**
  * Ticks aligned to round multiples (of elapsed time or wall clock), so they
  * scroll with the data instead of re-spacing every frame.
  */
 export function timeTicks(from: number, to: number, mode: AxisMode, origin: number, count = 6) {
-  const span = to - from
-  const step = TIME_STEPS.find((s) => span / s <= count) ?? TIME_STEPS.at(-1)!
+  const step = timeStep(to - from, count)
   const base = mode === "elapsed" ? origin : 0
   const first = Math.ceil((from - base) / step) * step + base
   const ticks: number[] = []
@@ -186,10 +197,13 @@ export function stddev(values: number[]) {
   return Math.sqrt(values.reduce((a, b) => a + (b - mean) ** 2, 0) / (values.length - 1))
 }
 
+/** Fewer samples than this have no meaningful trend. */
+export const MIN_TREND_SAMPLES = 10
+
 /** Least-squares slope of `key` in units per millisecond, plus R². */
 export function trend(samples: Sample[], key: MetricKey) {
   const n = samples.length
-  if (n < 10) return { slope: 0, r2: 0 }
+  if (n < MIN_TREND_SAMPLES) return { slope: 0, r2: 0 }
   const t0 = samples[0].t
   let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0
   for (const s of samples) {

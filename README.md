@@ -12,8 +12,31 @@ You need [Bun](https://bun.sh), [Task](https://taskfile.dev), Rust through
 task dev
 ```
 
-That installs dependencies, builds everything and opens the app. The first build takes a few minutes.
-`task peak:build` builds the local app and `peak run -- <command>` CLI.
+That installs dependencies, builds everything and opens the app for development. The first build takes a few minutes.
+
+### The `peak` command
+
+Building doesn't put `peak` on your PATH. To open Peak without a dev server, or to use `peak run` from anywhere:
+
+```sh
+task peak:build                                    # optimized build; about 5 minutes the first time
+./src-tauri/target/release/peak                    # opens the app
+./src-tauri/target/release/peak run -- npm test    # with the app open, monitors that command
+```
+
+To have a bare `peak` command, install it:
+
+```sh
+task peak:install        # builds, then copies it to ~/.local/bin/peak
+```
+
+Set `PEAK_INSTALL_DIR` to choose another directory. Peak never edits your shell profile. If the directory isn't on your
+PATH, the task says so and shows the line to add. The installed app still needs Tauri's Linux system libraries.
+
+`task dev` also leaves a binary at `src-tauri/target/debug/peak`. Its CLI works, but its window loads from the dev
+server, so it stays blank on its own.
+
+### Remote targets, in brief
 
 To monitor Docker containers, Kubernetes pods or SSH hosts, Peak copies a small static collector to the target.
 **You don't need to build or install it:** it's built into the app, using a Rust target that `rustup` adds on the

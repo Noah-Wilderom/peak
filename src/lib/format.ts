@@ -23,18 +23,23 @@ export function formatDuration(ms: number) {
   return `${sec}s`
 }
 
-/** Seconds relative to process start, e.g. "1:24". */
-export function formatOffset(ms: number) {
+/** Seconds relative to process start, e.g. "1:24", or "1:24.5" with `tenths`. */
+export function formatOffset(ms: number, tenths = false): string {
+  if (tenths) {
+    const t = Math.max(0, Math.round(ms / 100))
+    return `${formatOffset(Math.floor(t / 10) * 1000)}.${t % 10}`
+  }
   const s = Math.max(0, Math.round(ms / 1000))
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`
 }
 
-export function formatClock(ts: number) {
+export function formatClock(ts: number, tenths = false) {
   return new Date(ts).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    ...(tenths && { fractionalSecondDigits: 1 as const }),
   })
 }
 

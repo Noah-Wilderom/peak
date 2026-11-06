@@ -16,7 +16,7 @@ import { Bytes } from "@/components/bytes"
 import type { Proc, Sample } from "@/lib/types"
 import { analyzeTrend, composition, COMPOSITION_KEYS, gcStats } from "@/lib/analysis"
 import { formatBytes, formatDuration, formatMs } from "@/lib/format"
-import { percentiles, visibleSamples, type View } from "@/lib/series"
+import { MIN_TREND_SAMPLES, percentiles, visibleSamples, type View } from "@/lib/series"
 
 const VERDICT = {
   growing: { icon: TrendingUpIcon, title: "Growing steadily.", body: "Memory climbs in a straight line — the shape of a leak." },
@@ -32,7 +32,14 @@ export function MemoryTab({ totalMemory }: { totalMemory: number }) {
   const [p50, p95, p99] = useMemo(() => percentiles(samples.map((s) => s.rss), [50, 95, 99]), [samples])
   const gc = useMemo(() => gcStats(proc, from, to), [proc, from, to])
   const last = proc.samples.at(-1)!
-  const V = VERDICT[t.verdict]
+  const tooFew = samples.length < MIN_TREND_SAMPLES
+  const V = tooFew
+    ? {
+        icon: MinusIcon,
+        title: "Too few samples.",
+        body: `This window holds ${samples.length} of the ${MIN_TREND_SAMPLES} samples a trend needs. Pick a longer range.`,
+      }
+    : VERDICT[t.verdict]
 
   return (
     <motion.div
@@ -48,12 +55,14 @@ export function MemoryTab({ totalMemory }: { totalMemory: number }) {
           </div>
           <p className="mt-3 text-title">{V.title}</p>
           <p className="mt-1 text-sm opacity-70">{V.body}</p>
-          <div className="mt-4 flex gap-6 text-sm tabular-nums">
-            <span>
-              <Tween value={t.perMin} format={(v) => `${v >= 0 ? "+" : "−"}${formatBytes(Math.abs(v))}/min`} className="font-semibold" />
-            </span>
-            <span className="opacity-70">R² {t.r2.toFixed(2)}</span>
-          </div>
+          {!tooFew && (
+            <div className="mt-4 flex gap-6 text-sm tabular-nums">
+              <span>
+                <Tween value={t.perMin} format={(v) => `${v >= 0 ? "+" : "−"}${formatBytes(Math.abs(v))}/min`} className="font-semibold" />
+              </span>
+              <span className="opacity-70">R² {t.r2.toFixed(2)}</span>
+            </div>
+          )}
           {Number.isFinite(t.toLimit) && (
             <p className="mt-2 text-xs opacity-70">Reaches system memory ({formatBytes(totalMemory)}) in ~{formatDuration(t.toLimit)}.</p>
           )}

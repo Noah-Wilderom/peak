@@ -1,0 +1,18 @@
+# real Chromium, browser mock (simulated data). recorded 2026-11-06T11:33:48Z
+ok   overview + markers
+ok   marker click opens output at that time
+ok   chart click jumps; drag zooms
+ok   1s window: live, linked, labelled, tooltip, zoom
+ok   10s window: live, linked, labelled, tooltip, zoom
+ok   short windows on a stored run hold still at its end
+ok   all ranges fit a narrow window
+ok   report tab + copies
+ok   resources tab
+ok   cpu profile records with progress and shows time values
+ok   machine strip and page
+ok   history search, compare leaves session alone
+ok   reopen stored run is marked
+ok   settings persist across reload, storage updates, alert fires
+ok   simulated target: connect, attach, lose the link, reconnect
+ALL OK
+exit=0

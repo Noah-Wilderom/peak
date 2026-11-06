@@ -1,0 +1,15 @@
+# Installed binary (from scripts/verify-install.sh, PEAK_INSTALL_DIR run) in a real window under Xvfb, container, no dev server
+# recorded 2026-11-06T11:01:43Z
+# NO_K3S=1 PEAK_E2E_ONLY='starts with an empty|captures a real command' scripts/e2e/desktop/run.sh <installed peak> ...
+
+(peak:48): dbind-WARNING **: 10:58:53.618: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   starts with an empty real backend
+ok   captures a real command with output
+
+(peak:117): dbind-WARNING **: 10:58:58.199: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ALL OK
+EXIT=0

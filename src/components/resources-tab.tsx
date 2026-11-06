@@ -5,7 +5,7 @@ import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartToo
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card } from "@/components/card"
 import { ChildrenTable } from "@/components/children-table"
-import { formatTimeLabel, useTimelineChart } from "@/components/charts/timeline"
+import { useTimelineChart } from "@/components/charts/timeline"
 import { childMemorySeries, reported } from "@/lib/resources"
 import { formatBytes, formatMs } from "@/lib/format"
 
@@ -25,7 +25,7 @@ function Unavailable({ children }: { children: React.ReactNode }) {
 }
 
 export function ResourcesTab() {
-  const { proc, data, xAxis, chart, selection } = useTimelineChart()
+  const { proc, data, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const running = proc.status === "running"
   const ports = proc.ports ?? []
   const memory = useMemo(() => childMemorySeries(proc, data), [proc, data])
@@ -46,7 +46,7 @@ export function ResourcesTab() {
                 content={
                   <ChartTooltipContent
                     indicator="line"
-                    labelFormatter={(_, p) => `${formatTimeLabel(p[0].payload.t, proc)} · total ${formatBytes(p[0].payload.total)}`}
+                    labelFormatter={(_, p) => `${timeLabel(p[0].payload.t)} · total ${formatBytes(p[0].payload.total)}`}
                     formatter={(value, name) => (
                       <div className="flex w-full items-center justify-between gap-6">
                         <span className="text-muted-foreground">{memoryConfig[String(name)].label}</span>
@@ -58,7 +58,7 @@ export function ResourcesTab() {
               />
               <ChartLegend verticalAlign="top" align="right" content={<ChartLegendContent className="justify-end pb-3" />} />
               {memory.series.map((s) => (
-                <Area key={s.key} dataKey={s.key} stackId="tree" type="monotone" stroke={`var(--color-${s.key})`} fill={`var(--color-${s.key})`} fillOpacity={0.25} strokeWidth={1.5} isAnimationActive={false} dot={false} />
+                <Area key={s.key} dataKey={s.key} stackId="tree" type="monotone" stroke={`var(--color-${s.key})`} fill={`var(--color-${s.key})`} fillOpacity={0.25} strokeWidth={1.5} isAnimationActive={false} dot={dot} />
               ))}
               {zoom}
             </AreaChart>
@@ -84,7 +84,7 @@ export function ResourcesTab() {
                   content={
                     <ChartTooltipContent
                       indicator="line"
-                      labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+                      labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
                       formatter={(value, name) => (
                         <div className="flex w-full items-center justify-between gap-6">
                           <span className="text-muted-foreground">{handleConfig[name as keyof typeof handleConfig].label}</span>
@@ -96,7 +96,7 @@ export function ResourcesTab() {
                 />
                 <ChartLegend verticalAlign="top" align="right" content={<ChartLegendContent className="justify-end pb-3" />} />
                 {(Object.keys(handleConfig) as (keyof typeof handleConfig)[]).map((k) => (
-                  <Line key={k} dataKey={k} type="monotone" stroke={`var(--color-${k})`} strokeWidth={2} isAnimationActive={false} dot={false} />
+                  <Line key={k} dataKey={k} type="monotone" stroke={`var(--color-${k})`} strokeWidth={2} isAnimationActive={false} dot={dot} />
                 ))}
                 {zoom}
               </LineChart>
@@ -118,7 +118,7 @@ export function ResourcesTab() {
                   content={
                     <ChartTooltipContent
                       indicator="line"
-                      labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+                      labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
                       formatter={(value) => (
                         <div className="flex w-full items-center justify-between gap-6">
                           <span className="text-muted-foreground">Lag (p99)</span>
@@ -128,7 +128,7 @@ export function ResourcesTab() {
                     />
                   }
                 />
-                <Line dataKey="loopLag" type="monotone" stroke="var(--color-loopLag)" strokeWidth={2} isAnimationActive={false} dot={false} />
+                <Line dataKey="loopLag" type="monotone" stroke="var(--color-loopLag)" strokeWidth={2} isAnimationActive={false} dot={dot} />
                 {zoom}
               </LineChart>
             </ChartContainer>

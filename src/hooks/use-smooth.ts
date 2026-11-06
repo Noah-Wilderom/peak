@@ -5,7 +5,8 @@ import { rangeMs, type View } from "@/lib/series"
 
 // ─── shared animation clock ──────────────────────────────────────────────────
 // One requestAnimationFrame loop for every chart; each subscriber is called at
-// most once per `interval` ms, so long ranges don't re-render at 60fps.
+// most once per `interval` ms, so long ranges don't re-render at 60fps. Subscribers
+// with the same interval always fire in the same frame, so linked charts agree.
 
 type Sub = { interval: number; last: number; cb: (now: number) => void }
 const subs = new Set<Sub>()
@@ -14,8 +15,9 @@ let raf = 0
 function loop(ts: number) {
   const now = Date.now()
   subs.forEach((s) => {
-    if (ts - s.last >= s.interval) {
-      s.last = ts
+    const slot = Math.floor(ts / s.interval)
+    if (slot !== s.last) {
+      s.last = slot
       s.cb(now)
     }
   })
@@ -26,7 +28,7 @@ function useClock(enabled: boolean, interval: number) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     if (!enabled) return
-    const sub: Sub = { interval, last: 0, cb: setNow }
+    const sub: Sub = { interval, last: -1, cb: setNow }
     subs.add(sub)
     if (!raf) raf = requestAnimationFrame(loop)
     return () => {
@@ -49,8 +51,9 @@ export function useTimeDomain(proc: Proc, view: View, paused: boolean): [number,
   const span = rangeMs(proc, view)
   const lastT = proc.samples.at(-1)!.t
   const live = view.kind === "live" && proc.status === "running" && !paused
-  // ~1px of movement per update on a ~1000px plot, between 60fps and 1fps.
-  const interval = Math.min(1000, Math.max(16, span / 1000))
+  // ~1px of movement per update on a ~1000px plot, between ~33fps and 1fps. Short
+  // windows would ask for more, but redrawing every chart faster starves pointer input.
+  const interval = Math.min(1000, Math.max(30, span / 1000))
   const now = useClock(live, interval)
 
   if (view.kind === "fixed") return [view.from, view.to]

@@ -41,6 +41,63 @@ describe("useTimeDomain", () => {
     expect(ended.result.current[1]).toBe(t0)
   })
 
+  describe.each([
+    { range: "1s", span: 1_000 },
+    { range: "10s", span: 10_000 },
+  ] as const)("in the $range window", ({ range, span }) => {
+    const view = { kind: "live", range } as const
+
+    it("keeps its exact span while following the clock frame by frame", () => {
+      const t0 = now()
+      const proc = makeProc({ startedAt: t0 - 60_000, samples: [sample(t0 - 60_000, 1), sample(t0, 1)] })
+      const { result } = renderHook(() => useTimeDomain(proc, view, false))
+      expect(result.current).toEqual([t0 - TICK_MS * 1.5 - span, t0 - TICK_MS * 1.5])
+      const seen = [result.current[1]]
+      for (let i = 0; i < 3; i++) {
+        act(() => vi.advanceTimersByTime(100))
+        const [from, to] = result.current
+        expect(to - from).toBe(span)
+        // Within one redraw of the clock.
+        expect(now() - TICK_MS * 1.5 - to).toBeLessThanOrEqual(34)
+        seen.push(to)
+      }
+      expect(new Set(seen).size).toBe(seen.length)
+    })
+
+    it("starts at the first sample, then advances past it", () => {
+      const t0 = now()
+      const proc = makeProc({ startedAt: t0, samples: [sample(t0, 1)] })
+      const { result } = renderHook(() => useTimeDomain(proc, view, false))
+      expect(result.current).toEqual([t0 - span, t0])
+      act(() => vi.advanceTimersByTime(TICK_MS * 3))
+      expect(now() - TICK_MS * 1.5 - result.current[1]).toBeLessThanOrEqual(34)
+      expect(result.current[1]).toBeGreaterThan(t0)
+    })
+
+    it("freezes on the last sample when paused or ended, so stored runs show their end", () => {
+      const t0 = now()
+      const proc = makeProc({ samples: [sample(t0 - 20_000, 1), sample(t0 - 5_000, 1)] })
+      const paused = renderHook(() => useTimeDomain(proc, view, true))
+      const ended = renderHook(() => useTimeDomain({ ...proc, status: "exited" }, view, false))
+      act(() => vi.advanceTimersByTime(500))
+      expect(paused.result.current).toEqual([t0 - 5_000 - span, t0 - 5_000])
+      expect(ended.result.current).toEqual([t0 - 5_000 - span, t0 - 5_000])
+    })
+  })
+
+  it("moves every chart mounted at any time in the same frame", () => {
+    const t0 = now()
+    const proc = makeProc({ startedAt: t0 - 60_000, samples: [sample(t0 - 60_000, 1), sample(t0, 1)] })
+    const view = { kind: "live", range: "1s" } as const
+    const a = renderHook(() => useTimeDomain(proc, view, false))
+    act(() => vi.advanceTimersByTime(47))
+    const b = renderHook(() => useTimeDomain(proc, view, false))
+    for (let i = 0; i < 12; i++) {
+      act(() => vi.advanceTimersByTime(16))
+      if (i > 2) expect(b.result.current).toEqual(a.result.current)
+    }
+  })
+
   it("shares one animation loop between charts", () => {
     const t0 = now()
     const proc = makeProc({ samples: [sample(t0 - 1000, 1), sample(t0, 1)] })

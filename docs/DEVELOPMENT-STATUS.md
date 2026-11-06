@@ -3,12 +3,88 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 10:31 UTC
-- **State:** original delivery and the verified collector-availability fix are committed and pushed.
+- **Last update:** 2026-11-06 11:36 UTC
+- **State:** delivered and pushed through `5a27302`. **Two uncommitted items are ready for PM acceptance:** the build/launch/PATH fix and the 1s and 10s chart windows, both below.
 - **PM delivery update:** 2026-11-06 10:35:25 UTC. Fix: `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047` on `origin/master`; the checkpoint schedule is disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
-## Current bug: "no peak-collector build for x86_64 is available"
+## Current issue: `task peak:build`, then `peak`: "command not found"
+
+**Status: fixed and verified, uncommitted.** Backend code is unchanged, so backend gates didn't need to run for this item.
+
+**Cause.** Two separate things. Building never puts anything on `PATH`, and nothing said so. Worse, `task peak:build` made a
+debug binary whose window loads from the dev server, so calling it directly gave a window with no UI.
+
+**Working now, on a build from before this fix:**
+
+```sh
+bun run tauri build --no-bundle && ./src-tauri/target/release/peak    # the app
+./src-tauri/target/release/peak run -- <command>                      # the CLI; the app must be open to monitor it
+install -Dm755 src-tauri/target/release/peak ~/.local/bin/peak        # optional, gives a bare `peak` if that dir is on PATH
+```
+
+`task dev` remains the development launch.
+
+**Fix.**
+- `task peak:build` now makes the optimized app at `src-tauri/target/release/peak`, then says it isn't on `PATH` and prints the commands that work.
+- New `task peak:install` runs `scripts/install-peak.sh`, which copies it to `~/.local/bin/peak` or `PEAK_INSTALL_DIR`. If that dir isn't on `PATH` it prints the direct path and the `export` line. It warns if another `peak` comes first, and never edits a profile.
+- README, `docs/HANDOFF.md` and `examples/` explain building versus `PATH`. `examples/Taskfile.yml` keeps using the debug CLI and now gives a useful message when it's absent.
+- `task dev` and the embedded collector are unchanged. `peak collector` passes on the built and installed copies.
+
+**Evidence,** in `docs/evidence/build-to-launch/`:
+
+| Log | Scenario | Result |
+|---|---|---|
+| `1-before-the-fix.log`, 10:40:42-10:46:30 UTC | Unchanged master | `peak` exit 127. The old debug binary never shows the UI in a real window with no dev server. The immediate commands above work, including both real-window steps |
+| `2-documented-steps.log`, 10:47:32-10:56:16 UTC, `scripts/verify-install.sh` | Fresh export, `peak` not on `PATH`, no `node_modules` or `target` | ALL STEPS AS DOCUMENTED, exit 0: build in 322s with the message, direct `run` and `collector`, install to a temp dir with the warning, the printed `export` line in a new shell gives a bare `peak`, reinstall without a warning, an earlier `peak` warned about, default destination under a temp `HOME`, refusal with nothing built. Real profiles and `~/.local/bin/peak` checksummed unchanged |
+| `3-installed-binary-window.log` | The copy installed by that run, real window, no dev server | "starts with an empty real backend" and "captures a real command" pass |
+
+Also run by hand: `task cpu DURATION=1s` in `examples/` with the existing debug binary works. With `PEAK_BIN=/nonexistent/peak` it stops with the new message.
+
+**Limits.**
+- This host has no system WebKit, so the window was only opened in the disposable container under Xvfb. It was never opened directly on a desktop.
+- No real shell profile or real `~/.local/bin` was used, as instructed. The default destination ran under a temporary `HOME`.
+- The first optimized build takes about 5 minutes. The installed app still needs Tauri's system libraries. No `.desktop` entry is created. None of this ran on GitHub Actions.
+
+## Current scope: 1s and 10s chart timeframes
+
+**Status: implemented and verified, uncommitted.** Requested as "we also need a 10 seconds and 1 second timeframe for the charts".
+Frontend only: sampling stays at 500ms and nothing in the backend changed, so backend gates don't apply.
+
+`1s` and `10s` now come first in the range control on Overview, Memory and Resources, ahead of the unchanged `30s 1m 5m 15m 1h All`.
+It's one shared control, and it's the only place chart ranges are chosen. Compare, Machine and the sidebar sparklines have no range control.
+
+**What short windows needed beyond the two options:**
+
+| Problem | Before | Now |
+|---|---|---|
+| Axis ticks | 1 or 2 labels at 1s | Steps of 100, 200 and 500ms, labelled in tenths (`16:20.6`, `09:00:18.6`). 10s stays in whole seconds, every 2s |
+| Tooltips | Samples 500ms apart could share a label | Tenths for windows of 10s or less. Longer windows are as they were |
+| Drag to zoom | Needed 2s, impossible in a 1s window | Needs two samples at 1s and 1s at 10s. 30s and longer are unchanged |
+| Dragging a moving chart | A 1s window crosses the plot every second, so the pointer lost its place | All linked charts hold their range and data from press to release, then catch up. Found in the real browser, not by unit tests |
+| Zoom bounds | Could snap to a sample past the edge | Clamped to the visible window |
+| Pointer with no reading | Recharts reports no time while the nearest sample is past the plot's edge, so the drag end or the press was dropped. Found only in the real window | The drag reaches the window edge on that side. A press with no reading still holds the charts, and the drag starts at the first reading. A click with no reading does nothing, and trying again works |
+| Zoom label | "0s" for short zooms | Tenths and the real length, e.g. `11:16:26.8 – 11:16:27.3 · 553ms` |
+| Sparse data | No line if samples were further apart than the window | One real sample past each edge, so the line crosses. Nothing is invented |
+| Y axis | Could clip that line, or collapse with no sample inside | Scales to the samples the line runs towards |
+| One sample | Drew nothing | Draws a point |
+| Linked charts | Could differ by a frame | Same-interval charts redraw in the same frame |
+| Memory trend | Would say "Stable." from 3 samples | "Too few samples" under 10, with no slope or R². This applies at any range, so very short runs see it too |
+| Marker clicks | The 1.5% tolerance was far below one sample at 1s | At least half a sample |
+
+Redraws are capped at the 30s range's existing rate (every 30ms), rather than the 60fps that short windows would otherwise ask for. A live 1s window shows 2 or 3 real samples, and the control says "one sample every 500ms".
+
+**Validation** (fixture and mock unless marked real):
+- `docs/evidence/charts-1s-10s/frontend-gates.log`: `bun run test:coverage` 254 tests in 30 files, 100% statements, branches, functions and lines, thresholds unchanged. `bun run typecheck` and `bun run build`: exit 0.
+- New `src/components/charts/timeline.test.tsx`, plus additions to the series, format and hook tests. For both presets: exact span and boundaries, unmerged samples, live advancement, freezing at a stored run's end, ticks, labels, tooltips, linked ranges, zoom and hold, and sparse and one-sample data.
+- Real Chromium against the **simulated** browser mock, ALL OK, exit 0 (`docs/evidence/charts-1s-10s/browser-mock.log`, `scripts/e2e/mock-e2e.mjs`): both presets live, linked axes across charts, advancement, tenths, tooltip, zoom and reset; a stored run holding still with a steady tooltip; "Too few samples"; no overflow at 1100px; every earlier step still passing.
+- **Real window, real `/proc` samples** (`docs/evidence/charts-1s-10s/real-window.log`, 11:31:49-11:32:42 UTC, release binary sha256 `6087af8e`, disposable container, Xvfb): ALL OK. Both presets on a real `sleep 45`: linked axes, labels and advancement, then a real drag, e.g. `0:10.8 0:11.0 ... 0:11.6`, zooming to `11:32:23.8 – 11:32:24.8 · 950ms`. The same binary also passes the existing capture, marker, chart drag, chart click and stop steps (11:35:45-11:36:28 UTC). That window step is now part of `scripts/e2e/desktop/desktop.mjs`. Only these steps ran, not the full 24-step suite, which has no SSH, Docker or Kubernetes changes to check.
+
+**Known limit: tooltips on a moving 1s chart.** Recharts holds the hovered point by array position, not by pointer position. On a live 1s window, with the pointer at rest, the tooltip was blank in 12 of 59 frames in a 4-second sample (headless Chromium, software rendering), when its sample was outside the plot. It was 0 blank frames at 10s, 30s and 1m, and 0 on a stored run at 1s. What it shows is always the right sample. To read values at 1s, zoom, use Freeze or open a stored run.
+
+**Also:** screenshots are in `/mnt/HC_Volume_107248377/.peak-sysroot/evidence/charts-1s-10s-final/`, outside the repo. A live window past the last sample stays empty with its axes intact, which is what a stalled remote target shows. That case is unit-tested only. There is no pan gesture in Peak, so zoom and reset cover it. Frame rates in headless software rendering (11-21fps at every range) say nothing about a real GPU.
+
+## Resolved bug: "no peak-collector build for x86_64 is available"
 
 Reported on Docker target `sportboekernl-laravel.test-1`, launched with `task dev`. **Status: fixed and verified. The fix is
 committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.**
@@ -192,7 +268,7 @@ a metrics NotFound read as a missing pod; pruning closed the Settings page; a re
 - webkit2gtk dev libraries are absent here. They're extracted rootlessly to `/mnt/HC_Volume_107248377/.peak-sysroot`,
   along with `kubectl`, `tauri-driver`, Playwright and Node 20/22. Nothing was installed system-wide. The rustup musl target
   is installed in the user's toolchain.
-- The root disk holds Docker's data: 95% full (4.1 GB free) after cleanup. The disposable images I pulled are removed
+- The root disk holds Docker's data: 95% full (4.1 GB free) after cleanup. The disposable images I pulled are removed, including those re-created for today's window checks,
   and no `peak-live` containers or networks remain. Docker's build cache was left alone because it's shared; it's
   2.2 GB in total and includes layers from this work, so `docker builder prune` is the owner's call.
 
@@ -204,4 +280,4 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-See "Current bug" above. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.
+**PM:** accept the build/launch fix and the 1s and 10s windows, then commit and publish them to `master`. Both are uncommitted in this checkout, alongside PM's own `docs/PROJECT-MANAGEMENT.md`. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.

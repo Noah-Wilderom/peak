@@ -50,7 +50,7 @@ tasks:
           enum: [cpu, memory, io]
     preconditions:
       - sh: 'test -x {{.PEAK_BIN | shellQuote}}'
-        msg: 'Build the local CLI with task peak:build, or set PEAK_BIN to your installed peak executable.'
+        msg: 'No Peak CLI at {{.PEAK_BIN}}. task dev builds it (and keeps the app open), or set PEAK_BIN to the absolute path of an installed peak.'
     cmds:
       - '{{.PEAK_BIN | shellQuote}} run -- ./bin/{{.DEMO}} -duration {{.DURATION | shellQuote}} {{.CLI_ARGS}}'
 

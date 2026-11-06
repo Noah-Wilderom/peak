@@ -1,0 +1,38 @@
+started 2026-11-06T10:40:42Z, checkout at 5a27302, source unchanged
+
+=== 1. the report
+$ task peak:build  (done just before this log), then in a shell with no peak on PATH:
+bash: line 1: peak: command not found
+exit=127 (from bash; the 0 first logged here was the status of the pipeline's `head`)
+
+=== 2. does the debug binary it builds work as an app? Real window, no dev server
+PROBLEMS:
+Error: never saw /peak\./
+exit=1
+
+=== 3. immediate command, on unchanged master
+$ bun run tauri build --no-bundle
+   Compiling thiserror v2.0.21
+   Compiling thiserror-impl v2.0.21
+   Compiling proc-macro-error-attr v1.0.4
+   Compiling proc-macro-error v1.0.4
+   Compiling thiserror v1.0.69
+   Compiling thiserror-impl v1.0.69
+    Finished `release` profile [optimized] target(s) in 4m 05s
+       Built application at: /mnt/HC_Volume_107248377/peak/src-tauri/target/release/peak
+exit=0
+$ install -Dm755 src-tauri/target/release/peak <temp>/bin/peak
+$ <temp>/bin/peak collector
+x86_64: <temp>/x/peak/collectors/x86_64-f619970e99887da8/peak-collector (0.1.0 protocol 1)
+exit=0
+$ <temp>/bin/peak run -- echo hello   (no app running)
+peak: the app isn't running — running without monitoring
+hello
+exit=0
+
+=== 4. that binary in a real window, no dev server
+ok   starts with an empty real backend
+ok   captures a real command with output
+ALL OK
+exit=0
+ended 2026-11-06T10:46:30Z

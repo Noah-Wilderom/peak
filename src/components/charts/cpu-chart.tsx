@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatTimeLabel, useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
+import { useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
 import { formatPercent } from "@/lib/format"
 
 const config = {
@@ -16,7 +16,7 @@ const config = {
 } satisfies ChartConfig
 
 export function CpuChart() {
-  const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
+  const { data, from, to, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const y = useEasedYAxis(visibleMax(data, from, to, ["cpuUser", "cpuSys"], true), { min: 100 })
 
   return (
@@ -31,7 +31,7 @@ export function CpuChart() {
           content={
             <ChartTooltipContent
               indicator="line"
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(value, name) => (
                 <div className="flex w-full items-center justify-between gap-6">
                   <span className="text-muted-foreground">{config[name as keyof typeof config]?.label}</span>
@@ -51,7 +51,7 @@ export function CpuChart() {
           fill="var(--color-cpuUser)"
           fillOpacity={0.1}
           isAnimationActive={false}
-          dot={false}
+          dot={dot}
         />
         <Area
           dataKey="cpuSys"
@@ -62,7 +62,7 @@ export function CpuChart() {
           fill="var(--color-cpuSys)"
           fillOpacity={0.15}
           isAnimationActive={false}
-          dot={false}
+          dot={dot}
         />
         {selection && <ReferenceArea x1={selection.a} x2={selection.b} fill="var(--foreground)" fillOpacity={0.06} />}
       </AreaChart>

@@ -35,6 +35,9 @@ describe("format", () => {
     expect(formatDuration(3 * 3600_000 + 7 * 60_000)).toBe("3h 07m")
     expect(formatOffset(84_000)).toBe("1:24")
     expect(formatOffset(-5)).toBe("0:00")
+    expect(formatOffset(84_500, true)).toBe("1:24.5")
+    expect(formatOffset(59_960, true)).toBe("1:00.0")
+    expect(formatOffset(-5, true)).toBe("0:00.0")
   })
 
   it("breaks bytes down into every unit", () => {
@@ -47,6 +50,7 @@ describe("format", () => {
 
   it("formats clock, percent, counts and milliseconds", () => {
     expect(formatClock(new Date(2026, 0, 1, 9, 5, 7).getTime())).toBe("09:05:07")
+    expect(formatClock(new Date(2026, 0, 1, 9, 5, 7, 500).getTime(), true)).toBe("09:05:07.5")
     expect(formatPercent(12.345)).toBe("12.3%")
     expect(formatPercent(250)).toBe("250%")
     expect(formatCount(950)).toBe("950")

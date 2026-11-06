@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatTimeLabel, useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
+import { useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
 import { formatBytes, formatCount, formatMs, formatRate } from "@/lib/format"
 import { histogram, percentiles } from "@/lib/series"
 import type { Sample } from "@/lib/types"
@@ -38,7 +38,7 @@ export const compositionConfig = {
 const KEYS = COMPOSITION_KEYS
 
 export function CompositionChart() {
-  const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
+  const { data, from, to, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const rows = useMemo(() => data.map((d) => ({ t: d.t, ...composition(d) })), [data])
   const y = useEasedYAxis(visibleMax(data, from, to, ["rss"]), { bytes: true })
 
@@ -64,7 +64,7 @@ export function CompositionChart() {
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(value, name, item) => (
                 <div className="flex w-full items-center gap-2">
                   <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: item.color }} />
@@ -86,7 +86,7 @@ export function CompositionChart() {
             fill={`var(--color-${k})`}
             fillOpacity={1}
             isAnimationActive={false}
-            dot={false}
+            dot={dot}
           />
         ))}
         {selection && <ReferenceArea x1={selection.a} x2={selection.b} fill="var(--signal)" fillOpacity={0.08} />}
@@ -111,7 +111,7 @@ function RateChart({
   axisFormat: (v: number) => string
   bytes?: boolean
 }) {
-  const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
+  const { data, from, to, xAxis, chart, selection, timeLabel, dot } = useTimelineChart()
   const y = useEasedYAxis(visibleMax(data, from, to, [dataKey]), { bytes, count: 3, min: 1 })
   const config = { [dataKey]: { label, color: "var(--chart-1)" } } satisfies ChartConfig
 
@@ -127,7 +127,7 @@ function RateChart({
           content={
             <ChartTooltipContent
               indicator="line"
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(value) => (
                 <div className="flex w-full items-center justify-between gap-6">
                   <span className="text-muted-foreground">{label}</span>
@@ -145,7 +145,7 @@ function RateChart({
           fill={`var(--color-${dataKey})`}
           fillOpacity={0.08}
           isAnimationActive={false}
-          dot={false}
+          dot={dot}
         />
         {selection && <ReferenceArea x1={selection.a} x2={selection.b} fill="var(--foreground)" fillOpacity={0.06} />}
       </AreaChart>
@@ -169,7 +169,7 @@ const gcConfig = {
 } satisfies ChartConfig
 
 export function GcChart() {
-  const { proc, from, to, xAxis } = useTimelineChart()
+  const { proc, from, to, xAxis, timeLabel } = useTimelineChart()
   const visible = useMemo(() => proc.gc.filter((g) => g.t >= from - 5000 && g.t <= to), [proc.gc, from, to])
   const minor = visible.filter((g) => g.kind === "minor")
   const major = visible.filter((g) => g.kind === "major")
@@ -188,7 +188,7 @@ export function GcChart() {
           content={
             <ChartTooltipContent
               hideIndicator
-              labelFormatter={(_, p) => formatTimeLabel(p[0].payload.t, proc)}
+              labelFormatter={(_, p) => timeLabel(p[0].payload.t)}
               formatter={(_, __, item) => {
                 const g = item.payload as (typeof visible)[number]
                 return (
