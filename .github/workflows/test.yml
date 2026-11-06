@@ -52,11 +52,14 @@ jobs:
       - name: Build frontend
         working-directory: .
         run: bun install --frozen-lockfile && bun run build
-      - run: cargo fmt --check
-      - run: cargo clippy --all-targets -- -D warnings
-      # Core modules are covered by tests; lib.rs/main.rs are thin Tauri glue.
-      - run: cargo llvm-cov --ignore-filename-regex '(lib|main)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
-      - run: cargo llvm-cov report --ignore-filename-regex '(lib|main)\.rs$' --summary-only
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      # The collector must build on its own, without the desktop's system libraries.
+      - run: cargo build -p peak-collector
+      # Core modules are covered by tests; lib.rs/main.rs are thin glue. The live_*
+      # files are test harnesses for real infrastructure (see docs/REMOTE-VALIDATION.md).
+      - run: cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+      - run: cargo llvm-cov report --ignore-filename-regex '(lib|main|live_\w+)\.rs$' --summary-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -77,5 +80,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: node --test src-tauri/agents/tests/
+      - run: node --test src-tauri/agents/tests/*.test.mjs
       - run: python -m unittest discover -s src-tauri/agents/tests -v

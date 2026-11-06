@@ -9,7 +9,7 @@
   globalThis.__peakAgent = true
 
   const net = require("node:net")
-  const { PerformanceObserver, constants } = require("node:perf_hooks")
+  const { PerformanceObserver, constants, monitorEventLoopDelay } = require("node:perf_hooks")
   const v8 = require("node:v8")
   let inspector = null
   try {
@@ -28,10 +28,27 @@
 
   // ─── heap stats ───
   let lastUsed = 0
+  // Event-loop responsiveness. The histogram's resolution timer is subtracted so
+  // an idle loop reads near zero rather than near the sampling period. Absent
+  // (not zero) until the histogram has data or where the runtime lacks it.
+  const LAG_RESOLUTION_MS = 10
+  let delay = null
+  try {
+    delay = monitorEventLoopDelay({ resolution: LAG_RESOLUTION_MS })
+    delay.enable()
+  } catch {
+    delay = null
+  }
+  const readLag = () => {
+    if (!delay || delay.count === 0) return undefined
+    const ms = Math.max(0, delay.percentile(99) / 1e6 - LAG_RESOLUTION_MS)
+    delay.reset()
+    return ms
+  }
   const heap = () => {
     const m = process.memoryUsage()
     lastUsed = m.heapUsed
-    send({ type: "heap", heapUsed: m.heapUsed, heapTotal: m.heapTotal, external: m.external })
+    send({ type: "heap", heapUsed: m.heapUsed, heapTotal: m.heapTotal, external: m.external, loopLag: readLag() })
   }
   heap()
   setInterval(heap, 500).unref()
@@ -150,6 +167,56 @@
     return { heapUsed: process.memoryUsage().heapUsed, entries, sites }
   }
 
+  /**
+   * Convert a V8 CPU profile (flat nodes + hit counts) into a call tree whose
+   * `self` is sampled milliseconds. Time comes from `timeDeltas`, attributed to
+   * the sampled node, so the tree sums to the recording's elapsed time. Loop
+   * waits land in (idle); synchronous blocking stays with the calling frame.
+   */
+  function cpuTree(profile) {
+    const selfMs = new Map()
+    const { samples = [], timeDeltas = [] } = profile
+    for (let i = 0; i < samples.length; i++) {
+      selfMs.set(samples[i], (selfMs.get(samples[i]) || 0) + (timeDeltas[i] || 0) / 1000)
+    }
+    const byId = new Map(profile.nodes.map((n) => [n.id, n]))
+    const build = (node, depth) => {
+      const cf = node.callFrame
+      const file = cf.url ? `${cf.url.replace(/^file:\/\//, "").split("/").slice(-2).join("/")}:${cf.lineNumber + 1}` : undefined
+      const children = []
+      if (depth < 200) {
+        for (const id of node.children || []) {
+          const child = build(byId.get(id), depth + 1)
+          // Drop subtrees that were never on-CPU; they carry no timing.
+          if (child.self > 0 || child.children.length) children.push(child)
+        }
+      }
+      return { name: cf.functionName || (cf.url ? "(anonymous)" : cf.functionName || "(root)"), file, self: selfMs.get(node.id) || 0, children }
+    }
+    const root = build(profile.nodes[0], 0)
+    root.name = "(root)"
+    return root
+  }
+
+  let profiling = false
+  async function cpuprofile(ms) {
+    if (!session) throw new Error("node:inspector is unavailable in this runtime")
+    if (profiling) throw new Error("a CPU profile is already being recorded")
+    profiling = true
+    try {
+      await post("Profiler.enable")
+      await post("Profiler.setSamplingInterval", { interval: 1000 })
+      await post("Profiler.start")
+      const began = performance.now()
+      await new Promise((r) => setTimeout(r, Math.max(1, Number(ms) || 1000)))
+      const { profile } = await post("Profiler.stop")
+      return { durationMs: performance.now() - began, sampling: "v8", root: cpuTree(profile) }
+    } finally {
+      profiling = false
+      post("Profiler.disable").catch(() => {})
+    }
+  }
+
   async function handle(line) {
     let req
     try {
@@ -160,6 +227,7 @@
     try {
       let data = null
       if (req.cmd === "snapshot") data = await snapshot()
+      else if (req.cmd === "cpuprofile") data = await cpuprofile(req.ms)
       else if (req.cmd === "gc") {
         if (!session) throw new Error("node:inspector is unavailable")
         await post("HeapProfiler.collectGarbage")
@@ -181,5 +249,5 @@
     }
   })
 
-  module.exports = { summarize, frames }
+  module.exports = { summarize, frames, cpuTree }
 })()

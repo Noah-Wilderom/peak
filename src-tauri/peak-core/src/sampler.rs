@@ -56,6 +56,8 @@ pub struct TreeSample {
     pub nice: i32,
     pub ppid: u32,
     pub children: Vec<ChildProc>,
+    /// Metrics that couldn't be read for part of the tree, so totals understate them.
+    pub unavailable: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -209,6 +211,11 @@ impl TreeSampler {
             nice: root.map(|r| r.stat.nice).unwrap_or(0),
             ppid: root.map(|r| r.stat.ppid).unwrap_or(0),
             children,
+            unavailable: [("io", tree.iter().any(|p| p.io_denied)), ("fds", tree.iter().any(|p| p.fds_denied))]
+                .into_iter()
+                .filter(|(_, denied)| *denied)
+                .map(|(name, _)| name.to_string())
+                .collect(),
         }
     }
 }
@@ -222,7 +229,7 @@ pub struct SystemSampler {
 impl SystemSampler {
     pub fn sample(&mut self, t: u64, fs: &ProcFs) -> SystemSample {
         let m = fs.meminfo();
-        let (psi_some, psi_full) = fs.psi_memory();
+        let psi = fs.psi_memory();
         let now = fs.cpu_totals();
         let cpu = match (self.prev_cpu, now) {
             (Some((b0, t0)), Some((b1, t1))) if t1 > t0 => (b1.saturating_sub(b0)) as f64 / (t1 - t0) as f64 * 100.0,
@@ -235,8 +242,8 @@ impl SystemSampler {
             mem_available: m.available,
             swap_total: m.swap_total,
             swap_free: m.swap_free,
-            psi_some,
-            psi_full,
+            psi_some: psi.map(|p| p.0),
+            psi_full: psi.map(|p| p.1),
             load1: fs.loadavg(),
             cpu,
         }
@@ -278,6 +285,8 @@ mod tests {
             io: Io { rchar, wchar: rchar / 2, syscr: 1, syscw: 1, ..Default::default() },
             fds: Fds { files: 3, sockets: 1, pipes: 2 },
             socket_inodes: vec![],
+            io_denied: false,
+            fds_denied: false,
         }
     }
 

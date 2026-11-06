@@ -39,9 +39,9 @@ export async function startHub() {
         setTimeout(() => reject(new Error("timed out waiting for message")), ms).unref()
       })
     },
-    async request(cmd, reqId) {
+    async request(cmd, reqId, params = {}) {
       await ready
-      socket.write(JSON.stringify({ cmd, reqId }) + "\n")
+      socket.write(JSON.stringify({ cmd, reqId, ...params }) + "\n")
       return this.waitFor((m) => m.type === "reply" && m.reqId === reqId, 60000)
     },
     close: () => new Promise((r) => { socket?.destroy(); server.close(r) }),

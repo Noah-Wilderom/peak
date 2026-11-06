@@ -1,20 +1,36 @@
 import { invoke } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
+import { AlertEngine, applyAlerts } from "@/lib/alerts"
 import type { MonitorApi } from "@/lib/monitor-api"
 import {
+  DEFAULT_SETTINGS,
   MAX_SAMPLES,
   type Attachable,
   type ChildProc,
+  type ContainerProcess,
+  type ContainerTotals,
   type Counters,
+  type CpuProfile,
+  type DockerContainer,
+  type Gap,
   type GcEvent,
   type HeapSnapshot,
+  type KubeAccess,
+  type KubeMetrics,
+  type KubePod,
+  type LaunchSpec,
   type LogLine,
   type MonitorEvent,
   type Proc,
+  type RunSummary,
   type Sample,
+  type Settings,
   type State,
+  type StorageInfo,
   type SystemInfo,
   type SystemSample,
+  type TargetSpec,
+  type TargetState,
 } from "@/lib/types"
 
 const MAX_LOGS = 2000
@@ -45,17 +61,23 @@ export interface ProcDelta {
   profiling: boolean
   childNames?: Proc["childNames"]
   ports?: Proc["ports"]
+  unavailable?: string[]
+  gaps?: Gap[]
+  clockOffsetMs?: number
 }
 
 /** What the backend emits on `peak://tick`. */
 export interface TickPayload {
   procs: ProcDelta[]
   system: SystemSample | null
+  /** Present when any target exists: connection state and its latest figures. */
+  targets?: TargetState[]
 }
 
 export interface FullState {
   procs: Proc[]
   system: SystemInfo
+  targets?: TargetState[]
 }
 
 function append<T>(xs: T[], add: T[], max: number) {
@@ -106,6 +128,9 @@ export function applyDelta(p: Proc, d: ProcDelta): Proc {
     profiling: d.profiling,
     childNames: d.childNames,
     ports: d.ports,
+    unavailable: d.unavailable,
+    gaps: d.gaps ?? p.gaps,
+    target: p.target && d.clockOffsetMs !== undefined ? { ...p.target, clockOffsetMs: d.clockOffsetMs } : p.target,
   }
 }
 
@@ -120,12 +145,15 @@ export class TauriMonitor implements MonitorApi {
     paused: false,
     system: { totalMemory: 1, cpus: 1, hostname: "", os: "" },
     ready: false,
+    machine: [],
+    targets: [],
   }
   /** While paused, deltas are applied here and the visible state stays put. */
   private hidden: Proc[] | null = null
   private listeners = new Set<() => void>()
   private eventListeners = new Set<(e: MonitorEvent) => void>()
   private started = false
+  private alerts = new AlertEngine()
 
   constructor(
     private readonly call: Invoke = invoke as Invoke,
@@ -173,10 +201,13 @@ export class TauriMonitor implements MonitorApi {
     try {
       await this.on<TickPayload>("peak://tick", (e) => this.onTick(e.payload))
       await this.on<Proc>("peak://proc", (e) => this.upsert(e.payload, true))
+      // Thresholds are a nicety: if they can't be read, monitoring still starts.
+      this.alerts.configure(await this.call<Settings>("get_settings").catch(() => DEFAULT_SETTINGS))
       const full = await this.call<FullState>("get_state")
       this.set({
         procs: full.procs.map(normalizeProc),
         system: full.system,
+        targets: full.targets ?? [],
         selectedId: this.state.selectedId ?? full.procs[0]?.id ?? null,
         ready: true,
       })
@@ -185,11 +216,12 @@ export class TauriMonitor implements MonitorApi {
     }
   }
 
-  onTick({ procs: deltas, system }: TickPayload) {
-    if (system) this.state = { ...this.state, machine: append(this.state.machine ?? [], [system], MAX_SAMPLES) }
+  onTick({ procs: deltas, system, targets }: TickPayload) {
+    if (targets) this.state = { ...this.state, targets }
+    if (system) this.state = { ...this.state, machine: append(this.state.machine, [system], MAX_SAMPLES) }
     const byId = new Map(deltas.map((d) => [d.id, d]))
     const events: MonitorEvent[] = []
-    const procs = this.current().map((p) => {
+    const updated = this.current().map((p) => {
       const d = byId.get(p.id)
       if (!d) return p
       const next = applyDelta(p, d)
@@ -197,6 +229,10 @@ export class TauriMonitor implements MonitorApi {
         events.push({ type: next.status === "crashed" ? "crashed" : "exited", proc: next })
       }
       return next
+    })
+    const procs = applyAlerts(this.alerts, updated, (proc, alert) => {
+      events.push({ type: "alert", proc, alert, notify: this.alerts.notifications })
+      void this.call("add_alert", { id: proc.id, alert }).catch(this.fail)
     })
     this.commit(procs)
     events.forEach((e) => this.emit(e))
@@ -243,6 +279,13 @@ export class TauriMonitor implements MonitorApi {
     return snapshot
   }
 
+  cpuProfile = async (id: string, ms: number) => {
+    const profile = await this.call<CpuProfile>("cpu_profile", { id, ms })
+    const add = (p: Proc) => (p.id === id ? { ...p, cpuProfiles: [...(p.cpuProfiles ?? []), profile] } : p)
+    this.commit(this.current().map(add))
+    return profile
+  }
+
   forceGc = (id: string) => void this.call("force_gc", { id }).catch(this.fail)
 
   kill = (id: string) => void this.call("stop", { id }).catch(this.fail)
@@ -259,17 +302,113 @@ export class TauriMonitor implements MonitorApi {
 
   remove = (id: string) => {
     void this.call("remove", { id }).catch(this.fail)
-    const procs = this.current().filter((p) => p.id !== id)
-    const selectedId = this.state.selectedId === id ? (procs[0]?.id ?? null) : this.state.selectedId
-    this.commit(procs, { selectedId })
+    this.drop((p) => p.id !== id)
   }
 
   clearEnded = () => {
     void this.call("clear_ended").catch(this.fail)
-    const procs = this.current().filter((p) => p.status === "running")
+    this.drop((p) => p.status === "running")
+  }
+
+  // ─── history ───
+
+  listRuns = (query?: string) => this.call<RunSummary[]>("list_runs", { query: query || null })
+
+  openRun = async (id: string) => {
+    this.upsert(await this.call<Proc>("open_run", { id }), false)
+  }
+
+  loadRun = async (id: string) => normalizeProc(await this.call<Proc>("load_run", { id }))
+
+  deleteRun = async (id: string) => {
+    const deleted = await this.call<boolean>("delete_run", { id })
+    this.drop((p) => p.id !== id)
+    return deleted
+  }
+
+  pruneRuns = async (olderThanDays?: number) => {
+    const removed = await this.call<number>("prune_runs", { olderThanDays: olderThanDays ?? null })
+    // The backend clears ended runs from the session only when pruning everything.
+    if (olderThanDays === undefined) this.drop((p) => p.status === "running")
+    return removed
+  }
+
+  /** Keep only matching processes, moving the selection if it was dropped. */
+  private drop(keep: (p: Proc) => boolean) {
+    const procs = this.current().filter(keep)
     const selectedId = procs.some((p) => p.id === this.state.selectedId) ? this.state.selectedId : (procs[0]?.id ?? null)
     this.commit(procs, { selectedId })
   }
+
+  // ─── settings and storage ───
+
+  storageInfo = () => this.call<StorageInfo>("storage_info")
+
+  vacuum = () => this.call<void>("vacuum")
+
+  getSettings = () => this.call<Settings>("get_settings")
+
+  setSettings = async (settings: Settings) => {
+    const stored = await this.call<Settings>("set_settings", { settings })
+    this.alerts.configure(stored)
+    return stored
+  }
+
+  // ─── targets ───
+
+  addTarget = async (spec: TargetSpec) => {
+    const added = await this.call<TargetState>("add_target", { spec })
+    const others = this.state.targets.filter((t) => t.spec.id !== added.spec.id)
+    this.set({ targets: [...others, added] })
+    return added
+  }
+
+  removeTarget = async (id: string) => {
+    await this.call("remove_target", { id })
+    this.set({ targets: this.state.targets.filter((t) => t.spec.id !== id) })
+  }
+
+  connectTarget = async (id: string) => void (await this.call("connect_target", { id }))
+
+  disconnectTarget = async (id: string) => void (await this.call("disconnect_target", { id }))
+
+  listTargetProcesses = (id: string) => this.call<Attachable[]>("list_target_processes", { id })
+
+  attachTarget = async (id: string, pid: number) => {
+    this.upsert(await this.call<Proc>("attach_target", { id, pid }), true)
+  }
+
+  launchTarget = async (id: string, spec: LaunchSpec) => {
+    this.upsert(await this.call<Proc>("launch_target", { id, spec }), true)
+  }
+
+  detach = async (id: string) => void (await this.call("detach", { id }))
+
+  signal = async (id: string, signal: string) => void (await this.call("signal_run", { id, signal }))
+
+  dockerContexts = () => this.call<string[]>("docker_contexts")
+
+  dockerContainers = (context: string) => this.call<DockerContainer[]>("docker_containers", { context })
+
+  dockerTotals = (context: string, id: string) => this.call<ContainerTotals | null>("docker_totals", { context, id })
+
+  dockerTop = (context: string, id: string) => this.call<ContainerProcess[]>("docker_top", { context, id })
+
+  dockerLogs = (context: string, id: string, tail: number) => this.call<string>("docker_logs", { context, id, tail })
+
+  kubeContexts = () => this.call<string[]>("kube_contexts")
+
+  kubeNamespaces = (context: string) => this.call<string[]>("kube_namespaces", { context })
+
+  kubePods = (context: string, namespace: string) => this.call<KubePod[]>("kube_pods", { context, namespace })
+
+  kubeLogs = (context: string, namespace: string, pod: string, container: string, tail: number) =>
+    this.call<string>("kube_logs", { context, namespace, pod, container, tail })
+
+  kubeMetrics = (context: string, namespace: string, pod: string) =>
+    this.call<KubeMetrics[] | null>("kube_metrics", { context, namespace, pod })
+
+  kubeAccess = (context: string, namespace: string) => this.call<KubeAccess>("kube_access", { context, namespace })
 
   private fail = (err: unknown) => this.set({ error: String(err) })
 }

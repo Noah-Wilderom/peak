@@ -278,6 +278,10 @@ pub struct RawProc {
     pub io: Io,
     pub fds: Fds,
     pub socket_inodes: Vec<u64>,
+    /// `io` couldn't be read (another user's process, hidepid): the zeros mean unknown.
+    pub io_denied: bool,
+    /// The fd table couldn't be read: `fds` and `socket_inodes` mean unknown.
+    pub fds_denied: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -349,6 +353,8 @@ impl ProcFs {
     pub fn read(&self, pid: u32) -> Option<RawProc> {
         let targets = self.fd_targets(pid);
         Some(RawProc {
+            io_denied: fs::read_to_string(self.path(pid, "io")).is_err(),
+            fds_denied: fs::read_dir(self.path(pid, "fd")).is_err(),
             stat: self.stat(pid)?,
             status: self.status(pid)?,
             io: self.io(pid),
@@ -372,8 +378,9 @@ impl ProcFs {
         parse_meminfo(&fs::read_to_string(self.root.join("meminfo")).unwrap_or_default())
     }
 
-    pub fn psi_memory(&self) -> (f64, f64) {
-        parse_psi(&fs::read_to_string(self.root.join("pressure/memory")).unwrap_or_default())
+    /// `None` when the kernel has no pressure information (PSI disabled or absent).
+    pub fn psi_memory(&self) -> Option<(f64, f64)> {
+        fs::read_to_string(self.root.join("pressure/memory")).ok().map(|s| parse_psi(&s))
     }
 
     pub fn loadavg(&self) -> f64 {
@@ -599,7 +606,7 @@ mod tests {
         assert_eq!(fs_.meminfo().total, 2048.0 * KB);
         fs::create_dir_all(dir.path().join("pressure")).unwrap();
         fs::write(dir.path().join("pressure/memory"), "some avg10=2.00\n").unwrap();
-        assert_eq!(fs_.psi_memory().0, 2.0);
+        assert_eq!(fs_.psi_memory().unwrap().0, 2.0);
         fs::write(dir.path().join("loadavg"), "1.25 1 1").unwrap();
         assert_eq!(fs_.loadavg(), 1.25);
         assert_eq!(fs_.cpu_totals(), None); // the fixture's stat has no cpu line
@@ -619,7 +626,7 @@ mod tests {
         assert!(fs_.boot_time().is_none());
         assert!(fs_.listeners().is_empty());
         assert_eq!(fs_.meminfo(), MemInfo::default());
-        assert_eq!(fs_.psi_memory(), (0.0, 0.0));
+        assert_eq!(fs_.psi_memory(), None);
         assert_eq!(fs_.loadavg(), 0.0);
         assert!(fs_.cpu_totals().is_none());
         assert_eq!(fs_.hostname(), "");

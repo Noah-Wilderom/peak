@@ -28,3 +28,5 @@ examples/bin/
 examples/profiles/
 
 coverage
+__pycache__/
+*.pyc

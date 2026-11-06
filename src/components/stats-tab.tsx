@@ -22,8 +22,32 @@ export function buildStats(proc: Proc, system: SystemInfo): Group[] {
   const [p50, p95, p99] = percentiles(s.map((x) => x.rss), [50, 95, 99])
   const gc = gcStats(proc, proc.startedAt, last.t)
   const now = (v: string) => (running ? v : "—")
+  const noIo = proc.unavailable?.includes("io")
+  const noFds = proc.unavailable?.includes("fds")
+  const io = (v: string) => (noIo ? "Unavailable" : v)
+  const handles = (v: string) => (noFds ? "Unavailable" : now(v))
+  const t = proc.target
 
   return [
+    ...(t
+      ? [
+          {
+            title: "Target",
+            rows: [
+              ["Where", `${t.label} (${t.kind})`],
+              ["How", t.launched ? "Launched by peak" : "Attached; only observed"],
+              ["PID in its namespace", String(t.identity.pid)],
+              ["PID namespace", t.identity.pidNs],
+              ["Boot", t.identity.bootId],
+              ["Start ticks", String(t.identity.startTicks)],
+              ...(t.identity.containerId ? [["Container", t.identity.containerId] as Row] : []),
+              ...(t.identity.podUid ? [["Pod", t.identity.podUid] as Row] : []),
+              ["This machine's clock vs the target's", `${t.clockOffsetMs >= 0 ? "+" : "−"}${formatMs(Math.abs(t.clockOffsetMs))}`],
+              ["Gaps in data", String(proc.gaps?.length ?? 0)],
+            ] as Row[],
+          },
+        ]
+      : []),
     {
       title: "Process",
       rows: [
@@ -48,7 +72,7 @@ export function buildStats(proc: Proc, system: SystemInfo): Group[] {
         ["Resident (RSS)", now(formatBytes(last.rss)), running ? last.rss : undefined],
         ["Peak RSS", `${formatBytes(proc.peak.rss)} at T+${formatDuration(proc.peak.t - proc.startedAt)}`, proc.peak.rss],
         ["RSS p50 / p95 / p99", `${formatBytes(p50)} / ${formatBytes(p95)} / ${formatBytes(p99)}`],
-        ["Share of system memory", now(formatPercent((last.rss / system.totalMemory) * 100))],
+        [t ? "Share of the target's host memory" : "Share of system memory", now(formatPercent((last.rss / system.totalMemory) * 100))],
         ["Virtual size", now(formatBytes(proc.vsz)), running ? proc.vsz : undefined],
         ["Swap", now(formatBytes(proc.swap)), running ? proc.swap : undefined],
         ["Heap used / reserved", now(`${formatBytes(last.heap)} / ${formatBytes(last.heapTotal)}`)],
@@ -78,15 +102,15 @@ export function buildStats(proc: Proc, system: SystemInfo): Group[] {
     {
       title: "I/O",
       rows: [
-        ["Total read", formatBytes(c.readTotal), c.readTotal],
-        ["Total written", formatBytes(c.writeTotal), c.writeTotal],
-        ["Average read rate", formatRate(average(s, "read"))],
-        ["Average write rate", formatRate(average(s, "write"))],
-        ["Peak read rate", formatRate(maxOf(s, "read"))],
-        ["Peak write rate", formatRate(maxOf(s, "write"))],
-        ["Open files", now(String(proc.fds.files))],
-        ["Sockets", now(String(proc.fds.sockets))],
-        ["Pipes", now(String(proc.fds.pipes))],
+        ["Total read", io(formatBytes(c.readTotal)), noIo ? undefined : c.readTotal],
+        ["Total written", io(formatBytes(c.writeTotal)), noIo ? undefined : c.writeTotal],
+        ["Average read rate", io(formatRate(average(s, "read")))],
+        ["Average write rate", io(formatRate(average(s, "write")))],
+        ["Peak read rate", io(formatRate(maxOf(s, "read")))],
+        ["Peak write rate", io(formatRate(maxOf(s, "write")))],
+        ["Open files", handles(String(proc.fds.files))],
+        ["Sockets", handles(String(proc.fds.sockets))],
+        ["Pipes", handles(String(proc.fds.pipes))],
       ],
     },
     {

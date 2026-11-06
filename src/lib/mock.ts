@@ -4,22 +4,34 @@
  * sample for each running one every TICK_MS.
  */
 
+import { AlertEngine, applyAlerts } from "@/lib/alerts"
+import { formatBytes } from "@/lib/format"
 import type { MonitorApi } from "@/lib/monitor-api"
 import {
   MAX_SAMPLES,
   SYSTEM_MEMORY,
   TICK_MS,
+  DEFAULT_SETTINGS,
+  NEW_TARGET,
   frameTotal,
   type AllocFrame,
   type Attachable,
+  type CpuProfile,
   type GcEvent,
   type HeapEntry,
   type HeapSnapshot,
+  type LaunchSpec,
   type MonitorEvent,
   type Proc,
+  type RunSummary,
   type Runtime,
   type Sample,
+  type Settings,
   type State,
+  type StorageInfo,
+  type SystemSample,
+  type TargetSpec,
+  type TargetState,
   type Status,
 } from "@/lib/types"
 
@@ -428,6 +440,12 @@ function nextSample(p: MockProc, t: number): Sample {
     write: Math.max(0, write),
     alloc: heap * churn * (0.7 + r() * 0.6) + grew * 2,
     faults: grew / 4096 + 40 + r() * 200 + (cpu > 200 ? 2000 * r() : 0),
+    threads: p.threads,
+    files: p.fds.files,
+    sockets: p.fds.sockets,
+    pipes: p.fds.pipes,
+    // Only a runtime with an agent can report its own responsiveness.
+    ...(p.profiling ? { loopLag: Math.max(0, (cpu > 150 ? 18 : 2) + noise(cpu > 150 ? 12 : 1.5)) } : {}),
   }
 }
 
@@ -497,6 +515,7 @@ function step(p: MockProc, t: number): Status | null {
   accumulate(p, sample)
   maybeLog(p, t)
   jitterChildren(p)
+  sample.kids = p.children.map((c) => ({ pid: c.pid, rss: c.rss, cpu: c.cpu }))
 
   if (p.sim.oomAt && sample.rss >= p.sim.oomAt) {
     end(p, t, "crashed", 137, "SIGKILL")
@@ -517,7 +536,7 @@ function step(p: MockProc, t: number): Status | null {
   return null
 }
 
-function end(p: MockProc, t: number, status: Status, code: number, signal?: string) {
+function end(p: MockProc, t: number, status: Status, code: number | undefined, signal?: string) {
   p.status = status
   p.endedAt = t
   p.exitCode = code
@@ -641,6 +660,14 @@ function createProc(spec: Spec, now: number): MockProc {
     },
   }
 
+  p.childNames = Object.fromEntries(p.children.map((c) => [c.pid, c.name]))
+  // Dev servers listen on something; batch jobs don't.
+  if ((spec.profile ?? inferred.profile) === "leak") {
+    p.ports = [
+      { port: 3000, proto: "tcp", addr: "127.0.0.1", pid },
+      { port: 24678, proto: "tcp6", addr: "::1", pid },
+    ]
+  }
   // Seed the first sample so the UI never sees an empty series.
   p.samples.push(nextSample(p, startedAt))
   p.peak = p.samples[0]
@@ -656,7 +683,7 @@ function createProc(spec: Spec, now: number): MockProc {
 }
 
 function seed(now: number): MockProc[] {
-  return [
+  const procs = [
     createProc({ command: "bun run dev", cwd: "~/dev/storefront", pid: 48213, history: 1900 }, now),
     createProc(
       { command: "python train.py --epochs 3", cwd: "~/dev/ml/classifier", pid: 51877, base: 420 * MB, history: 900 },
@@ -693,7 +720,172 @@ function seed(now: number): MockProc[] {
       now,
     ),
   ]
+  // A run that crossed a limit before crashing, so markers and reports have an alert to show.
+  const ingest = procs[5]
+  const crossing = ingest.samples.find((s) => s.rss >= 1.5 * 1024 * MB)!
+  ingest.alerts = [
+    {
+      t: crossing.t,
+      kind: "memory",
+      message: `Memory reached ${formatBytes(crossing.rss)} (limit 1.5 GiB)`,
+      value: crossing.rss,
+      threshold: 1.5 * 1024 * MB,
+    },
+  ]
+  return procs
 }
+
+const DAY_MS = 86_400_000
+
+/** Past runs, so history, comparison and retention have something to show. */
+function seedHistory(now: number): MockProc[] {
+  const past = (command: string, cwd: string, pid: number, days: number, extra: Partial<Spec> = {}) =>
+    createProc({ command, cwd, pid, history: 240, lifespan: 240, endedAgoMs: days * DAY_MS, ...extra }, now)
+  return [
+    past("bun run build", "~/dev/storefront", 41001, 1),
+    past("bun run build", "~/dev/storefront", 40044, 3, { base: 160 * MB, lifespan: 160 }),
+    past("bun run build", "~/dev/storefront", 38120, 12, { base: 70 * MB, lifespan: 300, history: 300 }),
+    past("npm test", "~/dev/storefront", 39500, 2, { lifespan: 90 }),
+    past("npm test", "~/dev/storefront", 37002, 9, { lifespan: 120 }),
+    past("python train.py --epochs 3", "~/dev/ml/classifier", 33121, 6, { base: 420 * MB, profile: "spiky" }),
+    past("python scripts/ingest.py data/2026-09.parquet", "~/dev/ml/pipeline", 30219, 45, {
+      profile: "leak",
+      base: 300 * MB,
+      growth: 7,
+      oomAt: 1.9 * 1024 * MB,
+    }),
+  ]
+}
+
+/** A CPU profile shaped like the process's call sites; `self` is ms on-CPU. */
+function makeCpuProfile(p: MockProc, ms: number, t: number): CpuProfile {
+  const r = p.sim.rand
+  const build = ([name, file, w, , kids]: SiteSpec): AllocFrame => ({ name, file: file || undefined, self: w * (0.8 + r() * 0.4), children: kids.map(build) })
+  const root = build(SITES[p.sim.profile])
+  const scale = ms / frameTotal(root)
+  const rescale = (f: AllocFrame): AllocFrame => ({ ...f, self: f.self * scale, children: f.children.map(rescale) })
+  const sampling = p.runtime === "python" ? ("stack" as const) : ("v8" as const)
+  return { id: `c_${t.toString(36)}_${Math.floor(r() * 1e6).toString(36)}`, t, durationMs: ms, sampling, root: rescale(root) }
+}
+
+/** The machine's memory and load, drifting with what's running. */
+function nextMachine(prev: SystemSample | undefined, procs: Proc[], t: number): SystemSample {
+  const running = procs.filter((p) => p.status === "running")
+  const used = running.reduce((a, p) => a + p.samples.at(-1)!.rss, 0)
+  const cpu = running.reduce((a, p) => a + p.samples.at(-1)!.cpu, 0)
+  const wobble = (Math.sin(t / 45_000) + 1) * 0.5
+  return {
+    t,
+    memTotal: SYSTEM_MEMORY,
+    memAvailable: Math.max(0, SYSTEM_MEMORY * (0.72 - wobble * 0.08) - used),
+    swapTotal: 8 * 1024 ** 3,
+    swapFree: prev?.swapFree ?? 7.4 * 1024 ** 3,
+    psiSome: wobble * 1.5,
+    psiFull: wobble * 0.2,
+    load1: cpu / 100 + wobble,
+    cpu: clamp((cpu / 12 + wobble * 10), 0, 100),
+  }
+}
+
+function summarize(p: MockProc): RunSummary {
+  return {
+    id: p.id,
+    pid: p.pid,
+    command: p.command,
+    cwd: p.cwd,
+    runtime: p.runtime,
+    status: p.status,
+    startedAt: p.startedAt,
+    endedAt: p.endedAt,
+    exitCode: p.exitCode,
+    signal: p.signal,
+    peakRss: p.peak.rss,
+    avgCpu: p.samples.reduce((a, s) => a + s.cpu, 0) / p.samples.length,
+    samples: p.samples.length,
+  }
+}
+
+// ─── simulated targets ───────────────────────────────────────────────────────
+// Everything here is invented, for working on the UI without infrastructure.
+
+const NO_CAPABILITIES = { collector: false, attach: false, launch: false, signal: false, runtimeAgents: false, containerTotals: false, containerLogs: false, containerTop: false }
+const CONNECT_MS = 400
+
+function simulatedState(spec: TargetSpec): TargetState {
+  return { spec, state: "disconnected", error: null, capabilities: NO_CAPABILITIES, facts: null, system: null, clockOffsetMs: 0 }
+}
+
+function simulatedLink(t: TargetState): TargetState {
+  const container = t.spec.kind !== "ssh"
+  return {
+    ...t,
+    state: "connected",
+    error: null,
+    capabilities: {
+      collector: true,
+      attach: true,
+      launch: true,
+      signal: true,
+      runtimeAgents: true,
+      containerTotals: t.spec.kind === "docker",
+      containerLogs: container,
+      containerTop: t.spec.kind === "docker",
+    },
+    facts: {
+      protocol: 1,
+      collectorVersion: "simulated",
+      arch: "x86_64",
+      kernel: "simulated",
+      hostname: t.spec.label,
+      bootId: "simulated-boot",
+      pidNs: "pid:[simulated]",
+      uid: 1000,
+      clkTck: 100,
+      cpus: 8,
+      hostMemory: 16 * 1024 ** 3,
+      limits: { version: 2, memoryMax: container ? 2 * 1024 ** 3 : null, memoryCurrent: container ? 300 * MB : null, cpuQuotaCores: container ? 2 : null },
+      runtimeAgents: true,
+    },
+    clockOffsetMs: 240,
+  }
+}
+
+const TARGET_PROCESSES: Attachable[] = [
+  { pid: 812, command: "node server.js --port 8080", cwd: "/srv/app", rss: 310 * MB, startTicks: 90210 },
+  { pid: 1204, command: "python worker.py", cwd: "/srv/worker", rss: 180 * MB, startTicks: 91544 },
+]
+
+const DOCKER_CONTAINERS = [
+  { id: "c0ffee000000a1", name: "shop-web (simulated)", image: "shop/web:1.4", state: "running", status: "Up 3 hours" },
+  { id: "c0ffee000000b2", name: "shop-migrate (simulated)", image: "shop/web:1.4", state: "exited", status: "Exited (0) 3 hours ago" },
+]
+
+const KUBE_PODS = [
+  {
+    name: "api-7f9c (simulated)",
+    uid: "11111111-2222-3333-4444-555555555555",
+    namespace: "default",
+    phase: "Running",
+    node: "node-1",
+    containers: [
+      { name: "api", ready: true, state: "running", restarts: 0, containerId: "containerd://sim1" },
+      { name: "proxy", ready: true, state: "running", restarts: 1, containerId: "containerd://sim2" },
+    ],
+  },
+]
+
+const SETTINGS_KEY = "peak-mock-settings"
+
+function readSettings(): Settings {
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") }
+  } catch {
+    return { ...DEFAULT_SETTINGS }
+  }
+}
+
+/** Rough on-disk cost of a stored sample, so storage figures move believably. */
+const BYTES_PER_SAMPLE = 420
 
 // ─── store ───────────────────────────────────────────────────────────────────
 
@@ -712,15 +904,29 @@ export class MockMonitor implements MonitorApi {
   private listeners = new Set<Listener>()
   private eventListeners = new Set<(e: MonitorEvent) => void>()
   private timer: ReturnType<typeof setInterval> | undefined
+  /** Stored runs that aren't in the session right now. */
+  private archive: MockProc[]
+  /** Space freed by deletions, reclaimed by vacuum. */
+  private reclaimable = 0
+  private settings = readSettings()
+  private alerts = new AlertEngine()
+  /** When each run stopped getting data, while its target is unreachable. */
+  private gapFrom = new Map<string, number>()
 
   constructor() {
-    const procs = seed(Date.now())
+    this.alerts.configure(this.settings)
+    const now = Date.now()
+    const procs = seed(now)
+    this.archive = seedHistory(now)
+    const machine = Array.from({ length: 240 }, (_, i) => nextMachine(undefined, procs, now - (240 - i) * TICK_MS))
     this.state = {
       procs,
       selectedId: procs[0].id,
       paused: false,
       system: { totalMemory: SYSTEM_MEMORY, cpus: 12, hostname: "devbox", os: "Linux" },
       ready: true,
+      machine,
+      targets: [simulatedState({ ...NEW_TARGET, id: "staging", label: "staging-1 (simulated)", kind: "ssh", host: "me@staging-1", install: true })],
     }
   }
 
@@ -763,17 +969,21 @@ export class MockMonitor implements MonitorApi {
     const t = Date.now()
     const events: MonitorEvent[] = []
     // Sampling continues while paused; only the UI snapshot freezes.
-    const procs = this.current().map((p) => {
-      if (p.status !== "running") return p
+    const stepped = this.current().map((p) => {
+      if (p.status !== "running" || !this.linked(p)) return p
       const next: MockProc = { ...p, samples: [...p.samples], logs: [...p.logs], gc: [...p.gc], counters: { ...p.counters } }
       const ended = step(next, t)
       if (ended) events.push({ type: ended, proc: next } as MonitorEvent)
       return next
     })
+    const procs = applyAlerts(this.alerts, stepped, (proc, alert) => {
+      events.push({ type: "alert", proc, alert, notify: this.settings.notifications })
+    })
     if (this.state.paused) {
       this.frozen = procs
     } else {
-      this.set({ procs })
+      const machine = [...this.state.machine, nextMachine(this.state.machine.at(-1), procs, t)].slice(-MAX_SAMPLES)
+      this.set({ procs, machine })
     }
     events.forEach((e) => this.emit(e))
   }
@@ -815,6 +1025,17 @@ export class MockMonitor implements MonitorApi {
     return snapshot as HeapSnapshot | null
   }
 
+  cpuProfile = async (id: string, ms: number) => {
+    const proc = this.current().find((p) => p.id === id)
+    if (!proc?.profiling) throw new Error("no profiling agent is attached to this process")
+    await new Promise((r) => setTimeout(r, ms))
+    const profile = makeCpuProfile(proc, ms, Date.now())
+    this.update(id, (p) => {
+      p.cpuProfiles = [...(p.cpuProfiles ?? []), profile]
+    })
+    return profile
+  }
+
   forceGc = (id: string) => {
     const t = Date.now()
     this.update(id, (p) => {
@@ -840,24 +1061,241 @@ export class MockMonitor implements MonitorApi {
       { command: old.command, cwd: old.cwd, profile: old.sim.profile, lifespan: old.sim.lifespan },
       Date.now(),
     )
+    if (old.target) {
+      proc.id = `${old.target.targetId}~${proc.id}`
+      proc.target = old.target
+    }
+    // The earlier run stays in history, as it does in the real database.
+    this.archive.push(old)
     this.set({
       procs: this.current().map((p) => (p.id === id ? proc : p)),
       selectedId: proc.id,
     })
   }
 
-  remove = (id: string) => {
-    const procs = this.current().filter((p) => p.id !== id)
-    const selectedId = this.state.selectedId === id ? (procs[0]?.id ?? null) : this.state.selectedId
+  remove = (id: string) => this.keep((p) => p.id !== id)
+
+  clearEnded = () => this.keep((p) => p.status === "running")
+
+  /** Keep matching session processes; the rest stay in history, like the real database. */
+  private keep(keep: (p: MockProc) => boolean) {
+    const all = this.current()
+    const procs = all.filter(keep)
+    this.archive.push(...all.filter((p) => !keep(p)))
+    const selectedId = procs.some((p) => p.id === this.state.selectedId) ? this.state.selectedId : (procs[0]?.id ?? null)
     this.set({ procs, selectedId })
   }
 
-  clearEnded = () => {
-    const procs = this.current().filter((p) => p.status === "running")
-    const selectedId = procs.some((p) => p.id === this.state.selectedId)
-      ? this.state.selectedId
-      : (procs[0]?.id ?? null)
-    this.set({ procs, selectedId })
+  // ─── history ───
+
+  private stored() {
+    return [...this.current(), ...this.archive]
+  }
+
+  private linked(p: Proc) {
+    return !p.target || this.state.targets.some((t) => t.spec.id === p.target!.targetId && t.state === "connected")
+  }
+
+  listRuns = async (query?: string) => {
+    const q = query?.toLowerCase() ?? ""
+    return this.stored()
+      .filter((p) => p.command.toLowerCase().includes(q))
+      .map(summarize)
+      .sort((a, b) => b.startedAt - a.startedAt)
+  }
+
+  private find(id: string) {
+    const p = this.stored().find((x) => x.id === id)
+    if (!p) throw new Error("run not found")
+    return p
+  }
+
+  openRun = async (id: string) => {
+    const p = this.find(id)
+    if (this.current().includes(p)) return this.select(id)
+    this.archive = this.archive.filter((x) => x !== p)
+    this.set({ procs: [{ ...p, historical: true }, ...this.current()], selectedId: id })
+  }
+
+  loadRun = async (id: string): Promise<Proc> => this.find(id)
+
+  deleteRun = async (id: string) => {
+    if (this.current().some((p) => p.id === id && p.status === "running")) {
+      throw new Error("stop the process before deleting its history")
+    }
+    const victim = this.stored().find((p) => p.id === id)
+    if (!victim) return false
+    this.reclaimable += victim.samples.length * BYTES_PER_SAMPLE
+    this.keep((p) => p !== victim)
+    this.archive = this.archive.filter((p) => p !== victim)
+    return true
+  }
+
+  pruneRuns = async (olderThanDays?: number) => {
+    const before = olderThanDays === undefined ? Infinity : Date.now() - olderThanDays * DAY_MS
+    const old = (p: MockProc) => p.status !== "running" && p.endedAt! < before
+    const victims = this.stored().filter(old)
+    this.reclaimable += victims.reduce((a, p) => a + p.samples.length * BYTES_PER_SAMPLE, 0)
+    this.keep((p) => !old(p))
+    this.archive = this.archive.filter((p) => !old(p))
+    return victims.length
+  }
+
+  // ─── simulated targets ───
+
+  private setTarget(id: string, fn: (t: TargetState) => TargetState) {
+    this.set({ targets: this.state.targets.map((t) => (t.spec.id === id ? fn(t) : t)) })
+  }
+
+  private target(id: string) {
+    const t = this.state.targets.find((x) => x.spec.id === id)
+    if (!t) throw new Error("unknown target")
+    if (t.state !== "connected") throw new Error("target is not connected")
+    return t
+  }
+
+  addTarget = async (spec: TargetSpec) => {
+    const added = simulatedState({ ...spec, id: spec.id || `t${this.state.targets.length + 1}` })
+    this.set({ targets: [...this.state.targets.filter((t) => t.spec.id !== added.spec.id), added] })
+    return added
+  }
+
+  removeTarget = async (id: string) => {
+    if (this.current().some((p) => p.target?.targetId === id && p.status === "running")) {
+      throw new Error("detach from this target's processes first")
+    }
+    this.set({ targets: this.state.targets.filter((t) => t.spec.id !== id) })
+  }
+
+  connectTarget = async (id: string) => {
+    this.setTarget(id, (t) => ({ ...t, state: "connecting" }))
+    setTimeout(() => {
+      this.setTarget(id, simulatedLink)
+      // Back in touch: the same runs resume, and the outage shows as a gap.
+      const now = Date.now()
+      const procs = this.current().map((p) => {
+        const from = this.gapFrom.get(p.id)
+        if (p.target?.targetId !== id || from === undefined) return p
+        this.gapFrom.delete(p.id)
+        return { ...p, gaps: [...(p.gaps ?? []), { from, to: now }] }
+      })
+      this.set({ procs })
+    }, CONNECT_MS)
+  }
+
+  /** Losing the link says nothing about the workload: runs stay as they were. */
+  disconnectTarget = async (id: string) => {
+    const t = Date.now()
+    for (const p of this.current()) {
+      if (p.target?.targetId !== id || p.status !== "running") continue
+      // A command launched through the session ends with it; an attached one goes on.
+      if (p.target.launched) this.update(p.id, (x) => end(x, t, "exited", undefined, "stopped with the session"))
+      else this.gapFrom.set(p.id, p.samples.at(-1)!.t)
+    }
+    this.setTarget(id, (t) => ({ ...t, state: "disconnected", capabilities: NO_CAPABILITIES }))
+  }
+
+  listTargetProcesses = async (id: string) => {
+    this.target(id)
+    return TARGET_PROCESSES
+  }
+
+  private addRemote(id: string, command: string, cwd: string, pid: number | undefined, launched: boolean, spec?: LaunchSpec) {
+    const t = this.target(id)
+    const proc = createProc({ command, cwd, pid }, Date.now())
+    proc.id = `${id}~${proc.id}`
+    proc.profiling = launched && proc.profiling
+    if (!launched) proc.logs = []
+    proc.target = {
+      targetId: id,
+      label: t.spec.label,
+      kind: t.spec.kind!,
+      identity: { bootId: "simulated-boot", pidNs: "pid:[simulated]", pid: proc.pid, startTicks: 90210 },
+      launched,
+      spec,
+      clockOffsetMs: t.clockOffsetMs,
+    }
+    this.set({ procs: [proc, ...this.current()], selectedId: proc.id })
+    this.emit({ type: "captured", proc })
+  }
+
+  attachTarget = async (id: string, pid: number) => {
+    const a = TARGET_PROCESSES.find((x) => x.pid === pid)
+    this.addRemote(id, a?.command ?? `pid ${pid}`, a?.cwd ?? "/", pid, false)
+  }
+
+  launchTarget = async (id: string, spec: LaunchSpec) => {
+    this.addRemote(id, spec.command ?? spec.argv!.join(" "), spec.cwd, undefined, true, spec)
+  }
+
+  /** Stop watching: it keeps running, as far as anyone knows. */
+  detach = async (id: string) => {
+    const t = Date.now()
+    this.update(id, (p) => end(p, t, "exited", undefined, "monitoring stopped"))
+  }
+
+  signal = async (id: string, signal: string) => {
+    const t = Date.now()
+    this.update(id, (p) => end(p, t, "exited", undefined, `SIG${signal}`))
+  }
+
+  dockerContexts = async () => ["default", "remote-build"]
+
+  dockerContainers = async () => DOCKER_CONTAINERS
+
+  dockerTotals = async () => {
+    const swing = Math.random()
+    return { cpuPercent: 12 + swing * 30, memoryUsed: (280 + swing * 40) * MB, memoryLimit: 2 * 1024 ** 3, pids: 14, rawNet: "1.2MB / 800kB", rawBlock: "24MB / 0B" }
+  }
+
+  dockerTop = async () => [
+    { pid: "48211", user: "root", command: "node server.js" },
+    { pid: "48390", user: "root", command: "node worker.js" },
+  ]
+
+  dockerLogs = async () => "2026-11-06T09:00:00Z listening on :8080 (simulated)\n2026-11-06T09:00:04Z GET /health 200 (simulated)\n"
+
+  kubeContexts = async () => ["kind-dev"]
+
+  kubeNamespaces = async () => ["default", "web"]
+
+  kubePods = async (_: string, namespace: string) => (namespace === "default" ? KUBE_PODS : [])
+
+  kubeLogs = async () => "2026-11-06T09:00:00Z starting (simulated)\n"
+
+  kubeMetrics = async () => null
+
+  kubeAccess = async () => ({ listPods: true, readLogs: true, exec: true })
+
+  // ─── settings and storage ───
+
+  storageInfo = async (): Promise<StorageInfo> => {
+    const runs = this.stored()
+    const samples = runs.reduce((a, p) => a + p.samples.length, 0)
+    return {
+      path: "(in memory — browser mock)",
+      bytes: samples * BYTES_PER_SAMPLE + this.reclaimable,
+      runs: runs.length,
+      stoppedRuns: runs.filter((p) => p.status !== "running").length,
+      samples,
+    }
+  }
+
+  vacuum = async () => {
+    this.reclaimable = 0
+  }
+
+  getSettings = async () => this.settings
+
+  setSettings = async (next: Settings) => {
+    this.settings = next
+    this.alerts.configure(next)
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next))
+    } catch {
+      // Private windows may refuse storage; settings then last for this session.
+    }
+    return next
   }
 
   private current() {

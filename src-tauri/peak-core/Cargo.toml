@@ -1,0 +1,13 @@
+[package]
+name = "peak-core"
+version = "0.1.0"
+description = "Process sampling, runtime agents and the collector protocol, independent of Tauri"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3"

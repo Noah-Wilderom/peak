@@ -19,13 +19,16 @@ interface Cell {
 
 const ROW = 26
 
+/** A frame's identity among its siblings: same-named functions can live in different files. */
+const frameId = (f: AllocFrame) => (f.file ? `${f.name}\u0000${f.file}` : f.name)
+
 /** Lay frames out as an icicle chart (root on top), relative to `focus`. */
 export function layoutFlame(root: AllocFrame, focusPath: string[]) {
   // Walk down to the focused frame; its ancestors render full-width above it.
   const ancestors: AllocFrame[] = []
   let focus = root
   for (const name of focusPath) {
-    const next = focus.children.find((c) => c.name === name)
+    const next = focus.children.find((c) => frameId(c) === name)
     if (!next) break
     ancestors.push(focus)
     focus = next
@@ -40,7 +43,7 @@ export function layoutFlame(root: AllocFrame, focusPath: string[]) {
     cells.push({ key: `f-${path.join("/")}`, path, frame: f, depth, x, w: total / focusTotal, total })
     let cx = x
     for (const c of [...f.children].sort((a, b) => frameTotal(b) - frameTotal(a))) {
-      visit(c, depth + 1, cx, [...path, c.name])
+      visit(c, depth + 1, cx, [...path, frameId(c)])
       cx += frameTotal(c) / focusTotal
     }
   }
@@ -48,7 +51,18 @@ export function layoutFlame(root: AllocFrame, focusPath: string[]) {
   return { cells, depth: Math.max(...cells.map((c) => c.depth)) + 1, focusTotal }
 }
 
-export function FlameGraph({ root }: { root: AllocFrame }) {
+interface FlameGraphProps {
+  root: AllocFrame
+  /** How frame values read: bytes for allocation sites, time for CPU profiles. */
+  format?: (value: number) => string
+  hint?: string
+}
+
+export function FlameGraph({
+  root,
+  format = formatBytes,
+  hint = "Width = bytes allocated beneath a frame. Stronger shade = more allocated in the frame itself. Click to zoom.",
+}: FlameGraphProps) {
   const [focusPath, setFocusPath] = useState<string[]>([])
   const [hover, setHover] = useState<Cell | null>(null)
   const { dark } = useTheme()
@@ -88,11 +102,11 @@ export function FlameGraph({ root }: { root: AllocFrame }) {
               <span className="font-mono font-semibold text-foreground">{hover.frame.name}</span>
               {hover.frame.file && <span className="font-mono"> · {hover.frame.file}</span>}
               {" · "}
-              {formatBytes(hover.total)} total ({((hover.total / rootTotal) * 100).toFixed(1)}%) · {formatBytes(hover.frame.self)} self
+              {format(hover.total)} total ({((hover.total / rootTotal) * 100).toFixed(1)}%) · {format(hover.frame.self)} self
             </motion.span>
           ) : (
             <motion.span key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              Width = bytes allocated beneath a frame. Stronger shade = more allocated in the frame itself. Click to zoom.
+              {hint}
             </motion.span>
           )}
         </AnimatePresence>

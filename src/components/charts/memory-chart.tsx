@@ -8,7 +8,9 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { formatTimeLabel, useEasedYAxis, useTimelineChart, visibleMax } from "@/components/charts/timeline"
+import { MarkerStrip } from "@/components/charts/marker-strip"
 import { formatBytes } from "@/lib/format"
+import { MARKER_STYLE, timelineMarkers } from "@/lib/markers"
 
 const config = {
   rss: { label: "Resident (RSS)", color: "var(--chart-1)" },
@@ -19,9 +21,10 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
   const { proc, data, from, to, xAxis, chart, selection } = useTimelineChart()
   const peak = proc.peak
   const y = useEasedYAxis(Math.max(peak.rss, visibleMax(data, from, to, ["rss"])), { bytes: true })
-  const majors = proc.gc.filter((g) => g.kind === "major" && g.t >= from && g.t <= to)
+  const markers = timelineMarkers(proc, from, to)
 
   return (
+    <>
     <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
       <AreaChart data={data} margin={{ top: 16, right: 20, left: 8, bottom: 0 }} {...chart}>
         <defs>
@@ -63,8 +66,18 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
             dy: -14,
           }}
         />
-        {majors.map((g) => (
-          <ReferenceLine key={g.t} x={g.t} stroke="var(--input)" strokeWidth={1} />
+        {(proc.gaps ?? []).map((g) => (
+          <ReferenceArea
+            key={g.from}
+            x1={Math.max(g.from, from)}
+            x2={Math.min(g.to, to)}
+            fill="var(--warning)"
+            fillOpacity={0.12}
+            label={{ value: "No data", position: "insideTop", fill: "var(--warning)", fontSize: 11 }}
+          />
+        ))}
+        {markers.map((m) => (
+          <ReferenceLine key={`${m.kind}-${m.t}`} x={m.t} stroke={MARKER_STYLE[m.kind].color} strokeOpacity={m.kind === "stderr" ? 0.2 : 0.55} strokeWidth={1} />
         ))}
         <Area
           dataKey="rss"
@@ -100,5 +113,7 @@ export function MemoryChart({ height = 280 }: { height?: number }) {
         />
       </AreaChart>
     </ChartContainer>
+    <MarkerStrip markers={markers} from={from} to={to} />
+    </>
   )
 }

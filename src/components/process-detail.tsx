@@ -8,30 +8,43 @@ import { MemoryChart } from "@/components/charts/memory-chart"
 import { CpuChart } from "@/components/charts/cpu-chart"
 import { IoChart } from "@/components/charts/io-chart"
 import { TimelineProvider } from "@/components/charts/timeline"
-import { LogsPanel } from "@/components/logs-panel"
-import { ChildrenTable } from "@/components/children-table"
+import { LogsPanel, type LogJump } from "@/components/logs-panel"
+import { ResourcesTab } from "@/components/resources-tab"
 import { MemoryTab } from "@/components/memory-tab"
 import { ProfilerTab } from "@/components/profiler-tab"
 import { StatsTab } from "@/components/stats-tab"
+import { ReportTab } from "@/components/report-tab"
 import { TimeControls } from "@/components/time-controls"
 import { Card } from "@/components/card"
 import { Tween } from "@/components/tween"
 import { Bytes } from "@/components/bytes"
 import { CopyPid } from "@/components/copy-pid"
 import { RuntimeTile, StatusPill } from "@/components/status"
-import { monitor, type Proc, type SystemInfo } from "@/lib/monitor"
+import { TargetActions } from "@/components/target-actions"
+import { monitor, type Proc, type SystemInfo, type TargetState } from "@/lib/monitor"
 import { average, valueAgo, visibleSamples, type AxisMode, type RangeKey, type View } from "@/lib/series"
 import { formatBytes, formatClock, formatDuration, formatOffset, formatPercent } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-const TIMELINE_TABS = new Set(["overview", "memory"])
+const TIMELINE_TABS = new Set(["overview", "memory", "resources"])
 
-export function ProcessDetail({ proc, paused, system }: { proc: Proc; paused: boolean; system: SystemInfo }) {
+export function ProcessDetail({ proc, paused, system: local, targets }: { proc: Proc; paused: boolean; system: SystemInfo; targets: TargetState[] }) {
   const running = proc.status === "running"
+  const target = proc.target && targets.find((t) => t.spec.id === proc.target!.targetId)
+  const linked = !proc.target || target?.state === "connected" || target?.state === "stale"
+  // Capacity figures for a remote run are that target's, not this machine's.
+  const system = target?.facts
+    ? { totalMemory: target.facts.hostMemory, cpus: target.facts.cpus, hostname: target.facts.hostname, os: "linux" }
+    : local
   const [view, setViewState] = useState<View>({ kind: "live", range: running ? "1m" : "all" })
   const [lastRange, setLastRange] = useState<RangeKey>(running ? "1m" : "all")
   const [axis, setAxis] = useState<AxisMode>("elapsed")
   const [tab, setTab] = useState("overview")
+  const [jump, setJump] = useState<LogJump | null>(null)
+  const jumpToOutput = (t: number) => {
+    setJump((j) => ({ t, seq: (j?.seq ?? 0) + 1 }))
+    setTab("logs")
+  }
   const setView = (v: View) => {
     if (v.kind === "live") setLastRange(v.range)
     setViewState(v)
@@ -49,8 +62,18 @@ export function ProcessDetail({ proc, paused, system }: { proc: Proc; paused: bo
             <div className="flex items-center gap-3">
               <h1 className="truncate font-mono text-[22px] leading-tight font-semibold tracking-tight">{proc.command}</h1>
               <StatusPill proc={proc} />
+              {proc.historical && (
+                <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-secondary px-2.5 text-label whitespace-nowrap text-muted-foreground">
+                  From history · {new Date(proc.startedAt).toLocaleDateString()}
+                </span>
+              )}
             </div>
             <p className="mt-1 truncate text-sm text-muted-foreground tabular-nums">
+              {proc.target && (
+                <>
+                  on <span className="font-semibold text-foreground">{proc.target.label}</span> <span className="text-faint">·</span>{" "}
+                </>
+              )}
               {proc.cwd} <span className="text-faint">·</span> <CopyPid pid={proc.pid} /> <span className="text-faint">·</span> started{" "}
               {formatClock(proc.startedAt)} <span className="text-faint">·</span> {running ? "up" : "ran"} {formatDuration(elapsed)}
             </p>
@@ -63,43 +86,54 @@ export function ProcessDetail({ proc, paused, system }: { proc: Proc; paused: bo
               {paused ? "Resume" : "Freeze"}
             </Button>
           )}
-          <Button variant="outline" onClick={() => monitor.restart(proc.id)}>
-            <RotateCwIcon data-icon="inline-start" />
-            {running ? "Restart" : "Run again"}
-          </Button>
-          {running ? (
+          {proc.target ? (
+            <TargetActions proc={proc} target={target} linked={linked} />
+          ) : (
+            <Button variant="outline" onClick={() => monitor.restart(proc.id)}>
+              <RotateCwIcon data-icon="inline-start" />
+              {running ? "Restart" : "Run again"}
+            </Button>
+          )}
+          {running && !proc.target ? (
             <Button onClick={() => monitor.kill(proc.id)}>
               <SquareIcon data-icon="inline-start" className="fill-current" />
               Stop
             </Button>
-          ) : (
+          ) : running ? null : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="secondary" size="icon" onClick={() => monitor.remove(proc.id)} aria-label="Remove">
                   <Trash2Icon />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Remove from list</TooltipContent>
+              <TooltipContent>Remove from list (stays in History)</TooltipContent>
             </Tooltip>
           )}
         </div>
       </header>
 
-      <TimelineProvider proc={proc} view={view} setView={setView} axis={axis} paused={paused}>
+      {proc.target && !linked && running && (
+        <p role="status" className="mx-8 mb-4 rounded-2xl bg-warning/10 px-4 py-2.5 text-sm ring-1 ring-warning/25 ring-inset">
+          <span className="font-semibold">No connection to {proc.target.label}.</span> It may still be running; peak can't tell from here. Data resumes after reconnecting, once it's verified to be the same process.
+        </p>
+      )}
+
+      <TimelineProvider proc={proc} view={view} setView={setView} axis={axis} paused={paused} onJump={jumpToOutput}>
         <Tabs value={tab} onValueChange={setTab} className="min-h-0 flex-1 gap-0">
           <div className="px-8 pb-4">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="memory">Memory</TabsTrigger>
               <TabsTrigger value="profiler">
-                Profiler <span className="text-faint tabular-nums">{proc.snapshots.length || ""}</span>
+                Profiler <span className="text-faint tabular-nums">{proc.snapshots.length + (proc.cpuProfiles?.length ?? 0) || ""}</span>
               </TabsTrigger>
               <TabsTrigger value="stats">Stats</TabsTrigger>
+              <TabsTrigger value="report">Report</TabsTrigger>
               <TabsTrigger value="logs">
                 Output <span className="text-faint tabular-nums">{proc.logs.length}</span>
               </TabsTrigger>
-              <TabsTrigger value="children">
-                Processes <span className="text-faint tabular-nums">{proc.children.length + 1}</span>
+              <TabsTrigger value="resources">
+                Resources <span className="text-faint tabular-nums">{proc.children.length + 1}</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -132,11 +166,14 @@ export function ProcessDetail({ proc, paused, system }: { proc: Proc; paused: bo
           <TabsContent value="stats" className="min-h-0 overflow-y-auto px-8 pb-8">
             <StatsTab proc={proc} system={system} />
           </TabsContent>
-          <TabsContent value="logs" className="min-h-0 px-8 pb-8">
-            <LogsPanel proc={proc} />
+          <TabsContent value="report" className="min-h-0 overflow-y-auto px-8 pb-8">
+            <ReportTab proc={proc} />
           </TabsContent>
-          <TabsContent value="children" className="min-h-0 overflow-y-auto px-8 pb-8">
-            <ChildrenTable proc={proc} />
+          <TabsContent value="logs" className="min-h-0 px-8 pb-8">
+            <LogsPanel proc={proc} jump={jump} />
+          </TabsContent>
+          <TabsContent value="resources" className="min-h-0 overflow-y-auto px-8 pb-8">
+            <ResourcesTab />
           </TabsContent>
         </Tabs>
       </TimelineProvider>
@@ -167,6 +204,7 @@ function Overview({ proc, view }: { proc: Proc; view: View }) {
   const last = proc.samples.at(-1)!
   const windowed = visibleSamples(proc, view)
   const rssDelta = last.rss - valueAgo(proc.samples, "rss", 30_000)
+  const noIo = proc.unavailable?.includes("io")
 
   return (
     <motion.div
@@ -209,16 +247,20 @@ function Overview({ proc, view }: { proc: Proc; view: View }) {
         />
         <StatTile
           label="Disk I/O"
-          value={running ? <Bytes value={last.read + last.write} rate /> : "—"}
+          value={noIo ? "Unreadable" : running ? <Bytes value={last.read + last.write} rate /> : "—"}
           hint={
-            <>
-              <Bytes value={average(windowed, "read")} rate /> read · <Bytes value={average(windowed, "write")} rate /> write
-            </>
+            noIo ? (
+              "Permissions don't allow reading this"
+            ) : (
+              <>
+                <Bytes value={average(windowed, "read")} rate /> read · <Bytes value={average(windowed, "write")} rate /> write
+              </>
+            )
           }
         />
       </div>
 
-      <Card title="Memory." subtitle="Resident set size and heap. Dashed blue marks the high-water mark; grey rules are major GCs. Drag to zoom.">
+      <Card title="Memory." subtitle="Resident set size and heap. Dashed blue marks the high-water mark. Drag to zoom; click a moment or event to see its output.">
         <MemoryChart />
       </Card>
 
@@ -226,7 +268,7 @@ function Overview({ proc, view }: { proc: Proc; view: View }) {
         <Card title="CPU." subtitle="User and kernel time across all cores — 100% is one full core.">
           <CpuChart />
         </Card>
-        <Card title="Disk I/O." subtitle="Bytes read and written per second.">
+        <Card title="Disk I/O." subtitle={noIo ? "Couldn't be read for this process: these flat lines mean unknown, not zero." : "Bytes read and written per second."}>
           <IoChart />
         </Card>
       </div>

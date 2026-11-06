@@ -1,5 +1,6 @@
 import { motion } from "motion/react"
 import type { Proc } from "@/lib/types"
+import { runOutcome } from "@/lib/history"
 import { cn } from "@/lib/utils"
 
 export function StatusDot({ status, className }: { status: Proc["status"]; className?: string }) {
@@ -26,11 +27,7 @@ export function StatusDot({ status, className }: { status: Proc["status"]; class
   )
 }
 
-export function statusLabel(p: Proc) {
-  if (p.status === "running") return "Running"
-  if (p.status === "crashed") return p.signal ? `Killed · ${p.signal}` : `Failed · exit ${p.exitCode}`
-  return p.signal ? `Stopped · ${p.signal}` : `Exited · ${p.exitCode}`
-}
+export const statusLabel = runOutcome
 
 export function StatusPill({ proc }: { proc: Proc }) {
   return (

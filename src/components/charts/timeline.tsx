@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react"
 import type { MouseHandlerDataParam } from "recharts"
 import { TICK_MS, type MetricKey, type Proc, type Sample } from "@/lib/types"
 import { byteUnit, niceTicks, timeTicks, viewData, type AxisMode, type View } from "@/lib/series"
+import { nearestMarker, timelineMarkers } from "@/lib/markers"
 import { formatClock, formatOffset } from "@/lib/format"
 import { useTimeDomain, useTweened } from "@/hooks/use-smooth"
 
@@ -11,9 +12,14 @@ interface TimelineValue {
   setView: (v: View) => void
   axis: AxisMode
   paused: boolean
+  /** Open the run's output at this time. */
+  onJump: (t: number) => void
   data: Sample[]
   bucketMs: number
 }
+
+/** A press and release this close together is a click, not a drag. */
+const CLICK_SLOP_PX = 4
 
 const TimelineContext = createContext<TimelineValue | null>(null)
 
@@ -23,11 +29,12 @@ export function TimelineProvider({
   setView,
   axis,
   paused,
+  onJump,
   children,
 }: Omit<TimelineValue, "data" | "bucketMs"> & { children: React.ReactNode }) {
   const { data, bucketMs } = useMemo(() => viewData(proc, view), [proc, view])
   return (
-    <TimelineContext.Provider value={{ proc, view, setView, axis, paused, data, bucketMs }}>
+    <TimelineContext.Provider value={{ proc, view, setView, axis, paused, onJump, data, bucketMs }}>
       {children}
     </TimelineContext.Provider>
   )
@@ -49,9 +56,9 @@ export function formatTimeLabel(t: number, proc: Proc) {
  */
 export function useTimelineChart() {
   const ctx = useTimeline()
-  const { proc, view, setView, axis, paused } = ctx
+  const { proc, view, setView, axis, paused, onJump } = ctx
   const [from, to] = useTimeDomain(proc, view, paused)
-  const [sel, setSel] = useState<{ a: number; b: number } | null>(null)
+  const [sel, setSel] = useState<{ a: number; b: number; x: number } | null>(null)
 
   // A process younger than the range has nothing to label before it started.
   const ticks = timeTicks(from, to, axis, proc.startedAt).filter((t) => t >= proc.startedAt)
@@ -72,17 +79,22 @@ export function useTimelineChart() {
   const chart = {
     syncId: `timeline-${proc.id}`,
     syncMethod: "value" as const,
-    onMouseDown: (s: MouseHandlerDataParam) => {
+    onMouseDown: (s: MouseHandlerDataParam, e: React.MouseEvent) => {
       const x = label(s)
-      if (Number.isFinite(x)) setSel({ a: x, b: x })
+      if (Number.isFinite(x)) setSel({ a: x, b: x, x: e.clientX })
     },
     onMouseMove: (s: MouseHandlerDataParam) => {
       const x = label(s)
       if (sel && Number.isFinite(x)) setSel({ ...sel, b: x })
     },
-    onMouseUp: () => {
+    onMouseUp: (_: MouseHandlerDataParam, e: React.MouseEvent) => {
       if (sel && Math.abs(sel.b - sel.a) >= TICK_MS * 4) {
         setView({ kind: "fixed", from: Math.min(sel.a, sel.b), to: Math.max(sel.a, sel.b) })
+      } else if (sel && Math.abs(e.clientX - sel.x) <= CLICK_SLOP_PX) {
+        // Too short to be a zoom, and the pointer stayed put: a click. A drag across
+        // too little data is neither. Snap to an event if it was aimed at one.
+        const hit = nearestMarker(timelineMarkers(proc, from, to), sel.a, (to - from) * 0.015)
+        onJump(hit?.t ?? sel.a)
       }
       setSel(null)
     },

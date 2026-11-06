@@ -69,6 +69,68 @@ def sites_from_tracemalloc(snapshot, limit=300):
     return root
 
 
+def percentile(values, p):
+    """Nearest-rank percentile; None for no data (unknown, not zero)."""
+    if not values:
+        return None
+    ordered = sorted(values)
+    return ordered[min(len(ordered) - 1, int(p / 100 * len(ordered)))]
+
+
+def add_stack(root, frames, ms):
+    """Add one sampled stack (oldest frame first) to a call tree, in sampled ms."""
+    node = root
+    for name, file in frames:
+        child = next((c for c in node["children"] if c["name"] == name and c.get("file") == file), None)
+        if child is None:
+            child = {"name": name, "file": file, "self": 0, "children": []}
+            node["children"].append(child)
+        node = child
+    node["self"] += ms
+
+
+def stack_of(frame, skip_files=()):
+    """Frames of a Python stack, oldest first, skipping peak's own threads' files."""
+    out = []
+    while frame is not None:
+        code = frame.f_code
+        if code.co_filename not in skip_files:
+            # The function's own line: one function stays one frame as it executes.
+            out.append((code.co_name, f"{os.path.basename(code.co_filename)}:{code.co_firstlineno}"))
+        frame = frame.f_back
+    out.reverse()
+    return out
+
+
+def sample_cpu(duration_ms, target_thread, interval_ms=5, current_frames=None, clock=None, sleep=None):
+    """Sample one thread's Python stack for `duration_ms`.
+
+    Each observation is charged the time since the previous one, so the tree sums
+    to the measured duration even when sampling falls behind under load. This
+    samples the stack whether or not the thread is on-CPU: blocking calls appear
+    under their Python frame, as in other wall-clock Python samplers.
+    """
+    import sys
+    import time
+
+    current_frames = current_frames or sys._current_frames
+    clock = clock or time.perf_counter
+    sleep = sleep or time.sleep
+    root = {"name": "(root)", "self": 0, "children": []}
+    began = clock()
+    last = began
+    deadline = began + duration_ms / 1000
+    while True:
+        sleep(interval_ms / 1000)
+        now = clock()
+        frame = current_frames().get(target_thread)
+        if frame is not None:
+            add_stack(root, stack_of(frame, (__file__,)), (now - last) * 1000)
+        last = now
+        if now >= deadline:
+            return {"durationMs": (now - began) * 1000, "sampling": "stack", "root": root}
+
+
 def _peak_start():
     addr = os.environ.get("PEAK_AGENT_ADDR")
     token = os.environ.get("PEAK_AGENT_TOKEN")
@@ -127,6 +189,33 @@ def _peak_start():
             while queue:
                 send(queue.pop(0))
 
+    def measure_lag():
+        # Oversleep of a short sleep: how long this thread waited to get the GIL
+        # (and a CPU) back. Reported as p99 per 500ms; nothing is sent without data.
+        period = 0.01
+        window = []
+        flushed = time.perf_counter()
+        while True:
+            began = time.perf_counter()
+            time.sleep(period)
+            now = time.perf_counter()
+            window.append(max(0.0, (now - began - period) * 1000))
+            if now - flushed >= 0.5:
+                send({"type": "lag", "loopLag": percentile(window, 99)})
+                window = []
+                flushed = now
+
+    profile_lock = threading.Lock()
+    main_thread = threading.main_thread().ident
+
+    def cpuprofile(ms):
+        if not profile_lock.acquire(blocking=False):
+            raise ValueError("a CPU profile is already being recorded")
+        try:
+            return sample_cpu(max(1, int(ms or 1000)), main_thread)
+        finally:
+            profile_lock.release()
+
     def snapshot():
         gc.collect()
         entries = summarize_objects(gc.get_objects())
@@ -141,10 +230,21 @@ def _peak_start():
             heap_used = sum(e["shallow"] for e in entries)
         return {"heapUsed": heap_used, "entries": entries, "sites": sites}
 
+    def serve_profile(req):
+        # Off the read thread, so snapshots and GC stay responsive while recording.
+        try:
+            data = cpuprofile(req.get("ms"))
+            send({"type": "reply", "reqId": req.get("reqId"), "ok": True, "data": data})
+        except Exception as e:  # never raise into the host
+            send({"type": "reply", "reqId": req.get("reqId"), "ok": False, "error": str(e)})
+
     def handle(line):
         try:
             req = json.loads(line)
         except ValueError:
+            return
+        if req.get("cmd") == "cpuprofile":
+            threading.Thread(target=serve_profile, args=(req,), name="peak-profile", daemon=True).start()
             return
         try:
             if req.get("cmd") == "snapshot":
@@ -172,6 +272,7 @@ def _peak_start():
                 line, buf = buf.split(b"\n", 1)
                 handle(line.decode("utf-8", "replace"))
 
+    threading.Thread(target=measure_lag, name="peak-lag", daemon=True).start()
     threading.Thread(target=flush, name="peak-flush", daemon=True).start()
     threading.Thread(target=read, name="peak-agent", daemon=True).start()
     return sock

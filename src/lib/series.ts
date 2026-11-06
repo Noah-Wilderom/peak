@@ -68,6 +68,7 @@ export function viewData(proc: Proc, view: View) {
       c.external = x.external
       c.code = x.code
       c.stack = x.stack
+      c.kids = x.kids
     }
     if (x.cpu > c.cpu) {
       c.cpu = x.cpu
@@ -78,6 +79,12 @@ export function viewData(proc: Proc, view: View) {
     c.write = Math.max(c.write, x.write)
     c.alloc = Math.max(c.alloc, x.alloc)
     c.faults = Math.max(c.faults, x.faults)
+    // Optional fields stay absent if never reported: unknown must not become zero.
+    if (x.loopLag !== undefined) c.loopLag = Math.max(c.loopLag ?? 0, x.loopLag)
+    c.threads = x.threads
+    c.files = x.files
+    c.sockets = x.sockets
+    c.pipes = x.pipes
   }
   if (cur) out.push(cur)
   return { data: out, bucketMs, span }

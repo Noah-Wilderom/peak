@@ -88,6 +88,37 @@ describe("buildStats", () => {
   })
 })
 
+describe("buildStats for remote and unreadable data", () => {
+  const target = { targetId: "t", label: "box", kind: "kubernetes" as const, launched: true, clockOffsetMs: -1200, identity: { bootId: "b", pidNs: "n", pid: 7, startTicks: 3, containerId: "cid", podUid: "uid" } }
+  const rows = (p: Parameters<typeof buildStats>[0]) => Object.fromEntries(buildStats(p, system).flatMap((g) => g.rows.map(([k, v]) => [k, v])))
+
+  it("shows identity, clocks and gaps for a remote run", () => {
+    const r = rows(makeProc({ target, gaps: [{ from: 1, to: 2 }] }))
+    expect(r["Where"]).toBe("box (kubernetes)")
+    expect(r["How"]).toBe("Launched by peak")
+    expect(r["PID in its namespace"]).toBe("7")
+    expect(r["Container"]).toBe("cid")
+    expect(r["Pod"]).toBe("uid")
+    expect(r["This machine's clock vs the target's"]).toBe("−1.2s")
+    expect(r["Gaps in data"]).toBe("1")
+    expect(r["Share of the target's host memory"]).toBeDefined()
+    const bare = rows(makeProc({ target: { ...target, launched: false, clockOffsetMs: 5, identity: { bootId: "b", pidNs: "n", pid: 7, startTicks: 3 } } }))
+    expect(bare["How"]).toMatch(/only observed/)
+    expect(bare["Container"]).toBeUndefined()
+    expect(bare["Gaps in data"]).toBe("0")
+    expect(bare["This machine's clock vs the target's"]).toBe("+5ms")
+    expect(rows(makeProc())["Where"]).toBeUndefined()
+  })
+
+  it("marks unreadable metrics instead of printing zeros", () => {
+    const r = rows(makeProc({ unavailable: ["io", "fds"] }))
+    for (const k of ["Total read", "Total written", "Average read rate", "Peak write rate", "Open files", "Sockets", "Pipes"]) expect(r[k]).toBe("Unavailable")
+    const ok = rows(makeProc())
+    expect(ok["Total read"]).toBe("0 B")
+    expect(ok["Open files"]).toBe("1")
+  })
+})
+
 describe("layoutFlame", () => {
   const root = {
     name: "(root)", self: 0, children: [
@@ -201,7 +232,7 @@ describe("memory detail charts", () => {
       ],
     })
     const { container } = render(
-      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 1000, to: 30500 }} setView={() => {}} axis="elapsed" paused>
+      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 1000, to: 30500 }} setView={() => {}} onJump={() => {}} axis="elapsed" paused>
         <GcChart />
         <DistributionChart samples={samples} />
         <HeapTreemap entries={[{ name: "Object", count: 3, shallow: 30, retained: 40, delta: 10 }, { name: "Map", count: 1, shallow: 5, retained: 5, delta: -2 }]} />
@@ -250,7 +281,7 @@ describe("edge cases", () => {
     const zero = sample(1000, 0, { heap: 0, heapTotal: 0, external: 0, code: 0, stack: 0 })
     const proc = makeProc({ samples: [zero], peak: zero })
     render(
-      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 50_000, to: 60_000 }} setView={() => {}} axis="clock" paused>
+      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 50_000, to: 60_000 }} setView={() => {}} onJump={() => {}} axis="clock" paused>
         <MemoryTab totalMemory={1024} />
       </TimelineProvider>,
     )
@@ -295,6 +326,36 @@ describe("edge cases", () => {
 })
 
 describe("timeline charts", () => {
+  it("treats a click as a jump, snapping to an event it was aimed at", async () => {
+    const { fireEvent } = await import("@testing-library/react")
+    const { TimelineProvider } = await import("@/components/charts/timeline")
+    const { AllocChart } = await import("@/components/charts/memory-detail-charts")
+    const samples = Array.from({ length: 60 }, (_, i) => sample(1000 + i * 500, 100 + i))
+    const gc = samples.map((s) => ({ t: s.t + 50, kind: "major" as const, pauseMs: 1, freed: 1 }))
+    const onJump = vi.fn()
+    const { container } = render(
+      <TimelineProvider proc={makeProc({ samples, gc })} view={{ kind: "fixed", from: 1000, to: 30500 }} setView={vi.fn()} onJump={onJump} axis="clock" paused>
+        <AllocChart />
+      </TimelineProvider>,
+    )
+    const frame = () => act(() => new Promise((r) => setTimeout(r, 60)))
+    await frame()
+    const w = container.querySelector(".recharts-wrapper")!
+    fireEvent.mouseMove(w, { clientX: 400, clientY: 120 })
+    await frame()
+    fireEvent.mouseDown(w, { clientX: 400, clientY: 120 })
+    await frame()
+    fireEvent.mouseUp(w, { clientX: 400, clientY: 120 })
+    expect(onJump).toHaveBeenCalledTimes(1)
+    expect(gc.map((g) => g.t)).toContain(onJump.mock.calls[0][0])
+
+    // Across too little data to zoom, the pointer still moved: neither zoom nor click.
+    fireEvent.mouseDown(w, { clientX: 400, clientY: 120 })
+    await frame()
+    fireEvent.mouseUp(w, { clientX: 460, clientY: 120 })
+    expect(onJump).toHaveBeenCalledTimes(1)
+  })
+
   it("renders every tooltip and ignores stray pointer events", async () => {
     const { fireEvent } = await import("@testing-library/react")
     const { TimelineProvider, useTimeline } = await import("@/components/charts/timeline")
@@ -302,8 +363,9 @@ describe("timeline charts", () => {
     const samples = Array.from({ length: 60 }, (_, i) => sample(1000 + i * 500, 100 + i))
     const proc = makeProc({ samples })
     const setView = vi.fn()
+    const onJump = vi.fn()
     const { container } = render(
-      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 1000, to: 30500 }} setView={setView} axis="clock" paused>
+      <TimelineProvider proc={proc} view={{ kind: "fixed", from: 1000, to: 30500 }} setView={setView} onJump={onJump} axis="clock" paused>
         <CompositionChart />
         <AllocChart />
         <FaultsChart />

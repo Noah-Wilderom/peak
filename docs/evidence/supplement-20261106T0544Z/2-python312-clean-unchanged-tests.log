@@ -1,0 +1,20 @@
+started 2026-11-06T05:45:59Z
+=== A. UNCHANGED tests, clean CPython 3.12 (no distro sitecustomize, as actions/setup-python provides)
+dad315ebf2917438294766fcb791bae9119502837f59b7e397b61e480b73ee57  src-tauri/agents/tests/test_python_agent.py
+d15b86a7ab02123db8df13cb98380ea80cd652de5703a7cb4f2d60e4fbebab10  src-tauri/agents/python/sitecustomize.py
+Python 3.12.16
+/usr/local/bin/python 3.12.16 (main, Nov  5 2026, 07:58:20) [GCC 14.2.0]
+preloaded sitecustomize: None
+test_chains_existing_sitecustomize (test_python_agent.PythonAgentTest.test_chains_existing_sitecustomize) ... ok
+test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread (test_python_agent.PythonAgentTest.test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread) ... ok
+test_inert_without_environment_and_survives_missing_hub (test_python_agent.PythonAgentTest.test_inert_without_environment_and_survives_missing_hub) ... ok
+test_percentile (test_python_agent.PythonAgentTest.test_percentile) ... ok
+ok
+test_sites_tree (test_python_agent.PythonAgentTest.test_sites_tree) ... ok
+ok
+test_summaries (test_python_agent.PythonAgentTest.test_summaries) ... ok
+----------------------------------------------------------------------
+Ran 8 tests in 6.204s
+OK
+exit=0
+ended 2026-11-06T05:46:06Z

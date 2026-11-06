@@ -1,6 +1,6 @@
 # Remote process monitoring for Peak
 
-Researched 2026-11-06 against the current source and first-party documentation. This is a design recommendation, not a tested remote prototype. No remote machines, Docker daemons, or Kubernetes clusters were accessed.
+Researched 2026-11-06 against the then-current source and first-party documentation, as a design recommendation. It has since been implemented; see [REMOTE-VALIDATION.md](REMOTE-VALIDATION.md) for what was built and what has actually been tested.
 
 ## Recommendation
 

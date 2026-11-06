@@ -2,25 +2,50 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type AppType from "@/App"
-import type { monitor as MonitorType } from "@/lib/monitor"
+import type { monitor as MonitorType, Proc } from "@/lib/monitor"
+import type { View } from "@/lib/series"
+
+// The gliding time domain re-renders on every animation frame. Under coverage a
+// render can outlast the frame interval, and act() then never drains. Its glide
+// is covered in hooks.test.tsx; these walkthroughs don't depend on it.
+vi.mock("@/hooks/use-smooth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/hooks/use-smooth")>()
+  return { ...actual, useTimeDomain: (p: Proc, v: View) => actual.useTimeDomain(p, v, true) }
+})
 
 // Every test gets a fresh mock store.
 let App: typeof AppType
 let monitor: typeof MonitorType
 beforeEach(async () => {
   vi.resetModules()
+  // Same for number and axis tweens, which never settle while samples keep arriving.
+  // (After the reset: this must reach the same module instance the app imports.)
+  const { MotionGlobalConfig } = await import("motion/react")
+  MotionGlobalConfig.skipAnimations = true
   App = (await import("@/App")).default
   monitor = (await import("@/lib/monitor")).monitor
 })
 
+/**
+ * Let time pass with React scheduling normally. An async act() here would keep
+ * flushing for as long as chart animations keep queueing work, which under
+ * coverage can be forever.
+ */
+async function sleep(ms: number) {
+  const env = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  env.IS_REACT_ACT_ENVIRONMENT = false
+  await new Promise((r) => setTimeout(r, ms))
+  env.IS_REACT_ACT_ENVIRONMENT = true
+}
+
 /** Hover every chart so tooltips (and their formatters) render. Recharts
  * handles pointer events on the next animation frame. */
 async function hoverCharts(container: HTMLElement) {
-  await act(() => new Promise((r) => setTimeout(r, 40)))
+  await sleep(40)
   for (const svg of container.querySelectorAll(".recharts-wrapper")) {
     fireEvent.mouseMove(svg, { clientX: 400, clientY: 120 })
   }
-  await act(() => new Promise((r) => setTimeout(r, 60)))
+  await sleep(60)
 }
 
 /** Select a process in the sidebar and wait for its view to replace the old one. */
@@ -32,8 +57,6 @@ async function openProc(user: ReturnType<typeof userEvent.setup>, sidebar: HTMLE
     expect(h1s[0].textContent).toMatch(name)
   })
 }
-
-const sleep = (ms: number) => act(() => new Promise((r) => setTimeout(r, ms)))
 
 describe("App", () => {
   it("walks through every view of a process", async () => {
@@ -55,7 +78,7 @@ describe("App", () => {
     await user.click(screen.getByRole("radio", { name: "1h" }))
 
     // Drag across the memory chart to zoom, then reset.
-    const frame = () => act(() => new Promise((r) => setTimeout(r, 40)))
+    const frame = () => sleep(40)
     const chart = () => container.querySelectorAll(".recharts-wrapper")[1] ?? container.querySelector(".recharts-wrapper")!
     const main = [...container.querySelectorAll("section")].find((s) => s.textContent?.startsWith("Memory."))!
     const memChart = () => main.querySelector(".recharts-wrapper")!
@@ -126,13 +149,48 @@ describe("App", () => {
     await user.click(await screen.findByText("Follow output"))
 
     // Processes tab.
-    await user.click(screen.getByRole("tab", { name: /Processes/ }))
+    await user.click(screen.getByRole("tab", { name: /Resources/ }))
     expect(screen.getByText("Command")).toBeInTheDocument()
+    expect(await screen.findByText("Runtime lag.")).toBeInTheDocument()
+    await hoverCharts(container)
 
     // Freeze / resume.
     await user.click(screen.getByRole("button", { name: /Freeze/ }))
     expect(await screen.findByText(/View frozen/)).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: /Resume/ }))
+  })
+
+  it("navigates from timeline events to the run's output", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    const sidebar = container.querySelector("aside")!
+    await openProc(user, sidebar, /ingest\.py/)
+
+    // Each kind of event is on the strip, labelled, and opens the output at its time.
+    const strip = await screen.findByRole("group", { name: "Timeline events" })
+    expect(within(strip).getByRole("button", { name: /^Alert at T\+.*Memory reached/ })).toBeInTheDocument()
+    expect(within(strip).getAllByRole("button", { name: /^Snapshot at/ }).length).toBeGreaterThan(0)
+    expect(within(strip).getAllByRole("button", { name: /^Major GC at/ }).length).toBeGreaterThan(0)
+    expect(within(strip).getAllByRole("button", { name: /^stderr at/ }).length).toBeGreaterThan(0)
+
+    await user.click(within(strip).getAllByRole("button", { name: /^stderr at/ })[0])
+    expect(screen.getByRole("tab", { name: /Output/ })).toHaveAttribute("data-state", "active")
+    expect(await screen.findByText(/^Output at T\+/)).toBeInTheDocument()
+    expect(container.querySelector("[data-log].bg-signal\\/10")!.textContent).toMatch(/Warning|Killed|\d/)
+    await user.click(within(container.querySelector("main")!).getByRole("button", { name: "Clear" }))
+    expect(screen.queryByText(/^Output at T\+/)).not.toBeInTheDocument()
+
+    // A plain click on the chart does the same; a drag still zooms instead.
+    await user.click(screen.getByRole("tab", { name: "Overview" }))
+    const memory = () => [...container.querySelectorAll("section")].find((s) => s.textContent?.startsWith("Memory."))!.querySelector(".recharts-wrapper")!
+    await sleep(60)
+    fireEvent.mouseMove(memory(), { clientX: 400, clientY: 120 })
+    await sleep(60)
+    fireEvent.mouseDown(memory(), { clientX: 400, clientY: 120 })
+    await sleep(60)
+    fireEvent.mouseUp(memory(), { clientX: 400, clientY: 120 })
+    expect(await screen.findByText(/^(Output at T\+|No output within 5s)/)).toBeInTheDocument()
+    expect(screen.getByRole("tab", { name: /Output/ })).toHaveAttribute("data-state", "active")
   })
 
   it("handles ended processes, removal and filtering", async () => {
@@ -144,7 +202,7 @@ describe("App", () => {
     expect(screen.getAllByText(/Ended/).length).toBeGreaterThan(0)
     await user.click(screen.getByRole("tab", { name: "Memory" }))
     await user.click(screen.getByRole("tab", { name: "Stats" }))
-    await user.click(screen.getByRole("tab", { name: /Processes/ }))
+    await user.click(screen.getByRole("tab", { name: /Resources/ }))
     expect(screen.getByText(/torn down/)).toBeInTheDocument()
 
     // Rust process: no collector.
@@ -219,7 +277,7 @@ describe("App", () => {
     await user.click(screen.getByRole("tab", { name: "Memory" }))
     expect(await screen.findByText("No collector data for this runtime.")).toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: /Profiler/ }))
-    expect(await screen.findByText("Heap profiling isn't available.")).toBeInTheDocument()
+    expect(await screen.findByText("Heap and CPU profiling aren't available.")).toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: "Stats" }))
     expect(await screen.findByText("Not observed")).toBeInTheDocument()
     // A process that fails with an exit code (no signal) gets a "failed" label and toast.
@@ -229,9 +287,172 @@ describe("App", () => {
     expect(container).toBeTruthy()
   })
 
+  it("browses history, reopens a stored run and compares two", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    const sidebar = container.querySelector("aside")!
+    await screen.findByText("bun run dev", { selector: "h1" })
+    const sessionBefore = monitor.getSnapshot().procs.length
+
+    await user.click(within(sidebar).getByRole("button", { name: "History" }))
+    expect(await screen.findByRole("heading", { name: "History." })).toBeInTheDocument()
+    const group = (await screen.findByRole("heading", { name: "npm test" })).closest("section")!
+    const boxes = within(group).getAllByRole("checkbox")
+    await user.click(boxes[0])
+    await user.click(boxes[1])
+    await user.click(screen.getByRole("button", { name: "Compare" }))
+    expect(await screen.findByRole("heading", { name: "Differences." })).toBeInTheDocument()
+    expect(monitor.getSnapshot().procs).toHaveLength(sessionBefore)
+
+    await user.click(within(container.querySelector("main")!).getByRole("button", { name: "History" }))
+    await user.click(await screen.findByRole("button", { name: "Close" }))
+    expect(await screen.findByText("bun run dev", { selector: "h1" })).toBeInTheDocument()
+
+    // Opening a stored run: it's clearly marked, in its own section, and restartable.
+    await user.click(within(sidebar).getByRole("button", { name: "History" }))
+    const again = (await screen.findByRole("heading", { name: "npm test" })).closest("section")!
+    await user.click(within(again).getAllByRole("button", { name: /^Open/ })[0])
+    expect(await screen.findByText("npm test", { selector: "h1" })).toBeInTheDocument()
+    expect(screen.getByText(/^From history ·/)).toBeInTheDocument()
+    expect(within(sidebar).getByText("From history")).toBeInTheDocument()
+    expect(monitor.getSnapshot().procs).toHaveLength(sessionBefore + 1)
+    await user.click(screen.getByRole("tab", { name: "Report" }))
+    expect(await screen.findByText("Verdict")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Run again" }))
+    await waitFor(() => expect(screen.queryByText(/^From history ·/)).not.toBeInTheDocument())
+  })
+
+  it("connects a simulated target and routes capture, attach and controls to it", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    const sidebar = container.querySelector("aside")!
+    await screen.findByText("bun run dev", { selector: "h1" })
+    await user.click(within(sidebar).getByRole("button", { name: "Targets" }))
+    expect(await screen.findByRole("heading", { name: "Targets." })).toBeInTheDocument()
+    const card = screen.getByRole("region", { name: /staging-1/ })
+    await user.click(within(card).getByRole("button", { name: "Connect" }))
+    expect(await within(card).findByText("Connected")).toBeInTheDocument()
+    expect(within(card).getByText("Host memory")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Close" }))
+
+    // Capture: choose the target; the attach list and run go there.
+    await user.click(within(sidebar).getByRole("button", { name: "Capture" }))
+    await user.selectOptions(await screen.findByRole("combobox", { name: "Where" }), "staging")
+    expect(screen.getByText(/stops if the connection is lost/)).toBeInTheDocument()
+    expect(screen.queryByText("From your terminal.")).not.toBeInTheDocument()
+    await user.click(await screen.findByText("node server.js --port 8080"))
+    expect(await screen.findByText("node server.js --port 8080", { selector: "h1" })).toBeInTheDocument()
+    expect(screen.getAllByText(/staging-1/).length).toBeGreaterThan(0)
+    const attached = monitor.getSnapshot().procs[0]
+    expect(attached.target?.launched).toBe(false)
+    expect(screen.queryByRole("button", { name: "Stop" }), "an existing service has no plain Stop").not.toBeInTheDocument()
+    await user.click(screen.getByRole("tab", { name: "Stats" }))
+    expect(await screen.findByText("Target.")).toBeInTheDocument()
+
+    // Losing the link: a banner, and no claim the workload ended.
+    await act(() => monitor.disconnectTarget("staging"))
+    expect(await screen.findByText(/It may still be running/)).toBeInTheDocument()
+    expect(within(sidebar).getByLabelText("No connection")).toBeInTheDocument()
+    expect(monitor.getSnapshot().procs[0].status).toBe("running")
+    await act(async () => {
+      await monitor.connectTarget("staging")
+      await new Promise((r) => setTimeout(r, 450))
+    })
+    await waitFor(() => expect(screen.queryByText(/It may still be running/)).not.toBeInTheDocument())
+    await user.click(screen.getByRole("tab", { name: "Overview" }))
+    expect((monitor.getSnapshot().procs[0].gaps ?? []).length).toBe(1)
+
+    // Launch on the target, with and without a shell.
+    await user.click(within(sidebar).getByRole("button", { name: "Capture" }))
+    await user.selectOptions(await screen.findByRole("combobox", { name: "Where" }), "staging")
+    await user.type(screen.getByPlaceholderText("bun run build"), "node job.js --fast")
+    await user.click(screen.getByRole("checkbox"))
+    await user.click(screen.getByRole("button", { name: /Run and capture/ }))
+    expect(await screen.findByText("node job.js --fast", { selector: "h1" })).toBeInTheDocument()
+    expect(monitor.getSnapshot().procs[0].target?.spec?.argv).toEqual(["node", "job.js", "--fast"])
+    await user.click(screen.getByRole("button", { name: "Stop" }))
+    expect(await screen.findByRole("button", { name: "Run again" })).toBeInTheDocument()
+    await user.click(within(sidebar).getByRole("button", { name: "Capture" }))
+    await user.selectOptions(await screen.findByRole("combobox", { name: "Where" }), "staging")
+    await user.type(screen.getByPlaceholderText("bun run build"), "python x.py")
+    await user.click(screen.getByRole("button", { name: /Run and capture/ }))
+    expect(await screen.findByText("python x.py", { selector: "h1" })).toBeInTheDocument()
+    expect(monitor.getSnapshot().procs[0].target?.spec?.command).toBe("python x.py")
+  })
+
+  it("flags unreadable disk figures on the overview", async () => {
+    const { container } = render(<App />)
+    const user = userEvent.setup({ delay: null })
+    await screen.findByText("bun run dev", { selector: "h1" })
+    const run = monitor.getSnapshot().procs[0]
+    await act(async () => {
+      Object.assign(run, { unavailable: ["io"] })
+      monitor.select(monitor.getSnapshot().procs[1].id)
+      monitor.select(run.id)
+    })
+    await waitFor(() => expect(screen.getByText("Unreadable")).toBeInTheDocument())
+    expect(screen.getByText(/flat lines mean unknown/)).toBeInTheDocument()
+    expect(container).toBeTruthy()
+    void user
+  })
+
+  it("opens the machine view from the sidebar strip", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    await screen.findByText("bun run dev", { selector: "h1" })
+    await user.click(within(container.querySelector("aside")!).getByRole("button", { name: /This machine/ }))
+    expect(await screen.findByRole("heading", { name: "This machine." })).toBeInTheDocument()
+    expect(screen.getByText(/of the machine\./)).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(await screen.findByText("bun run dev", { selector: "h1" })).toBeInTheDocument()
+    act(() => monitor.clearEnded())
+  })
+
+  it("stays on Settings when pruning removes the selected run", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    const sidebar = container.querySelector("aside")!
+    await openProc(user, sidebar, /ingest\.py/)
+    await user.click(within(sidebar).getByRole("button", { name: "Settings" }))
+    await user.click(await screen.findByRole("button", { name: "Delete all stopped runs" }))
+    await user.click(screen.getByRole("button", { name: "Delete all" }))
+    expect(await screen.findByText(/\(0 stopped\)$/)).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Settings." })).toBeInTheDocument()
+    expect(monitor.getSnapshot().selectedId).not.toBeNull()
+  })
+
+  it("opens settings from the sidebar and shows the mock's storage", async () => {
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<App />)
+    await screen.findByText("bun run dev", { selector: "h1" })
+    await user.click(within(container.querySelector("aside")!).getByRole("button", { name: "Settings" }))
+    expect(await screen.findByRole("heading", { name: "Storage." })).toBeInTheDocument()
+    expect(screen.getByText(/in memory/)).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(await screen.findByText("bun run dev", { selector: "h1" })).toBeInTheDocument()
+  })
+
+  it("toasts and notifies natively for an alert when enabled", async () => {
+    const native = vi.fn().mockResolvedValue(true)
+    vi.resetModules()
+    vi.doMock("@/lib/notify", () => ({ nativeNotify: native, notificationStatus: () => "" }))
+    const { notify } = await import("@/App")
+    const { Toaster } = await import("@/components/ui/sonner")
+    render(<Toaster />)
+    const proc = monitor.getSnapshot().procs[0]
+    const alert = { t: 1, kind: "memory" as const, message: "Memory reached 2 GiB", value: 1, threshold: 1 }
+    act(() => notify({ type: "alert", proc, alert, notify: false }))
+    expect(await screen.findByText("Memory reached 2 GiB")).toBeInTheDocument()
+    expect(native).not.toHaveBeenCalled()
+    act(() => notify({ type: "alert", proc, alert, notify: true }))
+    expect(native).toHaveBeenCalledWith(`Peak alert: ${proc.command}`, "Memory reached 2 GiB")
+    vi.doUnmock("@/lib/notify")
+  })
+
   it("switches themes", async () => {
     const user = userEvent.setup({ delay: null })
     render(<App />)
+    await user.click(await screen.findByRole("button", { name: "Settings" }))
     await user.click(await screen.findByRole("radio", { name: "Dark theme" }))
     expect(document.documentElement).toHaveClass("dark")
     await user.click(screen.getByRole("radio", { name: "Light theme" }))

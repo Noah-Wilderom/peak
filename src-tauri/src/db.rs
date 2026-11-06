@@ -7,6 +7,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::model::*;
 use crate::monitor::RunWrite;
+use crate::remote::TargetSpec;
 
 const SCHEMA: &str = "
 CREATE TABLE IF NOT EXISTS runs (
@@ -177,6 +178,10 @@ impl Db {
         self.add_artifact(run_id, "cpu", p.t, json(p))
     }
 
+    pub fn add_alert(&self, run_id: &str, a: &Alert) -> Result<()> {
+        self.add_artifact(run_id, "alert", a.t, json(a))
+    }
+
     /// Runs, newest first, optionally filtered by a substring of the command.
     pub fn list_runs(&self, query: Option<&str>, limit: u32) -> Result<Vec<RunSummary>> {
         let pattern = format!("%{}%", query.unwrap_or("").replace('%', "\\%").replace('_', "\\_"));
@@ -254,6 +259,11 @@ impl Db {
             id,
             100,
         )?;
+        p.alerts = self.recent_json(
+            "SELECT data FROM artifacts WHERE run_id = ?1 AND kind = 'alert' ORDER BY t DESC LIMIT ?2",
+            id,
+            1000,
+        )?;
         let mut stmt = self
             .conn
             .prepare("SELECT id, t, stream, text FROM logs WHERE run_id = ?1 ORDER BY id DESC LIMIT ?2")
@@ -319,6 +329,25 @@ impl Db {
                  WHERE status = 'running'",
                 params![now as i64],
             )
+            .map_err(err)
+    }
+
+    /// Targets the user has set up. Connection state isn't stored: nothing reconnects by itself.
+    pub fn targets(&self) -> Vec<TargetSpec> {
+        self.conn
+            .query_row("SELECT value FROM settings WHERE key = 'targets'", [], |r| r.get::<_, String>(0))
+            .ok()
+            .and_then(|s| serde_json::from_str(&s).ok())
+            .unwrap_or_default()
+    }
+
+    pub fn set_targets(&self, targets: &[TargetSpec]) -> Result<()> {
+        self.conn
+            .execute(
+                "INSERT INTO settings (key, value) VALUES ('targets', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                params![json(&targets)],
+            )
+            .map(|_| ())
             .map_err(err)
     }
 
@@ -393,6 +422,11 @@ mod tests {
             child_names: Default::default(),
             ports: vec![],
             cpu_profiles: vec![],
+            alerts: vec![],
+            historical: false,
+            unavailable: vec![],
+            target: None,
+            gaps: vec![],
         }
     }
 
@@ -447,7 +481,8 @@ mod tests {
             &HeapSnapshot { id: "s1".into(), t: 5, heap_used: 1.0, entries: vec![], sites: root.clone() },
         )
         .unwrap();
-        db.add_cpu_profile("a", &CpuProfile { id: "c1".into(), t: 6, duration_ms: 100.0, root }).unwrap();
+        db.add_cpu_profile("a", &CpuProfile { id: "c1".into(), t: 6, duration_ms: 100.0, sampling: "v8".into(), root })
+            .unwrap();
         let p = db.load_run("a").unwrap().unwrap();
         assert_eq!(p.snapshots[0].id, "s1");
         assert_eq!(p.cpu_profiles[0].id, "c1");

@@ -19,3 +19,21 @@ tasks:
     desc: Build the local Peak desktop app and CLI
     cmds:
       - cargo build --manifest-path src-tauri/Cargo.toml
+
+  collector:build:
+    desc: Build the static headless collector where the debug app looks for it
+    dir: src-tauri
+    cmds:
+      - rustup target add x86_64-unknown-linux-musl
+      - cargo build -p peak-collector --release --target x86_64-unknown-linux-musl
+      - mkdir -p target/debug/collectors/x86_64
+      - cp target/x86_64-unknown-linux-musl/release/peak-collector target/debug/collectors/x86_64/
+
+  test:live:
+    desc: Run live remote validation against disposable sshd, containers and k3s
+    dir: src-tauri
+    env:
+      PEAK_COLLECTORS: target/debug/collectors
+    cmds:
+      - task: collector:build
+      - cargo test --test live_ssh --test live_docker --test live_kube -- --ignored --test-threads=1 --nocapture

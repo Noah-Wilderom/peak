@@ -1,5 +1,6 @@
 """Integration tests for the Python agent (sitecustomize.py)."""
 
+import importlib.util
 import json
 import os
 import socket
@@ -11,8 +12,18 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 AGENT_DIR = os.path.join(HERE, "..", "python")
-sys.path.insert(0, AGENT_DIR)
-import sitecustomize as agent  # noqa: E402
+
+
+def load_agent():
+    """Load the agent by path. `import sitecustomize` isn't reliable: Python imports that
+    name at startup, so on Ubuntu's Python it returns the distribution's own hook."""
+    spec = importlib.util.spec_from_file_location("peak_sitecustomize", os.path.join(AGENT_DIR, "sitecustomize.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+agent = load_agent()
 
 APP = """
 import time
@@ -64,9 +75,9 @@ class FakeHub:
                     raise AssertionError("timed out; got %r" % [m.get("type") for m in self.messages])
                 self.cv.wait(left)
 
-    def request(self, cmd, req_id):
+    def request(self, cmd, req_id, **params):
         self.wait_for(lambda m: m["type"] == "hello")
-        self.conn.sendall((json.dumps({"cmd": cmd, "reqId": req_id}) + "\n").encode())
+        self.conn.sendall((json.dumps({"cmd": cmd, "reqId": req_id, **params}) + "\n").encode())
         return self.wait_for(lambda m: m["type"] == "reply" and m["reqId"] == req_id, timeout=60)
 
 
@@ -107,6 +118,100 @@ class PythonAgentTest(unittest.TestCase):
         finally:
             child.kill()
             child.wait()
+
+    def test_reports_lag_and_records_cpu_profiles_alongside_heap_data(self):
+        # Holds the GIL through long pure-Python stretches, in a named function.
+        app = """
+import sys, time
+sys.setswitchinterval(0.05)
+def burn_cycles():
+    end = time.perf_counter() + 0.2
+    x = 0
+    while time.perf_counter() < end:
+        x += 1
+    return x
+end = time.time() + 60
+while time.time() < end:
+    burn_cycles()
+    time.sleep(0.02)
+"""
+        hub = FakeHub()
+        child = run({"PEAK_AGENT_ADDR": hub.addr, "PEAK_AGENT_TOKEN": "tok"}, app)
+        try:
+            lag = hub.wait_for(lambda m: m["type"] == "lag" and m["loopLag"] > 5)
+            self.assertLess(lag["loopLag"], 5000)
+
+            reply = hub.request("cpuprofile", 1, ms=1000)
+            self.assertTrue(reply["ok"], reply.get("error"))
+            data = reply["data"]
+            self.assertEqual(data["sampling"], "stack")
+            self.assertGreaterEqual(data["durationMs"], 950)
+            self.assertLess(data["durationMs"], 5000)
+
+            def find(node, name):
+                if node["name"] == name:
+                    return node
+                for c in node["children"]:
+                    hit = find(c, name)
+                    if hit:
+                        return hit
+                return None
+
+            def total(n):
+                return n["self"] + sum(total(c) for c in n["children"])
+
+            root = data["root"]
+            self.assertEqual(root["name"], "(root)")
+            burn = find(root, "burn_cycles")
+            self.assertIsNotNone(burn, "the hot function appears in the call tree")
+            self.assertGreater(total(burn), 300)
+            self.assertRegex(burn["file"], r"<string>:\d+$")
+            self.assertIsNone(find(root, "sample_cpu"), "the sampler does not profile itself")
+            self.assertLess(abs(total(root) - data["durationMs"]), 0.2 * data["durationMs"])
+
+            # A snapshot answers while a profile records, and overlaps are refused.
+            hub.conn.sendall((json.dumps({"cmd": "cpuprofile", "reqId": 2, "ms": 1500}) + "\n").encode())
+            time.sleep(0.2)
+            snap = hub.request("snapshot", 3)
+            self.assertTrue(snap["ok"], snap.get("error"))
+            overlap = hub.request("cpuprofile", 4, ms=100)
+            self.assertFalse(overlap["ok"])
+            self.assertIn("already being recorded", overlap["error"])
+            first = hub.wait_for(lambda m: m["type"] == "reply" and m["reqId"] == 2)
+            self.assertTrue(first["ok"])
+        finally:
+            child.kill()
+            child.wait()
+
+    def test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread(self):
+        clock = iter([0.0, 0.1, 0.2, 0.3])
+
+        class Code:
+            co_name = "work"
+            co_filename = "/app/job.py"
+            co_firstlineno = 7
+
+        class Frame:
+            f_code = Code
+            f_lineno = 12
+            f_back = None
+
+        seen = iter([{1: Frame}, {}, {1: Frame}])
+        out = agent.sample_cpu(
+            250, 1, current_frames=lambda: next(seen), clock=lambda: next(clock), sleep=lambda _: None
+        )
+        self.assertAlmostEqual(out["durationMs"], 300)
+        self.assertEqual(out["sampling"], "stack", "time here includes blocking, and says so")
+        work = out["root"]["children"][0]
+        self.assertEqual((work["name"], work["file"]), ("work", "job.py:7"))
+        # Two of three intervals saw the thread; the gap is not attributed to it.
+        self.assertAlmostEqual(work["self"], 200)
+
+    def test_percentile(self):
+        self.assertIsNone(agent.percentile([], 99))
+        self.assertEqual(agent.percentile([3], 99), 3)
+        self.assertEqual(agent.percentile(list(range(100)), 99), 99)
+        self.assertEqual(agent.percentile(list(range(100)), 50), 50)
 
     def test_inert_without_environment_and_survives_missing_hub(self):
         out = run({"PEAK_AGENT_ADDR": ""}, "print('ok')").communicate(timeout=20)[0]

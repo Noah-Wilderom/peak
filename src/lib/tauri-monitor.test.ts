@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { TauriMonitor, applyDelta, normalizeProc, type ProcDelta } from "@/lib/tauri-monitor"
-import type { HeapSnapshot, MonitorEvent, Proc } from "@/lib/types"
+import { DEFAULT_SETTINGS, type HeapSnapshot, type MonitorEvent, type Proc } from "@/lib/types"
 import { makeProc, sample } from "@/test/fixtures"
 
 const system = { totalMemory: 8, cpus: 4, hostname: "h", os: "linux" }
@@ -16,7 +16,7 @@ function delta(p: Proc, over: Partial<ProcDelta> = {}): ProcDelta {
 function setup(procs: Proc[] = [makeProc()], fail?: string) {
   const handlers = new Map<string, (e: { payload: unknown }) => void>()
   const calls: [string, Record<string, unknown> | undefined][] = []
-  const responses: Record<string, unknown> = { get_state: { procs, system } }
+  const responses: Record<string, unknown> = { get_state: { procs, system }, get_settings: DEFAULT_SETTINGS }
   const call = vi.fn(async (cmd: string, args?: Record<string, unknown>) => {
     calls.push([cmd, args])
     if (fail && cmd === fail) throw new Error("boom")
@@ -220,6 +220,184 @@ describe("TauriMonitor", () => {
     expect(m.getSnapshot().selectedId).toBeNull()
   })
 
+  it("evaluates saved thresholds on incoming samples and records what fires", async () => {
+    const { m, calls, responses, emit, events } = setup([makeProc({ samples: [sample(1000, 1)] })])
+    responses.get_settings = { ...DEFAULT_SETTINGS, alertMemoryMib: 1 }
+    m.subscribe(vi.fn())
+    await flush()
+    const p = m.getSnapshot().procs[0]
+    const over = 2 * 1024 * 1024
+    emit("peak://tick", { procs: [delta(p, { samples: [sample(2000, over)] })], system: null })
+    expect(events).toEqual([expect.objectContaining({ type: "alert", notify: true })])
+    expect(m.getSnapshot().procs[0].alerts).toHaveLength(1)
+    const recorded = calls.find(([c]) => c === "add_alert")!
+    expect(recorded[1]).toMatchObject({ id: "p1", alert: { kind: "memory", value: over } })
+
+    // Still over: no duplicate. New settings apply to the next sample.
+    emit("peak://tick", { procs: [delta(p, { samples: [sample(3000, over)] })], system: null })
+    expect(events).toHaveLength(1)
+    responses.set_settings = { ...DEFAULT_SETTINGS, alertMemoryMib: 0.5, notifications: false }
+    await m.setSettings(responses.set_settings as never)
+    emit("peak://tick", { procs: [delta(p, { samples: [sample(4000, over)] })], system: null })
+    expect(events).toHaveLength(2)
+    expect(events[1]).toMatchObject({ notify: false })
+  })
+
+  it("adds recorded CPU profiles to the run", async () => {
+    const { m, calls, responses } = setup([makeProc({ id: "a" }), makeProc({ id: "b", cpuProfiles: [] })])
+    m.subscribe(vi.fn())
+    await flush()
+    const profile = { id: "c", t: 1, durationMs: 5, sampling: "v8", root: { name: "r", self: 0, children: [] } }
+    responses.cpu_profile = profile
+    expect(await m.cpuProfile("a", 5000)).toBe(profile)
+    expect(calls.at(-1)).toEqual(["cpu_profile", { id: "a", ms: 5000 }])
+    expect(m.getSnapshot().procs[0].cpuProfiles).toEqual([profile])
+    await m.cpuProfile("a", 5000)
+    expect(m.getSnapshot().procs[0].cpuProfiles).toHaveLength(2)
+    expect(m.getSnapshot().procs[1].cpuProfiles).toEqual([])
+  })
+
+  it("routes targets and discovery to the backend, and tracks connection state", async () => {
+    const { m, calls, responses, emit, events } = setup()
+    m.subscribe(vi.fn())
+    await flush()
+    expect(m.getSnapshot().targets).toEqual([])
+    const state = (id: string, s = "disconnected") => ({ spec: { id }, state: s })
+    responses.add_target = state("t")
+    await m.addTarget({ id: "t" } as never)
+    await m.addTarget({ id: "t" } as never)
+    expect(m.getSnapshot().targets).toHaveLength(1)
+    emit("peak://tick", { procs: [], system: null, targets: [state("t", "connected")] })
+    expect(m.getSnapshot().targets[0].state).toBe("connected")
+    await m.connectTarget("t")
+    expect(calls.at(-1)).toEqual(["connect_target", { id: "t" }])
+    await m.disconnectTarget("t")
+    expect(calls.at(-1)).toEqual(["disconnect_target", { id: "t" }])
+    responses.list_target_processes = [{ pid: 1 }]
+    expect(await m.listTargetProcesses("t")).toEqual([{ pid: 1 }])
+
+    const run = makeProc({ id: "t~1", target: { targetId: "t" } as never })
+    responses.attach_target = run
+    await m.attachTarget("t", 1)
+    expect(calls.at(-1)).toEqual(["attach_target", { id: "t", pid: 1 }])
+    expect(m.getSnapshot().procs[0].id).toBe("t~1")
+    expect(events.at(-1)).toMatchObject({ type: "captured" })
+    responses.launch_target = makeProc({ id: "t~2" })
+    const spec = { command: "x", cwd: "/" }
+    await m.launchTarget("t", spec)
+    expect(calls.at(-1)).toEqual(["launch_target", { id: "t", spec }])
+    await m.detach("t~1")
+    expect(calls.at(-1)).toEqual(["detach", { id: "t~1" }])
+    await m.signal("t~1", "TERM")
+    expect(calls.at(-1)).toEqual(["signal_run", { id: "t~1", signal: "TERM" }])
+    await m.removeTarget("t")
+    expect(m.getSnapshot().targets).toEqual([])
+
+    for (const [name, args, cmd, want] of [
+      ["dockerContexts", [], "docker_contexts", undefined],
+      ["dockerContainers", ["c"], "docker_containers", { context: "c" }],
+      ["dockerTotals", ["c", "i"], "docker_totals", { context: "c", id: "i" }],
+      ["dockerTop", ["c", "i"], "docker_top", { context: "c", id: "i" }],
+      ["dockerLogs", ["c", "i", 5], "docker_logs", { context: "c", id: "i", tail: 5 }],
+      ["kubeContexts", [], "kube_contexts", undefined],
+      ["kubeNamespaces", ["c"], "kube_namespaces", { context: "c" }],
+      ["kubePods", ["c", "n"], "kube_pods", { context: "c", namespace: "n" }],
+      ["kubeLogs", ["c", "n", "p", "a", 5], "kube_logs", { context: "c", namespace: "n", pod: "p", container: "a", tail: 5 }],
+      ["kubeMetrics", ["c", "n", "p"], "kube_metrics", { context: "c", namespace: "n", pod: "p" }],
+      ["kubeAccess", ["c", "n"], "kube_access", { context: "c", namespace: "n" }],
+    ] as const) {
+      await (m as unknown as Record<string, (...a: unknown[]) => Promise<unknown>>)[name](...args)
+      expect(calls.at(-1)).toEqual([cmd, want])
+    }
+  })
+
+  it("loads targets from the full state", async () => {
+    const { m, responses } = setup()
+    ;(responses.get_state as { targets?: unknown[] }).targets = [{ spec: { id: "t" }, state: "connected" }]
+    m.subscribe(vi.fn())
+    await flush()
+    expect(m.getSnapshot().targets).toHaveLength(1)
+  })
+
+  it("carries unreadable-metric markers on deltas", () => {
+    const p = makeProc()
+    expect(applyDelta(p, delta(p, { unavailable: ["io"] })).unavailable).toEqual(["io"])
+  })
+
+  it("takes gaps and clock offsets from the backend, which is the only one who knows", () => {
+    const target = { targetId: "t", label: "l", kind: "ssh" as const, launched: false, clockOffsetMs: 1, identity: { bootId: "b", pidNs: "n", pid: 1, startTicks: 1 } }
+    const p = makeProc({ target, gaps: [{ from: 1, to: 2 }] })
+    const next = applyDelta(p, delta(p, { gaps: [{ from: 1, to: 2 }, { from: 5, to: 9 }], clockOffsetMs: 250 }))
+    expect(next.gaps).toHaveLength(2)
+    expect(next.target!.clockOffsetMs).toBe(250)
+    const quiet = applyDelta(p, delta(p))
+    expect(quiet.gaps, "an update without them doesn't forget them").toEqual(p.gaps)
+    expect(quiet.target!.clockOffsetMs).toBe(1)
+    const local = applyDelta(makeProc(), delta(makeProc(), { clockOffsetMs: 5 }))
+    expect(local.target).toBeUndefined()
+  })
+
+  it("keeps monitoring when thresholds can't be read", async () => {
+    const { m } = setup([makeProc()], "get_settings")
+    m.subscribe(vi.fn())
+    await flush()
+    expect(m.getSnapshot().ready).toBe(true)
+    expect(m.getSnapshot().error).toBeUndefined()
+    expect(m.getSnapshot().procs).toHaveLength(1)
+  })
+
+  it("reads and maintains stored history through the backend", async () => {
+    const running = makeProc({ id: "live" })
+    const ended = makeProc({ id: "old", status: "exited" })
+    const { m, calls, responses, events } = setup([running, ended])
+    m.subscribe(vi.fn())
+    await flush()
+    const stored = makeProc({ id: "stored", status: "exited", historical: true, samples: [] })
+    Object.assign(responses, {
+      list_runs: [{ id: "stored" }],
+      open_run: stored,
+      load_run: makeProc({ id: "cmp", samples: [] }),
+      delete_run: true,
+      prune_runs: 2,
+      storage_info: { path: "p", bytes: 1, runs: 1, stoppedRuns: 1, samples: 1 },
+      get_settings: { maxRuns: 7 },
+      set_settings: { maxRuns: 8 },
+    })
+
+    expect(await m.listRuns("vite")).toEqual([{ id: "stored" }])
+    expect(calls.at(-1)).toEqual(["list_runs", { query: "vite" }])
+    await m.listRuns()
+    expect(calls.at(-1)).toEqual(["list_runs", { query: null }])
+
+    // Comparing never touches the session; opening does, and is not announced as a new capture.
+    const loaded = await m.loadRun("cmp")
+    expect(loaded.samples).toHaveLength(1)
+    expect(m.getSnapshot().procs.map((p) => p.id)).toEqual(["live", "old"])
+    await m.openRun("stored")
+    expect(m.getSnapshot().procs[0]).toMatchObject({ id: "stored", historical: true })
+    expect(m.getSnapshot().selectedId).toBe("stored")
+    expect(events).toEqual([])
+
+    expect(await m.deleteRun("stored")).toBe(true)
+    expect(m.getSnapshot().procs.map((p) => p.id)).toEqual(["live", "old"])
+    expect(m.getSnapshot().selectedId).toBe("live")
+
+    expect(await m.pruneRuns(30)).toBe(2)
+    expect(calls.at(-1)).toEqual(["prune_runs", { olderThanDays: 30 }])
+    expect(m.getSnapshot().procs.map((p) => p.id), "age pruning leaves the session alone").toEqual(["live", "old"])
+    await m.pruneRuns()
+    expect(calls.at(-1)).toEqual(["prune_runs", { olderThanDays: null }])
+    expect(m.getSnapshot().procs.map((p) => p.id), "active work survives").toEqual(["live"])
+
+    expect((await m.storageInfo()).bytes).toBe(1)
+    await m.vacuum()
+    expect(calls.at(-1)).toEqual(["vacuum", undefined])
+    expect(await m.getSettings()).toEqual({ maxRuns: 7 })
+    const next = { maxRuns: 8 } as never
+    expect(await m.setSettings(next)).toEqual({ maxRuns: 8 })
+    expect(calls.at(-1)).toEqual(["set_settings", { settings: next }])
+  })
+
   it("keeps the selection when clearing and surfaces command errors", async () => {
     const { m, call } = setup([makeProc({ id: "a" }), makeProc({ id: "b", status: "exited" })])
     m.subscribe(vi.fn())
@@ -227,9 +405,10 @@ describe("TauriMonitor", () => {
     m.select("a")
     m.clearEnded()
     expect(m.getSnapshot().selectedId).toBe("a")
+    // "b" ended and was cleared, so a selection pointing at it can't survive.
     m.select("b")
     m.remove("a")
-    expect(m.getSnapshot().selectedId).toBe("b")
+    expect(m.getSnapshot().selectedId).toBeNull()
     call.mockRejectedValue(new Error("nope"))
     m.kill("b")
     await flush()

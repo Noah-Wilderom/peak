@@ -1,20 +1,18 @@
 //! peak — a local process monitor and memory profiler.
 //!
 //! Everything below the Tauri glue in this file lives in plain modules that
-//! are tested without a window: `procfs` (reading /proc), `sampler` (rates and
-//! composition), `runner` (spawning and signals), `monitor` (state and
-//! deltas), `hub` (runtime agents and the CLI socket), `db` (SQLite history),
-//! `service` (wiring them together) and `cli` (`peak run`).
+//! are tested without a window. `peak-core` holds what also runs on remote
+//! targets (`procfs`, `sampler`, `runner`, `monitor`, `hub`, `collector`). Here:
+//! `db` (SQLite history), `remote` (targets and transports), `service` (wiring
+//! them together) and `cli` (`peak run`).
 
 pub mod cli;
 pub mod db;
-pub mod hub;
-pub mod model;
-pub mod monitor;
-pub mod procfs;
-pub mod runner;
-pub mod sampler;
+pub mod remote;
 pub mod service;
+pub mod transport;
+
+pub use peak_core::{hub, model, monitor, procfs, runner, sampler};
 
 use std::sync::Arc;
 use std::thread;
@@ -27,7 +25,9 @@ use hub::{ControlFile, Hub};
 use model::*;
 use monitor::{AgentEnv, Monitor, now_ms};
 use procfs::ProcFs;
-use service::Service;
+use remote::{TargetSpec, TargetState};
+use service::{AppState, Service};
+use transport::{CliConnector, Tools};
 
 type State<'a> = tauri::State<'a, Arc<Service>>;
 
@@ -37,8 +37,8 @@ async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T, String> + Sen
 }
 
 #[tauri::command]
-fn get_state(state: State<'_>) -> FullState {
-    state.monitor.lock().unwrap().full_state()
+fn get_state(state: State<'_>) -> AppState {
+    state.full_state()
 }
 
 #[tauri::command]
@@ -57,24 +57,25 @@ fn list_attachable(state: State<'_>) -> Vec<Attachable> {
 }
 
 #[tauri::command]
-fn stop(state: State<'_>, id: String) -> Result<(), String> {
-    monitor::stop(&state.monitor, &id, Duration::from_secs(3))
+async fn stop(state: State<'_>, id: String) -> Result<(), String> {
+    let s = state.inner().clone();
+    blocking(move || s.stop(&id)).await
 }
 
 #[tauri::command]
 async fn restart(state: State<'_>, id: String) -> Result<Proc, String> {
-    let m = state.monitor.clone();
-    blocking(move || monitor::restart(&m, &id)).await
+    let s = state.inner().clone();
+    blocking(move || s.restart(&id)).await
 }
 
 #[tauri::command]
 fn remove(state: State<'_>, id: String) -> bool {
-    state.monitor.lock().unwrap().remove(&id)
+    state.remove(&id)
 }
 
 #[tauri::command]
 fn clear_ended(state: State<'_>) -> usize {
-    state.monitor.lock().unwrap().clear_ended()
+    state.clear_ended()
 }
 
 #[tauri::command]
@@ -91,8 +92,8 @@ async fn cpu_profile(state: State<'_>, id: String, ms: u64) -> Result<CpuProfile
 
 #[tauri::command]
 async fn force_gc(state: State<'_>, id: String) -> Result<(), String> {
-    let hub = state.hub.clone();
-    blocking(move || hub.force_gc(&id, Duration::from_secs(30))).await
+    let s = state.inner().clone();
+    blocking(move || s.force_gc(&id)).await
 }
 
 #[tauri::command]
@@ -141,10 +142,131 @@ fn set_settings(state: State<'_>, settings: Settings) -> Result<Settings, String
     state.set_settings(&settings)
 }
 
+#[tauri::command]
+fn add_alert(state: State<'_>, id: String, alert: Alert) -> Result<(), String> {
+    state.add_alert(&id, &alert)
+}
+
+#[tauri::command]
+fn add_target(state: State<'_>, spec: TargetSpec) -> Result<TargetState, String> {
+    state.add_target(spec)
+}
+
+#[tauri::command]
+fn remove_target(state: State<'_>, id: String) -> Result<(), String> {
+    state.remove_target(&id)
+}
+
+#[tauri::command]
+fn connect_target(state: State<'_>, id: String) -> Result<(), String> {
+    state.remote.connect(&id)
+}
+
+#[tauri::command]
+fn disconnect_target(state: State<'_>, id: String) -> Result<(), String> {
+    state.remote.disconnect(&id)
+}
+
+#[tauri::command]
+async fn list_target_processes(state: State<'_>, id: String) -> Result<Vec<Attachable>, String> {
+    let s = state.inner().clone();
+    blocking(move || s.remote.list_processes(&id)).await
+}
+
+#[tauri::command]
+async fn attach_target(state: State<'_>, id: String, pid: u32) -> Result<Proc, String> {
+    let s = state.inner().clone();
+    blocking(move || s.remote.attach(&id, pid)).await
+}
+
+#[tauri::command]
+async fn launch_target(state: State<'_>, id: String, spec: LaunchSpec) -> Result<Proc, String> {
+    let s = state.inner().clone();
+    blocking(move || s.remote.launch(&id, spec)).await
+}
+
+#[tauri::command]
+async fn detach(state: State<'_>, id: String) -> Result<(), String> {
+    let s = state.inner().clone();
+    blocking(move || s.detach(&id)).await
+}
+
+#[tauri::command]
+async fn signal_run(state: State<'_>, id: String, signal: String) -> Result<(), String> {
+    let s = state.inner().clone();
+    blocking(move || s.remote.signal(&id, &signal)).await
+}
+
+#[tauri::command]
+async fn docker_contexts() -> Result<Vec<String>, String> {
+    blocking(|| transport::docker_contexts(&Tools::default())).await
+}
+
+#[tauri::command]
+async fn docker_containers(context: String) -> Result<Vec<transport::DockerContainer>, String> {
+    blocking(move || transport::docker_containers(&Tools::default(), &context)).await
+}
+
+#[tauri::command]
+async fn docker_totals(context: String, id: String) -> Result<Option<transport::ContainerTotals>, String> {
+    blocking(move || transport::docker_totals(&Tools::default(), &context, &id)).await
+}
+
+#[tauri::command]
+async fn docker_top(context: String, id: String) -> Result<Vec<transport::ContainerProcess>, String> {
+    blocking(move || transport::docker_top(&Tools::default(), &context, &id)).await
+}
+
+#[tauri::command]
+async fn docker_logs(context: String, id: String, tail: u32) -> Result<String, String> {
+    blocking(move || transport::docker_logs(&Tools::default(), &context, &id, tail)).await
+}
+
+#[tauri::command]
+async fn kube_contexts() -> Result<Vec<String>, String> {
+    blocking(|| transport::kube_contexts(&Tools::default())).await
+}
+
+#[tauri::command]
+async fn kube_namespaces(context: String) -> Result<Vec<String>, String> {
+    blocking(move || transport::kube_namespaces(&Tools::default(), &context)).await
+}
+
+#[tauri::command]
+async fn kube_pods(context: String, namespace: String) -> Result<Vec<transport::KubePod>, String> {
+    blocking(move || transport::kube_pods(&Tools::default(), &context, &namespace)).await
+}
+
+#[tauri::command]
+async fn kube_logs(
+    context: String,
+    namespace: String,
+    pod: String,
+    container: String,
+    tail: u32,
+) -> Result<String, String> {
+    blocking(move || transport::kube_logs(&Tools::default(), &context, &namespace, &pod, &container, tail)).await
+}
+
+#[tauri::command]
+async fn kube_metrics(
+    context: String,
+    namespace: String,
+    pod: String,
+) -> Result<Option<Vec<transport::KubeMetrics>>, String> {
+    blocking(move || transport::kube_metrics(&Tools::default(), &context, &namespace, &pod)).await
+}
+
+#[tauri::command]
+async fn kube_access(context: String, namespace: String) -> Result<transport::KubeAccess, String> {
+    blocking(move || Ok(transport::kube_access(&Tools::default(), &context, &namespace))).await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let monitor = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
             let handle = app.handle().clone();
@@ -167,7 +289,8 @@ pub fn run() {
                 eprintln!("peak: {e}; history will not be saved");
                 Db::open_in_memory()
             })?;
-            let service = Arc::new(Service::new(monitor, hub, db));
+            let connector = Arc::new(CliConnector { tools: Tools::default() });
+            let service = Arc::new(Service::new(monitor, hub, db, connector));
 
             let s = service.clone();
             let handle = app.handle().clone();
@@ -200,7 +323,28 @@ pub fn run() {
             storage_info,
             vacuum,
             get_settings,
-            set_settings
+            set_settings,
+            add_alert,
+            add_target,
+            remove_target,
+            connect_target,
+            disconnect_target,
+            list_target_processes,
+            attach_target,
+            launch_target,
+            detach,
+            signal_run,
+            docker_contexts,
+            docker_containers,
+            docker_totals,
+            docker_top,
+            docker_logs,
+            kube_contexts,
+            kube_namespaces,
+            kube_pods,
+            kube_logs,
+            kube_metrics,
+            kube_access
         ])
         .build(tauri::generate_context!())
         .expect("error while building peak");
@@ -210,6 +354,9 @@ pub fn run() {
             // Processes peak started shouldn't outlive it.
             if let Some(state) = handle.try_state::<Arc<Service>>() {
                 state.monitor.lock().unwrap().shutdown();
+                // Remote sessions end by the collector's contract: attached services keep
+                // running; only commands launched through that session are stopped.
+                state.remote.shutdown();
             }
         }
     });

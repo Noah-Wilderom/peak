@@ -24,8 +24,8 @@ use crate::monitor::{AgentEnv, Origin, Shared, now_ms};
 use crate::runner::ExitInfo;
 use crate::sampler::AgentHeap;
 
-pub const NODE_AGENT: &str = include_str!("../agents/peak-agent.cjs");
-pub const PYTHON_AGENT: &str = include_str!("../agents/python/sitecustomize.py");
+pub const NODE_AGENT: &str = include_str!("../../agents/peak-agent.cjs");
+pub const PYTHON_AGENT: &str = include_str!("../../agents/python/sitecustomize.py");
 
 /// Inbound messages (agents and CLI).
 #[derive(Debug, Deserialize, PartialEq)]
@@ -343,13 +343,21 @@ struct AgentSnapshot {
 #[serde(rename_all = "camelCase")]
 struct AgentCpuProfile {
     duration_ms: f64,
+    #[serde(default = "crate::model::unknown_sampling")]
+    sampling: String,
     root: AllocFrame,
 }
 
 /// Validate an agent's CPU profile payload and stamp it.
 pub fn cpu_profile_from_agent(data: Value, t: u64) -> Result<CpuProfile, String> {
     let p: AgentCpuProfile = serde_json::from_value(data).map_err(|e| format!("bad cpu profile from agent: {e}"))?;
-    Ok(CpuProfile { id: format!("c_{t:x}_{}", random_hex(3)), t, duration_ms: p.duration_ms, root: p.root })
+    Ok(CpuProfile {
+        id: format!("c_{t:x}_{}", random_hex(3)),
+        t,
+        duration_ms: p.duration_ms,
+        sampling: p.sampling,
+        root: p.root,
+    })
 }
 
 /// Validate an agent's snapshot payload and stamp it.

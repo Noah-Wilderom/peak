@@ -1,0 +1,54 @@
+started 2026-11-06T05:46:06Z
+test file changed (import only); agent unchanged:
+8a7e67ae57f1c380e09ef52647526597f4d67d65e56b102b4c91fc999c17bb4c  src-tauri/agents/tests/test_python_agent.py
+d15b86a7ab02123db8df13cb98380ea80cd652de5703a7cb4f2d60e4fbebab10  src-tauri/agents/python/sitecustomize.py
+
+=== B. Stock Ubuntu Python 3.12, python -m unittest discover -s src-tauri/agents/tests -v
+Python 3.12.3
+test_chains_existing_sitecustomize (test_python_agent.PythonAgentTest.test_chains_existing_sitecustomize) ... ok
+test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread (test_python_agent.PythonAgentTest.test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread) ... ok
+test_inert_without_environment_and_survives_missing_hub (test_python_agent.PythonAgentTest.test_inert_without_environment_and_survives_missing_hub) ... ok
+test_percentile (test_python_agent.PythonAgentTest.test_percentile) ... ok
+ok
+test_sites_tree (test_python_agent.PythonAgentTest.test_sites_tree) ... ok
+ok
+test_summaries (test_python_agent.PythonAgentTest.test_summaries) ... ok
+----------------------------------------------------------------------
+Ran 8 tests in 5.151s
+OK
+exit=0
+
+=== C. Clean CPython 3.12, same command
+Python 3.12.16
+test_chains_existing_sitecustomize (test_python_agent.PythonAgentTest.test_chains_existing_sitecustomize) ... ok
+test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread (test_python_agent.PythonAgentTest.test_cpu_sampler_charges_elapsed_time_and_handles_a_missing_thread) ... ok
+test_inert_without_environment_and_survives_missing_hub (test_python_agent.PythonAgentTest.test_inert_without_environment_and_survives_missing_hub) ... ok
+test_percentile (test_python_agent.PythonAgentTest.test_percentile) ... ok
+ok
+test_sites_tree (test_python_agent.PythonAgentTest.test_sites_tree) ... ok
+ok
+test_summaries (test_python_agent.PythonAgentTest.test_summaries) ... ok
+----------------------------------------------------------------------
+Ran 8 tests in 6.110s
+OK
+exit=0
+
+=== D. bun run test:agents (Node 24 + mise Python 3.13, the suite the 05:29 run used)
+ℹ pass 4
+ℹ fail 0
+Ran 8 tests in 4.950s
+OK
+exit=0
+
+=== E. bun install --frozen-lockfile: repeat on the exact hashes, plus a real negative control
+6eb80a9159baa33782e71698dc6b54975976c794f6bb9db72f083e770e96dc93  package.json
+7325762cefe82b86199cee0599424853248fc86e025c0f0408a90f070aa160b5  bun.lock
+460 packages installed [3.35s]
+exit=0
+6eb80a9159baa33782e71698dc6b54975976c794f6bb9db72f083e770e96dc93  package.json
+7325762cefe82b86199cee0599424853248fc86e025c0f0408a90f070aa160b5  bun.lock
+--- control: a dependency the lockfile doesn't have must be refused
+error: lockfile had changes, but lockfile is frozen
+note: try re-running without --frozen-lockfile and commit the updated lockfile
+exit=1
+ended 2026-11-06T05:46:30Z

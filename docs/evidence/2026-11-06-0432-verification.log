@@ -1,0 +1,95 @@
+
+=== typecheck (04:32:33)
+$ tsc --noEmit
+exit=0
+
+=== frontend-coverage (04:32:38)
+      Tests  210 passed (210)
+exit=0
+
+=== build (04:33:27)
+✓ built in 1.17s
+exit=0
+
+=== agents-node24-python (04:33:33)
+ℹ pass 4 ℹ fail 0 Ran 8 tests in 5.148s OK 
+v20.20.2:
+ℹ pass 4 ℹ fail 0 
+v22.23.4:
+ℹ pass 4 ℹ fail 0 
+
+=== fmt (04:33:49)
+exit=0
+
+=== clippy (04:33:50)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.11s
+exit=0
+
+=== collector-alone (04:33:53)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.41s
+    Finished `release` profile [optimized] target(s) in 15.53s
+
+=== backend-coverage (04:34:12)
+test result: ok. 69 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.98s
+peak-core/src/cgroup.rs 104 0 100.00%
+peak-core/src/collector.rs 613 15 97.55%
+peak-core/src/hub.rs 375 2 99.47%
+peak-core/src/model.rs 231 0 100.00%
+peak-core/src/monitor.rs 987 2 99.80%
+peak-core/src/procfs.rs 478 0 100.00%
+peak-core/src/protocol.rs 48 0 100.00%
+peak-core/src/runner.rs 224 0 100.00%
+peak-core/src/sampler.rs 289 0 100.00%
+src/cli.rs 212 0 100.00%
+src/db.rs 412 4 99.03%
+src/remote.rs 1664 13 99.22%
+src/service.rs 392 11 97.19%
+src/transport.rs 872 18 97.94%
+TOTAL                            15783               290    98.16%         969                22    97.73%        6901                65    99.06%           0                 0         -
+exit=0
+
+=== live-ssh (04:34:47)
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.25s
+
+
+=== live-docker (04:35:14)
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 19.52s
+
+
+=== live-kube (04:35:37)
+thread 'observes_real_pods' (3083186) panicked at tests/live_kube.rs:49:5:
+timed out: metrics measured
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 242.91s
+
+=== browser-mock-e2e (04:39:41)
+ALL OK
+
+=== desktop-e2e (04:40:47)
+✓ built in 1.40s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 18.47s
+ok   starts with an empty real backend
+ok   captures a real command with output
+ok   timeline marks stderr and jumps to output
+ok   stop a local run: exits cleanly
+ok   python agent: lag and CPU profile from the real runtime
+ok   alerts from saved settings fire a toast and a marker
+ok   machine strip shows real host data
+ok   stopping, then report and history
+ok   real SSH target: connect, attach, launch, detach
+ok   attach an existing remote process: only observed, no plain Stop
+ok   disconnect: attached stays running, launched ends with the session
+ok   reconnect: same run, verified, and the gap shows
+ok   Docker and Kubernetes report a missing CLI honestly here
+ok   after a restart: history and settings survive
+ok   targets are remembered, and don't reconnect by themselves
+ALL OK
+
+=== done (04:41:59)
+
+[exited with code 0]

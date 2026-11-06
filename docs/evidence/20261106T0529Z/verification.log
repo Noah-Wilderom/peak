@@ -1,0 +1,287 @@
+commit base: a7531d9, uncommitted files: 94
+disk: /dev/sda1        75G   70G  2.5G  97% /
+
+=== typecheck  started 05:29:50  $ bun run typecheck
+$ tsc --noEmit
+--- typecheck  exit=0  ended 05:29:56
+
+=== frontend-coverage  started 05:29:56  $ bun run test:coverage
+$ vitest run --coverage
+ RUN  v5.1.0 /mnt/HC_Volume_107248377/peak
+      Coverage enabled with v8
+ Test Files  29 passed (29)
+      Tests  213 passed (213)
+   Start at  05:29:57
+   Duration  47.04s (tests 62%, environment 20%, import 10%, setup 7%, worker 1%, transform 1%)
+    Isolate  29 workers spawned · ~831ms startup each (spawn + environment, per file)
+             at least ~7.20s faster with isolate: false — reuses workers across files instead of one per file
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+No files with missing coverage.
+55 files fully covered.
+2 empty files skipped.
+=============================== Coverage summary ===============================
+Statements   : 100% ( 2336/2336 )
+Branches     : 100% ( 1716/1716 )
+Functions    : 100% ( 814/814 )
+Lines        : 100% ( 1910/1910 )
+================================================================================
+--- frontend-coverage  exit=0  ended 05:30:44
+
+=== frontend-build  started 05:30:44  $ bun run build
+✓ 3007 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                       0.45 kB │ gzip:   0.28 kB
+dist/assets/jetbrains-mono-vietnamese-wght-normal-Bt-aOZkq.woff2      7.50 kB
+dist/assets/jetbrains-mono-greek-wght-normal-Bw9x6K1M.woff2           9.00 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2              10.25 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2               11.23 kB
+dist/assets/jetbrains-mono-cyrillic-wght-normal-D73BlboJ.woff2       12.10 kB
+dist/assets/jetbrains-mono-latin-ext-wght-normal-DBQx-q_a.woff2      15.19 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2                18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2                   18.99 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2            25.96 kB
+dist/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2          40.40 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                   48.25 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2               85.06 kB
+dist/assets/index-DT7i-SCZ.css                                       69.45 kB │ gzip:  14.46 kB
+dist/assets/dist-js-BxTGmSEo.js                                       2.29 kB │ gzip:   0.83 kB
+dist/assets/index-Dnshs1NP.js                                     1,124.31 kB │ gzip: 340.61 kB
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.42s
+--- frontend-build  exit=0  ended 05:30:51
+
+=== agents  started 05:30:51  $ bun run test:agents
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3171.521973
+..../home/dev/.local/share/mise/installs/python/3.13.16/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=3, family=2, type=1, proto=0, laddr=('127.0.0.1', 45257)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/dev/.local/share/mise/installs/python/3.13.16/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=4, family=2, type=1, proto=0, laddr=('127.0.0.1', 45257), raddr=('127.0.0.1', 41352)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/dev/.local/share/mise/installs/python/3.13.16/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed file <_io.BufferedReader name=5>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+../home/dev/.local/share/mise/installs/python/3.13.16/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=3, family=2, type=1, proto=0, laddr=('127.0.0.1', 35187)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/dev/.local/share/mise/installs/python/3.13.16/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=4, family=2, type=1, proto=0, laddr=('127.0.0.1', 35187), raddr=('127.0.0.1', 58338)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..
+----------------------------------------------------------------------
+Ran 8 tests in 5.099s
+OK
+--- agents  exit=0  ended 05:30:59
+
+=== agents-node-v20.20.2  started 05:30:59  $ /mnt/HC_Volume_107248377/.peak-sysroot/node/node-v20.20.2-linux-x64/bin/node --test --test-reporter=spec src-tauri/agents/tests/node-agent.test.mjs
+✔ node agent streams heap and GC data and answers requests (452.658944ms)
+✔ node agent reports event-loop lag and records CPU profiles alongside heap data (2523.568623ms)
+✔ node agent is inert without peak's environment (54.176716ms)
+✔ node agent does not keep the host alive or crash it when the hub is gone (268.763039ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3421.971457
+--- agents-node-v20.20.2  exit=0  ended 05:31:03
+
+=== agents-node-v22.23.4  started 05:31:03  $ /mnt/HC_Volume_107248377/.peak-sysroot/node/node-v22.23.4-linux-x64/bin/node --test --test-reporter=spec src-tauri/agents/tests/node-agent.test.mjs
+✔ node agent streams heap and GC data and answers requests (399.150523ms)
+✔ node agent reports event-loop lag and records CPU profiles alongside heap data (2677.568346ms)
+✔ node agent is inert without peak's environment (33.14319ms)
+✔ node agent does not keep the host alive or crash it when the hub is gone (253.488196ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3502.807949
+--- agents-node-v22.23.4  exit=0  ended 05:31:07
+
+=== backend-fmt  started 05:31:07  $ cargo fmt --all --check
+--- backend-fmt  exit=0  ended 05:31:08
+
+=== backend-clippy  started 05:31:08  $ cargo clippy --workspace --all-targets -- -D warnings
+    Checking dbus v0.9.12
+    Checking tao v0.37.2
+    Checking wry v0.57.1
+    Checking tauri-runtime-wry v2.12.3
+    Checking tauri v2.12.5
+    Checking tauri-plugin-opener v2.7.2
+    Checking tauri-plugin-notification v2.8.0
+    Checking peak v0.1.0 (/mnt/HC_Volume_107248377/peak/src-tauri)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.50s
+--- backend-clippy  exit=0  ended 05:31:20
+
+=== collector-builds-alone  started 05:31:20  $ env -u RUSTFLAGS -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH cargo build -p peak-collector
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
+--- collector-builds-alone  exit=0  ended 05:31:21
+
+=== collector-static  started 05:31:21  $ env -u RUSTFLAGS cargo build -p peak-collector --release --target x86_64-unknown-linux-musl
+    Finished `release` profile [optimized] target(s) in 0.19s
+--- collector-static  exit=0  ended 05:31:21
+
+=== backend-coverage  started 05:31:21  $ cargo llvm-cov --workspace --ignore-filename-regex (lib|main|live_\w+)\.rs$ --fail-under-lines 99
+test procfs::tests::parses_status ... ok
+test procfs::tests::reads_fixture_tree ... ok
+test procfs::tests::reads_real_self ... ok
+test procfs::tests::rejects_bad_stat ... ok
+test protocol::tests::frames_have_a_stable_wire_format ... ok
+test protocol::tests::only_known_signals_are_accepted ... ok
+test protocol::tests::tick_frames_carry_full_deltas_through_the_tagged_enum ... ok
+test runner::tests::classifies_exits ... ok
+test monitor::tests::signals_refuse_a_pid_that_became_another_process ... ok
+test runner::tests::exit_info_from_status ... ok
+test runner::tests::expands_tilde ... ok
+test runner::tests::names_signals ... ok
+test runner::tests::pumps_lines_lossily ... ok
+test runner::tests::signals_process_groups ... ok
+test runner::tests::spawn_fails_for_missing_cwd ... ok
+test runner::tests::spawns_and_captures_output ... ok
+test sampler::tests::agent_heap_shapes_composition_and_alloc ... ok
+test sampler::tests::computes_rates_and_totals ... ok
+test sampler::tests::first_reading_is_a_baseline ... ok
+test sampler::tests::handles_empty_tree_and_zero_dt ... ok
+test sampler::tests::new_children_count_from_zero_and_exited_ones_drop_out ... ok
+test sampler::tests::records_resources_kids_and_loop_lag ... ok
+test sampler::tests::samples_the_system ... ok
+test runner::tests::resets_signals_and_children_get_sigint ... ok
+test monitor::tests::samples_a_running_tree ... ok
+test collector::tests::runtime_agents_work_through_the_collector ... ok
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.00s
+Filename                       Regions    Missed Regions     Cover   Functions  Missed Functions  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+peak-core/src/cgroup.rs            288                 3    98.96%          18                 0   100.00%         104                 0   100.00%           0                 0         -
+peak-core/src/collector.rs        1383                32    97.69%          91                 5    94.51%         613                15    97.55%           0                 0         -
+peak-core/src/hub.rs               960                18    98.12%          51                 2    96.08%         375                 2    99.47%           0                 0         -
+peak-core/src/model.rs             401                 0   100.00%          22                 0   100.00%         231                 0   100.00%           0                 0         -
+peak-core/src/monitor.rs          2143                19    99.11%         143                 1    99.30%         987                 2    99.80%           0                 0         -
+peak-core/src/procfs.rs           1095                26    97.63%          93                 0   100.00%         478                 0   100.00%           0                 0         -
+peak-core/src/protocol.rs          161                 0   100.00%           4                 0   100.00%          48                 0   100.00%           0                 0         -
+peak-core/src/runner.rs            472                 2    99.58%          35                 0   100.00%         224                 0   100.00%           0                 0         -
+peak-core/src/sampler.rs           495                 0   100.00%          16                 0   100.00%         289                 0   100.00%           0                 0         -
+src/cli.rs                         563                11    98.05%          35                 0   100.00%         212                 0   100.00%           0                 0         -
+src/db.rs                         1010                56    94.46%          56                 0   100.00%         412                 4    99.03%           0                 0         -
+src/remote.rs                     3774                47    98.75%         238                 6    97.48%        1664                13    99.22%           0                 0         -
+src/service.rs                    1207                25    97.93%          64                 9    85.94%         441                13    97.05%           0                 0         -
+src/transport.rs                  2042                39    98.09%         114                 2    98.25%         923                 8    99.13%           0                 0         -
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                            15994               278    98.26%         980                25    97.45%        7001                57    99.19%           0                 0         -
+--- backend-coverage  exit=0  ended 05:31:56
+
+=== live-ssh  started 05:31:56  $ cargo test --test live_ssh -- --ignored --test-threads=1
+running 3 tests
+test a_black_holed_host_blocks_nothing ... ok
+test failures_over_real_ssh_are_honest ... ok
+test observes_and_controls_over_real_ssh ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.20s
+--- live-ssh  exit=0  ended 05:33:11
+
+=== live-docker  started 05:33:11  $ cargo test --test live_docker -- --ignored --test-threads=1
+running 3 tests
+test minimal_and_locked_down_containers_fail_honestly ... ok
+test observes_a_real_container ... ok
+test works_through_an_ssh_docker_context ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 19.28s
+--- live-docker  exit=0  ended 05:33:34
+
+=== live-kubernetes  started 05:33:34  $ cargo test --test live_kube -- --ignored --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.53s
+     Running tests/live_kube.rs (target/debug/deps/live_kube-ad7bfc853fc05588)
+running 1 test
+test observes_real_pods ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 46.47s
+--- live-kubernetes  exit=0  ended 05:34:22
+
+=== browser-mock  (real Chromium, simulated data)
+
+=== browser-mock  started 05:34:26  $ bash -c cd '/mnt/HC_Volume_107248377/.peak-sysroot/e2e' && PLAYWRIGHT_BROWSERS_PATH='/mnt/HC_Volume_107248377/.peak-sysroot/e2e/browsers' SHOTS='/mnt/HC_Volume_107248377/.peak-sysroot/evidence/20261106T0529Z/browser' node mock-e2e.mjs
+ok   overview + markers
+ok   marker click opens output at that time
+ok   chart click jumps; drag zooms
+ok   report tab + copies
+ok   resources tab
+ok   cpu profile records with progress and shows time values
+ok   machine strip and page
+ok   history search, compare leaves session alone
+ok   reopen stored run is marked
+ok   settings persist across reload, storage updates, alert fires
+ok   simulated target: connect, attach, lose the link, reconnect
+ALL OK
+--- browser-mock  exit=0  ended 05:35:27
+
+=== desktop-binary  started 05:35:27  $ bash -c bun run build && cd src-tauri && cargo build --features tauri/custom-protocol
+rendering chunks...
+computing gzip size...
+dist/index.html                                                       0.45 kB │ gzip:   0.28 kB
+dist/assets/jetbrains-mono-vietnamese-wght-normal-Bt-aOZkq.woff2      7.50 kB
+dist/assets/jetbrains-mono-greek-wght-normal-Bw9x6K1M.woff2           9.00 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2              10.25 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2               11.23 kB
+dist/assets/jetbrains-mono-cyrillic-wght-normal-D73BlboJ.woff2       12.10 kB
+dist/assets/jetbrains-mono-latin-ext-wght-normal-DBQx-q_a.woff2      15.19 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2                18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2                   18.99 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2            25.96 kB
+dist/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2          40.40 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                   48.25 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2               85.06 kB
+dist/assets/index-DT7i-SCZ.css                                       69.45 kB │ gzip:  14.46 kB
+dist/assets/dist-js-BxTGmSEo.js                                       2.29 kB │ gzip:   0.83 kB
+dist/assets/index-Dnshs1NP.js                                     1,124.31 kB │ gzip: 340.61 kB
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.49s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 24.56s
+--- desktop-binary  exit=0  ended 05:35:58
+
+=== desktop-real  started 05:35:58  $ scripts/e2e/desktop/run.sh src-tauri/target/debug/peak /mnt/HC_Volume_107248377/.peak-sysroot/tauri-driver/bin/tauri-driver /mnt/HC_Volume_107248377/.peak-sysroot/collectors /mnt/HC_Volume_107248377/.peak-sysroot/bin/kubectl /mnt/HC_Volume_107248377/.peak-sysroot/evidence/20261106T0529Z/desktop
+ok   starts with an empty real backend
+ok   no notification service: peak says what it knows and keeps working
+ok   captures a real command with output
+ok   timeline marks stderr and jumps to output
+ok   a real chart drag zooms; a real chart click opens the output
+ok   stop a local run: exits cleanly
+ok   python agent: lag and CPU profile from the real runtime
+ok   a real notification daemon receives alerts, once per crossing
+ok   alerts from saved settings fire a toast and a marker
+ok   sustained CPU alert honours its duration; notifications can be turned off
+ok   machine strip shows real host data
+     clipboard: write accepted
+ok   stopping, then report and history
+ok   compare two real stored runs without adding them to the session
+ok   resources: real ports, children and lag
+ok   node agent: lag, and a CPU profile that says how it sampled
+ok   real SSH target: connect, attach, launch, detach
+ok   attach an existing remote process: only observed, no plain Stop
+ok   disconnect: attached stays running, launched ends with the session
+ok   reconnect: same run, verified, and the gap shows
+ok   real Docker daemon through the UI: totals, logs, collector, attach
+ok   real Kubernetes through the UI: pods, logs, RBAC answer, collector, attach
+ok   after a restart: history and settings survive
+ok   targets are remembered, and don't reconnect by themselves
+ok   storage maintenance removes history, leaves a running workload recording
+ALL OK
+--- desktop-real  exit=0  ended 05:38:00
+
+leftover disposable containers: 0
+screenshots: /mnt/HC_Volume_107248377/.peak-sysroot/evidence/20261106T0529Z
+ALL CHECKS PASSED

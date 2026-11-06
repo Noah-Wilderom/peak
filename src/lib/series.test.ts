@@ -105,3 +105,19 @@ describe("series", () => {
     expect(trend(constant, "rss")).toEqual({ slope: 0, r2: 0 })
   })
 })
+
+describe("viewData optional fields", () => {
+  const at = (t: number, rss: number, extra = {}) => ({ t, rss, heap: 0, heapTotal: 0, external: 0, code: 0, stack: 0, cpu: 0, cpuUser: 0, cpuSys: 0, read: 0, write: 0, alloc: 0, faults: 0, ...extra })
+  const base = { id: "p", startedAt: 0 } as never as Proc
+
+  it("buckets lag and resource counts, keeping absent fields absent", () => {
+    const samples = Array.from({ length: 400 }, (_, i) => at(i * 500, i === 1 ? 9 : 1, i === 0 ? { threads: 7, kids: [] } : i === 1 ? { loopLag: 40, threads: 3, kids: [{ pid: 1, rss: 2, cpu: 0 }] } : i === 2 ? { loopLag: 50 } : i === 3 ? { loopLag: 5 } : {}))
+    const first = viewData({ ...base, samples }, { kind: "live", range: "all" }).data[0]
+    expect(first.loopLag).toBe(40)
+    expect(first.kids).toEqual([{ pid: 1, rss: 2, cpu: 0 }])
+    expect(viewData({ ...base, samples }, { kind: "live", range: "all" }).data[1].loopLag, "the worst in the bucket").toBe(50)
+    const none = viewData({ ...base, samples: samples.map((s) => at(s.t, s.rss)) }, { kind: "live", range: "all" }).data[0]
+    expect("loopLag" in none).toBe(false)
+    expect(none.threads).toBeUndefined()
+  })
+})

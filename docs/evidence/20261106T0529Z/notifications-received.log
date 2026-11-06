@@ -1,0 +1,9 @@
+Peak | Notifications are working.
+Peak alert: python3 /tmp/busy.py | Memory reached 14.4 MiB (limit 1 MiB)
+Peak alert: python3 -m http.server 18765 & sleep 40 | Memory reached 9.1 MiB (limit 1 MiB)
+Peak alert: node --no-use-osr -e 'function busyWork(){const e=Date.now()+100;while(Date.now()<e);} setInterval(busyWork,120)' | Memory reached 49.1 MiB (limit 1 MiB)
+Peak alert: echo remote-output; sleep 30 | Memory reached 3.7 MiB (limit 1 MiB)
+Peak alert: sleep 300 | Memory reached 1.9 MiB (limit 1 MiB)
+Peak alert: sh -c echo docker-log-line; while true; do sleep 1; done | Memory reached 1.8 MiB (limit 1 MiB)
+Peak alert: sh -c echo kube-log-line; while true; do sleep 1; done | Memory reached 1.9 MiB (limit 1 MiB)
+Peak alert: echo still-here; sleep 60 | Memory reached 3.8 MiB (limit 1 MiB)

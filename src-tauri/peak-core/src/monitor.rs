@@ -3,9 +3,9 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::model::*;
 use crate::procfs::{self, ProcFs};
@@ -14,7 +14,16 @@ use crate::sampler::{AgentHeap, SystemSampler, TreeSampler};
 
 pub type Shared = Arc<Mutex<Monitor>>;
 
+/// Wall-clock milliseconds, read once and advanced by the monotonic clock. Rates
+/// and timelines stay correct if someone changes the system clock mid-run.
 pub fn now_ms() -> u64 {
+    static ANCHOR: OnceLock<(u64, Instant)> = OnceLock::new();
+    let (wall, mono) = ANCHOR.get_or_init(|| (wall_ms(), Instant::now()));
+    wall + mono.elapsed().as_millis() as u64
+}
+
+/// The system clock as it reads right now.
+pub fn wall_ms() -> u64 {
     SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
 }
 
@@ -88,6 +97,8 @@ struct Tracked {
     agents: HashMap<u32, AgentState>,
     gc_freed: f64,
     cpu_sum: f64,
+    /// Samples ever taken; `proc.samples` is a bounded window.
+    sample_count: u64,
 }
 
 /// Everything new about one run since the last tick, for the database.
@@ -108,12 +119,14 @@ pub fn meta_of(p: &mut Proc) -> Proc {
     let gc = std::mem::take(&mut p.gc);
     let snapshots = std::mem::take(&mut p.snapshots);
     let profiles = std::mem::take(&mut p.cpu_profiles);
+    let alerts = std::mem::take(&mut p.alerts);
     let meta = p.clone();
     p.samples = samples;
     p.logs = logs;
     p.gc = gc;
     p.snapshots = snapshots;
     p.cpu_profiles = profiles;
+    p.alerts = alerts;
     meta
 }
 
@@ -132,11 +145,12 @@ impl Tracked {
             agents: HashMap::new(),
             gc_freed: 0.0,
             cpu_sum: 0.0,
+            sample_count: 0,
         }
     }
 
     fn write_for(&mut self, d: &ProcDelta) -> RunWrite {
-        let n = self.proc.samples.len().max(1) as f64;
+        let n = self.sample_count.max(1) as f64;
         RunWrite {
             meta: meta_of(&mut self.proc),
             avg_cpu: self.cpu_sum / n,
@@ -173,6 +187,9 @@ impl Tracked {
             ports: p.ports.clone(),
             has_gc: p.has_gc,
             profiling: p.profiling,
+            unavailable: p.unavailable.clone(),
+            gaps: vec![],
+            clock_offset_ms: None,
         }
     }
 
@@ -312,6 +329,11 @@ impl Monitor {
             child_names: Default::default(),
             ports: vec![],
             cpu_profiles: vec![],
+            alerts: vec![],
+            historical: false,
+            unavailable: vec![],
+            target: None,
+            gaps: vec![],
         };
         self.procs.insert(0, Tracked::new(proc, origin, self.clk_tck, stat.map(|s| s.starttime)));
         // Take a first sample right away — the UI always expects one.
@@ -319,7 +341,12 @@ impl Monitor {
         let tr = &mut self.procs[0];
         match fs.read(pid) {
             Some(root) => sample_tree(tr, &fs, &fs.parents(), &fs.listeners(), root, t),
-            None => push_bounded(&mut tr.proc.samples, Sample { t, ..Default::default() }, MAX_SAMPLES),
+            None => {
+                // Already gone: still record that it existed, so the run stores something.
+                let first = Sample { t, ..Default::default() };
+                push_bounded(&mut tr.proc.samples, first.clone(), MAX_SAMPLES);
+                push_bounded(&mut tr.new_samples, first, MAX_SAMPLES);
+            }
         }
         // The first sample stays queued so it is persisted; the UI skips duplicates by timestamp.
         tr.proc.clone()
@@ -396,6 +423,7 @@ impl Monitor {
         if proc.status == Status::Running {
             proc.status = Status::Exited;
         }
+        proc.historical = true;
         self.procs.insert(0, Tracked::new(proc.clone(), Origin::Attached, self.clk_tck, None));
         proc
     }
@@ -406,19 +434,65 @@ impl Monitor {
         }
     }
 
+    pub fn add_alert(&mut self, id: &str, alert: Alert) {
+        if let Some(tr) = self.tracked(id) {
+            tr.proc.alerts.push(alert);
+        }
+    }
+
     /// Ask a process to stop. Returns the pid to escalate on if it lingers.
     pub fn request_stop(&mut self, id: &str) -> Result<u32, String> {
+        let fs = self.fs.clone();
         let tr = self.tracked(id).ok_or("unknown process")?;
         if tr.proc.status != Status::Running {
             return Err("process is not running".into());
         }
-        tr.stop_requested = true;
         let pid = tr.proc.pid;
+        verify_identity(&fs, pid, tr.root_start)?;
+        tr.stop_requested = true;
         let ok = match tr.origin {
             Origin::Spawned => runner::signal_group(pid, libc::SIGINT),
             Origin::Attached | Origin::External => runner::signal_pid(pid, libc::SIGTERM),
         };
         if ok { Ok(pid) } else { Err(format!("could not signal pid {pid}")) }
+    }
+
+    /// Send one signal to a tracked process, if it is still the same process.
+    pub fn signal(&mut self, id: &str, signal: i32) -> Result<(), String> {
+        let fs = self.fs.clone();
+        let tr = self.tracked(id).ok_or("unknown process")?;
+        if tr.proc.status != Status::Running {
+            return Err("process is not running".into());
+        }
+        let pid = tr.proc.pid;
+        verify_identity(&fs, pid, tr.root_start)?;
+        tr.stop_requested |= matches!(signal, libc::SIGINT | libc::SIGTERM | libc::SIGKILL);
+        let ok = match tr.origin {
+            Origin::Spawned => runner::signal_group(pid, signal),
+            Origin::Attached | Origin::External => runner::signal_pid(pid, signal),
+        };
+        if ok { Ok(()) } else { Err(format!("could not signal pid {pid}")) }
+    }
+
+    /// Start ticks of a tracked process's root, part of its identity.
+    pub fn start_ticks(&self, id: &str) -> Option<u64> {
+        self.procs.iter().find(|t| t.proc.id == id)?.root_start
+    }
+
+    /// The live process's start ticks, for checking identity before attaching.
+    pub fn live_start_ticks(&self, pid: u32) -> Option<u64> {
+        self.fs.stat(pid).map(|s| s.starttime)
+    }
+
+    /// Terminate spawned processes that haven't exited after `shutdown`.
+    pub fn kill_spawned(&mut self) {
+        for tr in self.procs.iter().filter(|t| t.origin == Origin::Spawned && t.proc.status == Status::Running) {
+            runner::signal_group(tr.proc.pid, libc::SIGKILL);
+        }
+    }
+
+    pub fn has_running_spawned(&self) -> bool {
+        self.procs.iter().any(|t| t.origin == Origin::Spawned && t.proc.status == Status::Running)
     }
 
     /// Terminate every process peak spawned (called when the app quits).
@@ -436,6 +510,13 @@ impl Monitor {
     pub fn remove(&mut self, id: &str) -> bool {
         let before = self.procs.len();
         self.procs.retain(|t| t.proc.id != id || t.proc.status == Status::Running);
+        before != self.procs.len()
+    }
+
+    /// Stop tracking a process regardless of state, without signalling it.
+    pub fn forget(&mut self, id: &str) -> bool {
+        let before = self.procs.len();
+        self.procs.retain(|t| t.proc.id != id);
         before != self.procs.len()
     }
 
@@ -464,6 +545,7 @@ impl Monitor {
                     return None;
                 }
                 Some(Attachable {
+                    start_ticks: self.fs.stat(pid).map(|s| s.starttime).unwrap_or(0),
                     pid,
                     command: cmd.join(" "),
                     cwd: self.fs.cwd(pid).unwrap_or_default(),
@@ -536,6 +618,16 @@ impl Monitor {
     }
 }
 
+/// Refuse to signal a PID that now belongs to a different process.
+fn verify_identity(fs: &ProcFs, pid: u32, expected: Option<u64>) -> Result<(), String> {
+    match (expected, fs.stat(pid)) {
+        (Some(want), Some(stat)) if stat.starttime != want => {
+            Err(format!("pid {pid} is now a different process; signal not sent"))
+        }
+        _ => Ok(()),
+    }
+}
+
 /// Read the rest of the tree under `root` and record one sample.
 fn sample_tree(
     tr: &mut Tracked,
@@ -577,11 +669,13 @@ fn sample_tree(
     p.nice = ts.nice;
     p.ppid = ts.ppid;
     for c in &ts.children {
-        p.child_names.entry(c.pid).or_insert_with(|| c.name.clone());
+        p.child_names.entry(c.pid.to_string()).or_insert_with(|| c.name.clone());
     }
     p.children = ts.children;
     p.ports = ports;
+    p.unavailable = ts.unavailable;
     tr.cpu_sum += ts.sample.cpu;
+    tr.sample_count += 1;
     p.counters = tr.sampler.counters.clone();
     if let Some(exe) = fs.exe(p.pid).filter(|e| *e != p.exe) {
         p.exe = exe;
@@ -592,12 +686,26 @@ fn sample_tree(
 
 // ─── operations that spawn threads (need the shared handle) ─────────────────
 
-/// Run `command` under peak.
+/// Run `command` under peak, through the shell.
 pub fn capture(shared: &Shared, command: &str, cwd: &str) -> Result<Proc, String> {
     let command = command.trim();
     if command.is_empty() {
         return Err("command is empty".into());
     }
+    launch(shared, command, runner::Program::Shell(command), cwd)
+}
+
+/// Run a command from its specification: a shell line, or an executable and its
+/// arguments for images that have no shell.
+pub fn launch_spec(shared: &Shared, spec: &LaunchSpec) -> Result<Proc, String> {
+    match (&spec.argv, &spec.command) {
+        (Some(argv), _) if !argv.is_empty() => launch(shared, &argv.join(" "), runner::Program::Argv(argv), &spec.cwd),
+        (_, Some(command)) => capture(shared, command, &spec.cwd),
+        _ => Err("command is empty".into()),
+    }
+}
+
+fn launch(shared: &Shared, command: &str, program: runner::Program<'_>, cwd: &str) -> Result<Proc, String> {
     let (id, dir, env) = {
         let mut m = shared.lock().unwrap();
         let id = m.new_id();
@@ -614,7 +722,7 @@ pub fn capture(shared: &Shared, command: &str, cwd: &str) -> Result<Proc, String
     // Hold the lock across spawn so the first output line can't beat `insert`.
     let mut m = shared.lock().unwrap();
     let pid = runner::spawn(
-        command,
+        program,
         &dir,
         &env,
         move |stream, text| s1.lock().unwrap().push_log(&id1, stream, text, now_ms()),
@@ -717,6 +825,56 @@ mod tests {
     }
 
     #[test]
+    fn average_cpu_covers_every_sample_not_the_bounded_window() {
+        let m = monitor();
+        let mut g = m.lock().unwrap();
+        g.insert("a".into(), Origin::Attached, std::process::id(), "x", "/tmp", 1);
+        let tr = g.tracked("a").unwrap();
+        tr.cpu_sum = 500.0;
+        tr.sample_count = 100; // far more than the retained window below
+        tr.proc.samples.truncate(1);
+        let d = tr.delta();
+        assert_eq!(tr.write_for(&d).avg_cpu, 5.0);
+    }
+
+    #[test]
+    fn signals_refuse_a_pid_that_became_another_process() {
+        let m = monitor();
+        let mut child = Command::new("sleep").arg("30").stdout(Stdio::null()).spawn().unwrap();
+        let mut g = m.lock().unwrap();
+        g.insert("a".into(), Origin::Attached, child.id(), "sleep", "/tmp", 1);
+        assert!(g.start_ticks("a").is_some());
+        assert_eq!(g.live_start_ticks(child.id()), g.start_ticks("a"));
+        // As if this PID had been reused since we started tracking.
+        g.tracked("a").unwrap().root_start = Some(1);
+        assert!(g.signal("a", libc::SIGTERM).unwrap_err().contains("different process"));
+        assert!(g.request_stop("a").unwrap_err().contains("different process"));
+        assert!(child.try_wait().unwrap().is_none(), "the innocent process wasn't touched");
+        child.kill().unwrap();
+        child.wait().unwrap();
+
+        // Same process: the signal goes through; a vanished one reports failure.
+        let mut other = Command::new("sleep").arg("30").stdout(Stdio::null()).spawn().unwrap();
+        g.insert("b".into(), Origin::Attached, other.id(), "sleep", "/tmp", 1);
+        g.signal("b", libc::SIGTERM).unwrap();
+        other.wait().unwrap();
+        assert!(g.signal("b", libc::SIGTERM).is_err());
+        assert!(g.signal("nope", libc::SIGTERM).is_err());
+        g.tick(now_ms());
+        assert!(g.signal("b", libc::SIGTERM).unwrap_err().contains("not running"));
+        assert!(g.forget("b"));
+        assert!(!g.forget("b"));
+    }
+
+    #[test]
+    fn the_clock_moves_forward_on_its_own_anchor() {
+        let a = now_ms();
+        thread::sleep(Duration::from_millis(5));
+        assert!(now_ms() > a);
+        assert!(wall_ms() > 0);
+    }
+
+    #[test]
     fn agent_env_vars() {
         assert!(AgentEnv::default().vars("t", None, None).is_empty());
         let env = AgentEnv {
@@ -810,8 +968,11 @@ mod tests {
         assert_eq!(restored.status, Status::Exited);
         assert_eq!(g.insert_historical(p).id, id, "inserting twice keeps the existing entry");
         let root = AllocFrame { name: "(root)".into(), file: None, self_bytes: 1.0, children: vec![] };
-        g.add_cpu_profile(&id, CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, root: root.clone() });
-        g.add_cpu_profile("nope", CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, root });
+        g.add_cpu_profile(
+            &id,
+            CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, sampling: "v8".into(), root: root.clone() },
+        );
+        g.add_cpu_profile("nope", CpuProfile { id: "c".into(), t: 1, duration_ms: 10.0, sampling: "v8".into(), root });
         assert_eq!(g.get(&id).unwrap().cpu_profiles.len(), 1);
         assert!(g.take_writes().iter().all(|w| w.meta.samples.is_empty()));
         // Ticks persist writes for changed runs and sample the system.

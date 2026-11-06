@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { monitor, type Attachable } from "@/lib/monitor"
+import { useMonitor } from "@/hooks/use-monitor"
 import { formatBytes } from "@/lib/format"
 
 const SUGGESTIONS = ["bun run build", "npm test", "python main.py", "node server.js", "cargo build --release"]
@@ -14,11 +15,21 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
   const [command, setCommand] = useState("")
   const [cwd, setCwd] = useState("~")
   const [busy, setBusy] = useState(false)
+  const [where, setWhere] = useState("")
+  const [noShell, setNoShell] = useState(false)
+  const { targets } = useMonitor()
+  const reachable = targets.filter((t) => t.state === "connected" || t.state === "stale")
+  const target = reachable.find((t) => t.spec.id === where)
   const run = async () => {
     // The submit button is disabled while empty or busy, which also blocks Enter-to-submit.
     setBusy(true)
     try {
-      await monitor.capture(command.trim(), cwd.trim())
+      if (target) {
+        const text = command.trim()
+        await monitor.launchTarget(target.spec.id, { ...(noShell ? { argv: text.split(/\s+/) } : { command: text }), cwd: cwd.trim() })
+      } else {
+        await monitor.capture(command.trim(), cwd.trim())
+      }
       setCommand("")
     } catch (e) {
       toast.error("Couldn't start process", { description: String(e) })
@@ -51,12 +62,31 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
           )}
         </div>
 
+        {reachable.length > 0 && (
+          <label className="mt-8 flex max-w-sm flex-col gap-1.5">
+            <span className="text-xs font-semibold text-muted-foreground">Where</span>
+            <select
+              aria-label="Where"
+              value={target?.spec.id ?? ""}
+              onChange={(e) => setWhere(e.target.value)}
+              className="h-9 rounded-2xl bg-field px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+            >
+              <option value="">This machine</option>
+              {reachable.map((t) => (
+                <option key={t.spec.id} value={t.spec.id}>{t.spec.label}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <div className="mt-10 grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="flex min-w-0 flex-col gap-4">
             <section className="rounded-card bg-secondary p-6">
               <h2 className="text-title">Run a command.</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Node and Python get a profiling agent for heap snapshots and GC data.
+                {target
+                  ? `Runs on ${target.spec.label}, output captured. It stops if the connection is lost, because its output pipes end with the session.`
+                  : "Node and Python get a profiling agent for heap snapshots and GC data."}
               </p>
               <form
                 className="mt-5 flex flex-col gap-3"
@@ -91,6 +121,12 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
                     </button>
                   ))}
                 </div>
+                {target && (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" checked={noShell} onChange={(e) => setNoShell(e.target.checked)} className="size-4 accent-foreground" />
+                    Run directly, without a shell (for images that don't have one)
+                  </label>
+                )}
                 <Button type="submit" size="lg" className="mt-2 self-start" disabled={!command.trim() || busy}>
                   {busy ? "Starting…" : "Run and capture"}
                   <CornerDownLeftIcon data-icon="inline-end" />
@@ -98,7 +134,7 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
               </form>
             </section>
 
-            <section className="rounded-card border border-border p-6">
+            {!target && <section className="rounded-card border border-border p-6">
               <h2 className="text-[15px] font-semibold">From your terminal.</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Prefix any command — output stays in your terminal and streams here too.
@@ -106,31 +142,30 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
               <code className="mt-4 block truncate rounded-full bg-secondary px-4 py-2 font-mono text-xs text-ink-soft select-text">
                 peak run -- bun run build
               </code>
-            </section>
+            </section>}
           </div>
 
-          <AttachList />
+          <AttachList key={target?.spec.id ?? "local"} targetId={target?.spec.id} label={target?.spec.label} />
         </div>
       </div>
     </motion.div>
   )
 }
 
-function AttachList() {
+function AttachList({ targetId, label }: { targetId?: string; label?: string }) {
   const [list, setList] = useState<Attachable[] | null>(null)
   const [filter, setFilter] = useState("")
   const [nonce, setNonce] = useState(0)
 
   useEffect(() => {
     let live = true
-    monitor
-      .listAttachable()
+    ;(targetId ? monitor.listTargetProcesses(targetId) : monitor.listAttachable())
       .then((l) => live && setList(l))
       .catch((e) => toast.error("Couldn't list processes", { description: String(e) }))
     return () => {
       live = false
     }
-  }, [nonce])
+  }, [nonce, targetId])
 
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase()
@@ -140,7 +175,7 @@ function AttachList() {
 
   const attach = async (pid: number) => {
     try {
-      await monitor.attach(pid)
+      await (targetId ? monitor.attachTarget(targetId, pid) : monitor.attach(pid))
     } catch (e) {
       toast.error("Couldn't attach", { description: String(e) })
     }
@@ -151,7 +186,9 @@ function AttachList() {
       <div className="flex items-start justify-between gap-4 px-6 pt-6">
         <div className="min-w-0">
           <h2 className="text-title">Attach to a process.</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Your processes, largest first.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {label ? `Yours on ${label}, largest first. Attaching only observes; existing output isn't captured.` : "Your processes, largest first."}
+          </p>
         </div>
         <Button
           variant="ghost"

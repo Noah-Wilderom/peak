@@ -95,17 +95,45 @@ pub fn reset_signals() -> io::Result<()> {
     Ok(())
 }
 
-/// Spawn `command` through `sh -c` in its own process group. Output lines and
-/// the final exit are delivered via callbacks from background threads.
-pub fn spawn<L, E>(command: &str, cwd: &PathBuf, env: &[(String, String)], on_line: L, on_exit: E) -> io::Result<u32>
+/// What to run: a shell line, or a direct executable where there may be no shell.
+#[derive(Debug, Clone, Copy)]
+pub enum Program<'a> {
+    Shell(&'a str),
+    Argv(&'a [String]),
+}
+
+impl Program<'_> {
+    fn command(self) -> Command {
+        match self {
+            Program::Shell(line) => {
+                let mut c = Command::new("/bin/sh");
+                c.arg("-c").arg(line);
+                c
+            }
+            Program::Argv(argv) => {
+                let mut c = Command::new(&argv[0]);
+                c.args(&argv[1..]);
+                c
+            }
+        }
+    }
+}
+
+/// Spawn a program in its own process group. Output lines and the final exit are
+/// delivered via callbacks from background threads.
+pub fn spawn<L, E>(
+    program: Program<'_>,
+    cwd: &PathBuf,
+    env: &[(String, String)],
+    on_line: L,
+    on_exit: E,
+) -> io::Result<u32>
 where
     L: Fn(Stream, String) + Send + Sync + Clone + 'static,
     E: FnOnce(ExitInfo) + Send + 'static,
 {
-    let mut cmd = Command::new("/bin/sh");
-    cmd.arg("-c")
-        .arg(command)
-        .current_dir(cwd)
+    let mut cmd = program.command();
+    cmd.current_dir(cwd)
         .envs(env.iter().map(|(k, v)| (k.as_str(), v.as_str())))
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -220,7 +248,7 @@ mod tests {
         let (tx, rx) = mpsc::channel();
         let l = lines.clone();
         spawn(
-            cmd,
+            Program::Shell(cmd),
             &PathBuf::from("/tmp"),
             &[("PEAK_TEST".into(), "yes".into())],
             move |s, t| l.lock().unwrap().push((s, t)),
@@ -245,7 +273,9 @@ mod tests {
     #[test]
     fn signals_process_groups() {
         let (tx, rx) = mpsc::channel();
-        let pid = spawn("sleep 30", &PathBuf::from("/tmp"), &[], ignore_line, move |e| tx.send(e).unwrap()).unwrap();
+        let pid =
+            spawn(Program::Shell("sleep 30"), &PathBuf::from("/tmp"), &[], ignore_line, move |e| tx.send(e).unwrap())
+                .unwrap();
         assert!(alive(pid));
         assert!(signal_group(pid, libc::SIGTERM));
         let exit = rx.recv_timeout(Duration::from_secs(10)).unwrap();
@@ -256,7 +286,12 @@ mod tests {
 
     #[test]
     fn spawn_fails_for_missing_cwd() {
-        assert!(spawn("true", &PathBuf::from("/definitely/missing"), &[], ignore_line, ignore_exit).is_err());
+        assert!(
+            spawn(Program::Shell("true"), &PathBuf::from("/definitely/missing"), &[], ignore_line, ignore_exit)
+                .is_err()
+        );
+        let argv = vec!["/definitely/missing".to_string()];
+        assert!(spawn(Program::Argv(&argv), &PathBuf::from("/tmp"), &[], ignore_line, ignore_exit).is_err());
     }
 
     #[test]
@@ -264,7 +299,9 @@ mod tests {
         reset_signals().unwrap();
         // Even if the parent ignores SIGINT, spawned groups still die from it.
         let (tx, rx) = mpsc::channel();
-        let pid = spawn("sleep 30", &PathBuf::from("/tmp"), &[], ignore_line, move |e| tx.send(e).unwrap()).unwrap();
+        let pid =
+            spawn(Program::Shell("sleep 30"), &PathBuf::from("/tmp"), &[], ignore_line, move |e| tx.send(e).unwrap())
+                .unwrap();
         thread::sleep(Duration::from_millis(50));
         signal_group(pid, libc::SIGINT);
         assert_eq!(rx.recv_timeout(Duration::from_secs(5)).unwrap().signal, Some(libc::SIGINT));
