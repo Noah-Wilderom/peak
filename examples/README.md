@@ -23,7 +23,7 @@ task examples:io
 The tasks compile the demos first, then invoke `peak run -- ./bin/<demo>`.
 That keeps Go compiler activity out of the workload's graphs. `PEAK_BIN` defaults
 to the debug binary `task dev` builds; override it with an absolute path to another
-Peak executable, such as an installed one (`PEAK_BIN=$HOME/.local/bin/peak`). Keep the desktop app open: Peak's CLI otherwise warns and runs the
+Peak executable, such as an installed one (`PEAK_BIN=$HOME/.local/bin/peak`). Keep the desktop app open: Peak's CLI otherwise says why it can't reach one and runs the
 command without monitoring.
 
 | Demo | What to look for | Flags |

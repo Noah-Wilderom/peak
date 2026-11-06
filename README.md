@@ -36,6 +36,20 @@ PATH, the task says so and shows the line to add. The installed app still needs 
 `task dev` also leaves a binary at `src-tauri/target/debug/peak`. Its CLI works, but its window loads from the dev
 server, so it stays blank on its own.
 
+### How `peak run` finds the app
+
+Any `peak` binary finds any open Peak app of the same user on the same machine, from any directory. With no app, your
+command still runs, with its usual output and exit code, and `peak` says why it isn't being monitored:
+
+| `peak` says | What it means |
+|---|---|
+| `the app isn't running on <host> for <user>` | No open app for that user on that machine. Peak only listens on localhost, so an app on your laptop can't be reached from an SSH session or a container. Check the host and user shown |
+| `the app is open (PID n) but isn't answering` | It's open but frozen or overloaded |
+| `the app is open (PID n) but can't be reached at <address>` | It's open, but its port refused the connection |
+| `a Peak app is recorded in another container or network namespace` | It's on this kernel, but this shell's localhost isn't the app's |
+| `couldn't read <path>` | A record couldn't be read, and no open app was found. If it's left over, delete that file |
+| `<n> Peak apps are open; this run is in the one with PID n` | The command is monitored. It goes to the app using the same data directory, otherwise the newest |
+
 ### Remote targets, in brief
 
 To monitor Docker containers, Kubernetes pods or SSH hosts, Peak copies a small static collector to the target.

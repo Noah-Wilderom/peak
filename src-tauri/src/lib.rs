@@ -9,6 +9,7 @@
 pub mod bundled;
 pub mod cli;
 pub mod db;
+pub mod discovery;
 pub mod remote;
 pub mod service;
 pub mod transport;
@@ -22,7 +23,7 @@ use std::time::Duration;
 use tauri::{Emitter, Manager, RunEvent};
 
 use db::Db;
-use hub::{ControlFile, Hub};
+use hub::Hub;
 use model::*;
 use monitor::{AgentEnv, Monitor, now_ms};
 use procfs::ProcFs;
@@ -283,8 +284,14 @@ pub fn run() {
             let dir = hub::default_data_dir();
             let env = hub::install_agents(&dir, &addr).unwrap_or(AgentEnv { addr: addr.clone(), ..Default::default() });
             monitor.lock().unwrap().agent_env = env;
-            // Lets `peak run` in a terminal find this instance.
-            let _ = hub::write_control_file(&dir, &ControlFile { addr, secret });
+            // Lets `peak run` in a terminal find this instance, for as long as it's open.
+            let here = discovery::Here::detect();
+            let dirs = discovery::default_dirs();
+            discovery::prune(&dirs, &here);
+            let publication = Arc::new(discovery::Publication::new(addr, secret, &dirs, &here));
+            for problem in publication.publish() {
+                eprintln!("peak: `peak run` won't be able to find this app: {problem}");
+            }
 
             let db = Db::open(&dir.join("peak.db")).or_else(|e| {
                 eprintln!("peak: {e}; history will not be saved");
@@ -295,13 +302,20 @@ pub fn run() {
 
             let s = service.clone();
             let handle = app.handle().clone();
+            let published = publication.clone();
             thread::spawn(move || {
+                let mut ticks = 0u64;
                 loop {
                     thread::sleep(Duration::from_millis(TICK_MS));
                     let _ = handle.emit("peak://tick", s.tick(now_ms()));
+                    ticks += 1;
+                    if ticks.is_multiple_of(20) {
+                        published.ensure();
+                    }
                 }
             });
             app.manage(service);
+            app.manage(publication);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -352,6 +366,9 @@ pub fn run() {
 
     app.run(|handle, event| {
         if let RunEvent::Exit = event {
+            if let Some(publication) = handle.try_state::<Arc<discovery::Publication>>() {
+                publication.retire();
+            }
             // Processes peak started shouldn't outlive it.
             if let Some(state) = handle.try_state::<Arc<Service>>() {
                 state.monitor.lock().unwrap().shutdown();

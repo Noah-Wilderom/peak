@@ -1,0 +1,27 @@
+# existing real-window steps on the final release binary, for monitoring, agents, charts and SSH collector. Docker and Kubernetes steps not run: no change there. started 2026-11-06T14:46:57Z
+0b2fc826ba39f067cd502e69726af36eb046404d43ec3d29c3b318dfce5f9708  /mnt/HC_Volume_107248377/.peak-sysroot/peak-release-cand
+
+(peak:48): dbind-WARNING **: 14:46:59.715: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   starts with an empty real backend
+ok   captures a real command with output
+ok   timeline marks stderr and jumps to output
+ok   a real chart drag zooms; a real chart click opens the output
+ok   stop a local run: exits cleanly
+     1s axis 0:10.6 0:10.8 0:11.0 0:11.2 0:11.4; zoom 14:47:34.6 – 14:47:35.1 · 504ms 
+     10s axis 0:12 0:14 0:16 0:18 0:20; zoom 14:47:35.7 – 14:47:43.8 · 8.11s 
+ok   1s and 10s windows on real samples
+ok   python agent: lag and CPU profile from the real runtime
+ok   node agent: lag, and a CPU profile that says how it sampled
+ok   real SSH target: connect, attach, launch, detach
+ok   attach an existing remote process: only observed, no plain Stop
+ok   disconnect: attached stays running, launched ends with the session
+ok   reconnect: same run, verified, and the gap shows
+
+(peak:341): dbind-WARNING **: 14:48:28.225: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ALL OK
+EXIT=0
+# finished 2026-11-06T14:48:31Z

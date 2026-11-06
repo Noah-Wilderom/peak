@@ -1,0 +1,18 @@
+# recorded 2026-11-06T14:30:48Z, PEAK_REQUIRE_COLLECTOR=1
+fmt exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.38s
+clippy exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.66s
+collector build exit=0
+test result: ok. 95 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.45s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.14s
+peak-core/src/hub.rs               924                14    98.48%          49                 2    95.92%         366                 2    99.45%    
+src/cli.rs                        1065                35    96.71%          55                 1    98.18%         421                 6    98.57%    
+src/discovery.rs                   888                 4    99.55%          58                 1    98.28%         368                 1    99.73%    
+TOTAL                            17649               310    98.24%        1075                28    97.40%        7679                66    99.14%    
+coverage exit=0

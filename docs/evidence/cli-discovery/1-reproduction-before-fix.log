@@ -1,0 +1,66 @@
+# unchanged code at d1d67db: CLI source untouched. Real app, real window (Xvfb, container), independent CLI processes. started 2026-11-06T14:04:33Z
+d1d67db0e4c600726bb300f87aca2e54a252c696
+6087af8e207a062495b8f220873544a62c30a0a9868500f02b7b8a5f1ee37c69  src-tauri/target/release/peak
+c6404a684a8d29a86c163ce96526de8441b23a4fac2c02c9718ed10401c8c34f  src-tauri/target/debug/peak
+ok   no app has ever run: says so, command unaffected 
+       exit 3, 68ms, said: peak: the app isn't running — running without monitoring
+
+(peak:53): dbind-WARNING **: 14:05:58.870: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   app open, `peak` on PATH, cwd /tmp 
+       exit 7, 3053ms, running then failed in the open app, output in both
+ok   different working directory, relative binary path 
+       exit 7, 3047ms, running then failed in the open app, output in both
+ok   installed copy in ~/.local/bin (task peak:install's result) 
+       exit 7, 3060ms, running then failed in the open app, output in both
+ok   the other build's CLI against this app (dev <-> release) 
+       exit 7, 3059ms, running then failed in the open app, output in both
+FAIL shell with a different XDG_DATA_HOME (snap, IDE and sudo terminals do this) 
+       the app never showed /cli-xdg-6-74338/
+ok   shell with an empty XDG_DATA_HOME, and no USER 
+       exit 7, 3069ms, running then failed in the open app, output in both
+FAIL shell with HOME unset 
+       the app never showed /cli-nohome-8-80462/
+FAIL record removed while the app stays open 
+       the app never showed /cli-removed-9-95132/
+FAIL a second app opens, then closes: the first stays reachable 
+       the app never showed /cli-second-closed-10-2794/
+FAIL two apps open: the run goes to exactly one, and peak says which 
+       didn't say which: ""
+FAIL app frozen (SIGSTOP): reported as not answering, not as absent 
+       wrong reason: "peak: the app isn't running — running without monitoring" (wanted /open.*(isn't answering)/)
+ok   another user can't use this user's app 
+       own: peak: the app isn't running — running without monitoring | pointed at this user's dir: peak: the app isn't running — running without monitoring
+ok   app closed normally: truly no app 
+       exit 3, 63ms, said: peak: the app isn't running — running without monitoring
+
+(peak:315): dbind-WARNING **: 14:06:53.633: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   reopened: found again, in a different working directory 
+       exit 7, 3061ms, running then failed in the open app, output in both
+FAIL app killed: stale record is recognised and never handed the secret 
+       the dead app's secret went to whatever holds its port now
+
+(peak:394): dbind-WARNING **: 14:07:02.261: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   restarted after the crash: found again 
+       exit 7, 3067ms, running then failed in the open app, output in both
+FAIL corrupt record beside a healthy app 
+       the app never showed /cli-corrupt-18-27023/
+FAIL only a corrupt record: reported as that, not as no app 
+       wrong reason: "peak: the app isn't running — running without monitoring" (wanted /couldn't read|can't read/)
+PROBLEMS: 9
+shell with a different XDG_DATA_HOME (snap, IDE and sudo terminals do this): the app never showed /cli-xdg-6-74338/
+shell with HOME unset: the app never showed /cli-nohome-8-80462/
+record removed while the app stays open: the app never showed /cli-removed-9-95132/
+a second app opens, then closes: the first stays reachable: the app never showed /cli-second-closed-10-2794/
+two apps open: the run goes to exactly one, and peak says which: didn't say which: ""
+app frozen (SIGSTOP): reported as not answering, not as absent: wrong reason: "peak: the app isn't running — running without monitoring" (wanted /open.*(isn't answering)/)
+app killed: stale record is recognised and never handed the secret: the dead app's secret went to whatever holds its port now
+corrupt record beside a healthy app: the app never showed /cli-corrupt-18-27023/
+only a corrupt record: reported as that, not as no app: wrong reason: "peak: the app isn't running — running without monitoring" (wanted /couldn't read|can't read/)
+EXIT=1
+# finished 2026-11-06T14:07:11Z

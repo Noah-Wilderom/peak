@@ -1,0 +1,58 @@
+# final code. release app (bun run tauri build --no-bundle, what task peak:build runs), real window, independent CLI processes; alternate CLI = plain debug build (what task dev builds). started 2026-11-06T14:44:08Z
+0b2fc826ba39f067cd502e69726af36eb046404d43ec3d29c3b318dfce5f9708  /mnt/HC_Volume_107248377/.peak-sysroot/peak-release-cand
+e7e210a549a8832ba1d3ecd26077ed5cf5de88ef055a6f160f22da155594c932  /mnt/HC_Volume_107248377/.peak-sysroot/peak-debug-cand
+ok   no app has ever run: says so, command unaffected 
+       exit 3, 42ms, said: peak: the app isn't running on ecc5a82cb416 for tester — running without monitoring
+
+(peak:53): dbind-WARNING **: 14:44:10.696: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   app open, `peak` on PATH, cwd /tmp 
+       exit 7, 3061ms, running then failed in the open app, output in both
+ok   different working directory, relative binary path 
+       exit 7, 3044ms, running then failed in the open app, output in both
+ok   installed copy in ~/.local/bin (task peak:install's result) 
+       exit 7, 3041ms, running then failed in the open app, output in both
+ok   the other build's CLI against this app (dev <-> release) 
+       exit 7, 3048ms, running then failed in the open app, output in both
+ok   shell with a different XDG_DATA_HOME (snap, IDE and sudo terminals do this) 
+       exit 7, 3055ms, running then failed in the open app, output in both
+ok   shell with an empty XDG_DATA_HOME, and no USER 
+       exit 7, 3051ms, running then failed in the open app, output in both
+ok   shell with HOME unset 
+       exit 7, 3041ms, running then failed in the open app, output in both
+ok   record removed while the app stays open 
+       exit 7, 3064ms, running then failed in the open app, output in both
+ok   a second app opens, then closes: the first stays reachable 
+       exit 7, 3055ms, running then failed in the open app, output in both
+ok   two apps open: the run goes to exactly one, and peak says which 
+       shown in driven app: false; said: peak: 2 Peak apps are open; this run is in the one with PID 231
+ok   app frozen (SIGSTOP): reported as not answering, not as absent 
+       exit 3, 3119ms, said: peak: the app is open (PID 53) but isn't answering — running without monitoring
+ok   thawed: the same app takes commands again 
+       exit 7, 3068ms, running then failed in the open app, output in both
+ok   another user can't use this user's app 
+       own: peak: the app isn't running on ecc5a82cb416 for other — running without monitoring | pointed at this user's dir: peak: couldn't read /home/tester/.local/share/peak/instances: Permission denied (os error 13) — running without monitoring
+ok   app closed normally: truly no app 
+       exit 3, 72ms, said: peak: the app isn't running on ecc5a82cb416 for tester — running without monitoring
+
+(peak:326): dbind-WARNING **: 14:45:16.014: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   reopened: found again, in a different working directory 
+       exit 7, 3061ms, running then failed in the open app, output in both
+ok   app killed: stale record is recognised and never handed the secret 
+       exit 3, 38ms, said: peak: the app isn't running on ecc5a82cb416 for tester — running without monitoring | port reused: exit 3, 39ms, said: peak: the app isn't running on ecc5a82cb416 for tester — running without monitoring
+
+(peak:405): dbind-WARNING **: 14:45:22.617: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+ok   restarted after the crash: found again 
+       exit 7, 3075ms, running then failed in the open app, output in both
+ok   corrupt record beside a healthy app 
+       exit 7, 3052ms, running then failed in the open app, output in both
+ok   only a corrupt record: reported as that, not as no app 
+       exit 3, 68ms, said: peak: couldn't read /home/tester/.local/share/peak/control.json: key must be a string at line 1 column 3 — running without monitoring
+ALL OK
+EXIT=0
+# finished 2026-11-06T14:45:33Z

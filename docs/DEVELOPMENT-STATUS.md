@@ -3,12 +3,65 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 11:36 UTC
-- **State:** both follow-ups are accepted and pushed: standalone build/launch/install and the 1s/10s chart windows.
+- **Last update:** 2026-11-06 14:50 UTC
+- **State:** delivered and pushed through `d1d67db`. **A new fix is uncommitted and ready for PM acceptance:** "the CLI says the app isn't running while it is", below.
 - **PM delivery update:** 2026-11-06 11:40:57 UTC. Both follow-ups: `5a1f57be524a0b7fcad2fb38838257a8f62e1419` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
-## Current issue: `task peak:build`, then `peak`: "command not found"
+## Current bug: "the cli keeps saying the app isn't running while it is running"
+
+**Status: fixed and verified on real builds, uncommitted. The user's own failure hasn't been seen directly.** The exact command and launch method are still pending from the user.
+
+**This host can't show the user's case.** It has no Peak process, `~/.local/share/peak` has no `control.json` or `peak.db`, and it has no system WebKit. So the user's app isn't running here under this account. I inspected read-only and touched nothing of theirs.
+
+**Reproduction.** Unchanged `d1d67db`, a real app in a real window (container, Xvfb), and `peak run` started as separate processes with plain shell environments. Log: `docs/evidence/cli-discovery/1-reproduction-before-fix.log`, 14:04:33-14:07:11 UTC, nine failures. The ordinary path worked: `peak` on PATH, relative path, installed copy, other build's CLI, other directories. These failed:
+
+| Scenario | What happened before the fix |
+|---|---|
+| A second Peak opens, then closes | **The closest match to the report.** It overwrites the single `control.json`, which then names a dead app. The first app stays open, and the CLI says "isn't running" until that app restarts |
+| Shell with a different `XDG_DATA_HOME` | Looks in another directory: "isn't running" |
+| Shell with `HOME` unset | Same |
+| Record removed while the app is open | Same, until the app restarts |
+| Corrupt record beside a healthy app | Same |
+| Two apps open | Nothing says which one got the run |
+| App frozen | "isn't running" |
+| Only a corrupt record | "isn't running" |
+| App crashed and its port reused | **The dead app's secret was sent to whatever now held the port** |
+
+**Cause.** Discovery was one file, in a directory chosen by the shell's environment, overwritten by every launch and never tied to a process. Any failure at all became "the app isn't running", and the app ignored errors writing that file.
+
+**Fix** (`src-tauri/src/discovery.rs`):
+- Each open app has its own record, so one closing can't hide another. It's written atomically, with private permissions.
+- Records go in the data directory named by the environment and the one named by the OS account. The CLI reads both, so its environment no longer decides what it finds.
+- A record names its process: PID, start time, boot, PID and network namespaces, host. That's checked before anything goes to its port, so a dead app's secret stays put and its record is cleared. Records from another machine sharing a home directory are left alone.
+- The app restores its records every 10s if they vanish, and removes them on a normal exit. It logs when it can't write them at startup.
+- Errors are specific: no app (naming host and user), open but not answering, open but unreachable, turned away (the hub now answers a wrong secret), another network namespace, unreadable record. README has the table. In all of them the command still runs, with its own output and exit code.
+- `control.json` is still written, for an older `peak` on the PATH. A new CLI also still works with an older app. Records are owner-checked, and the hub still requires the secret and listens on localhost only.
+
+**A chart bug of mine, found here and fixed.** The regression run caught a drag jumping to Output. If a press had no reading and the first reading came at the end of the drag, it looked like a click. It came from my pointer change in the last delivery, so `5a1f57b` has it. `timeline.tsx` now records where the press happened. Three isolated repeats had passed, so it's intermittent; there's now a test that reproduces it.
+
+**After the fix,** same harness, `scripts/e2e/desktop/cli-discovery.mjs`, all 20 scenarios on both final binaries. Each monitored case starts the CLI separately, sees the run as Running in the open window, then checks output in both places and exit 7 in both.
+
+| Log | What ran | Result |
+|---|---|---|
+| `2-after-fix-release-app.log`, finished 14:45:33 UTC | Release app; CLI on PATH, relative, installed, and the debug build's | ALL OK, 20/20 |
+| `3-after-fix-dev-app.log`, finished 14:46:57 UTC | Debug build with its UI on the dev server's port; the same CLIs, with the release build's as the other | ALL OK, 20/20 |
+| `4-backend-gates.log`, 14:30:48 UTC | fmt, clippy, collector build, tests with `PEAK_REQUIRE_COLLECTOR=1` | All exit 0; 95 + 78 tests; 99.14% lines, gate 99 |
+| `5-existing-window-regression.log`, finished 14:48:31 UTC | Local capture, markers, chart drag and click, stop, 1s/10s, Python and Node agents, SSH connect, attach, disconnect, reconnect | ALL OK, 12/12 |
+| `6-frontend-gates.log`, 14:40:52 UTC | Typecheck, coverage, build | Exit 0; 255 tests; 100% |
+
+The 20 scenarios also cover restart, crash and port reuse (secret not sent), frozen then thawed, another user with their own and with this user's environment, and no app at all. Rust didn't change after log 4, only `timeline.tsx` and its test. `scripts/verify-all.sh` now includes this harness; that script itself wasn't rerun.
+
+**Immediate workaround on a build without this fix:** close and reopen the Peak app you want to use, then avoid opening and closing a second one (log 1: "reopened" and "restarted after the crash" pass). If the shell has a different data directory, run it as `XDG_DATA_HOME= peak run -- <command>` (log 1: the empty `XDG_DATA_HOME` step passes). If `peak` runs over SSH or in a container while the app is elsewhere, it really can't reach it, before or after this fix: run `peak` on the machine with the app.
+
+**Limits.**
+- The user's exact cause isn't confirmed. The new error names the host, user and reason, so the next report will say which case it is.
+- Real windows ran only in the container under Xvfb. `task dev` itself wasn't run there: it's the same plain debug build, with its UI served on the dev port by the test script. `task peak:install`'s result was simulated by copying the binary to `~/.local/bin` in the container.
+- Unit-tested only: another network namespace, a home shared with another machine, reboot, an older app's record. Not tested with a real older binary on either side.
+- The account lookup can't help a sandbox that hides the home directory (Flatpak, strict snap). Neither was run.
+- The Docker and Kubernetes window steps and the browser mock walkthrough weren't rerun. Nothing changed there beyond the chart fix above, which has unit and real-window coverage.
+
+## Resolved: `task peak:build`, then `peak`: "command not found"
 
 **Status: accepted and pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`.** Backend code is unchanged, so backend gates didn't need to run for this item.
 
@@ -46,7 +99,7 @@ Also run by hand: `task cpu DURATION=1s` in `examples/` with the existing debug 
 - No real shell profile or real `~/.local/bin` was used, as instructed. The default destination ran under a temporary `HOME`.
 - The first optimized build takes about 5 minutes. The installed app still needs Tauri's system libraries. No `.desktop` entry is created. None of this ran on GitHub Actions.
 
-## Current scope: 1s and 10s chart timeframes
+## Resolved: 1s and 10s chart timeframes
 
 **Status: accepted and pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`.** Requested as "we also need a 10 seconds and 1 second timeframe for the charts".
 Frontend only: sampling stays at 500ms and nothing in the backend changed, so backend gates don't apply.
@@ -280,4 +333,4 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-Both follow-ups are accepted and pushed. Pull latest master; use `task peak:install` and its PATH guidance for bare `peak`, or `task dev` for development, and select 1s/10s in the charts. The documented live-tooltip limit remains. Further work is the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.
+**PM:** accept the CLI discovery fix, then commit and publish to `master`. It's uncommitted in this checkout, alongside your own `docs/PROJECT-MANAGEMENT.md`. Then have the user close any open Peak, update and retry, since a running older app doesn't write the new records. If it still fails, the new message names the reason: relay that line and their launch command. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.

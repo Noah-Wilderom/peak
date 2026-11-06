@@ -16,7 +16,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::{Value, json};
 
 use crate::model::*;
@@ -81,12 +81,6 @@ pub enum Inbound {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct ControlFile {
-    pub addr: String,
-    pub secret: String,
-}
-
 /// `$XDG_DATA_HOME/peak` or `~/.local/share/peak`.
 pub fn data_dir(xdg: Option<&str>, home: Option<&str>) -> PathBuf {
     match (xdg.filter(|x| !x.is_empty()), home) {
@@ -125,19 +119,6 @@ pub fn install_agents(dir: &Path, addr: &str) -> io::Result<AgentEnv> {
     fs::write(&node, NODE_AGENT)?;
     fs::write(py.join("sitecustomize.py"), PYTHON_AGENT)?;
     Ok(AgentEnv { addr: addr.to_string(), node_agent: Some(node), python_dir: Some(py) })
-}
-
-pub fn write_control_file(dir: &Path, cf: &ControlFile) -> io::Result<PathBuf> {
-    use std::os::unix::fs::OpenOptionsExt;
-    fs::create_dir_all(dir)?;
-    let path = dir.join("control.json");
-    let mut f = fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&path)?;
-    f.write_all(serde_json::to_string(cf)?.as_bytes())?;
-    Ok(path)
-}
-
-pub fn read_control_file(dir: &Path) -> Option<ControlFile> {
-    serde_json::from_str(&fs::read_to_string(dir.join("control.json")).ok()?).ok()
 }
 
 type Pending = Arc<Mutex<HashMap<u64, mpsc::Sender<Result<Value, String>>>>>;
@@ -200,6 +181,11 @@ impl Hub {
             }
             Ok(Inbound::Register { secret, command, cwd }) if secret == self.secret => {
                 self.serve_cli(write, lines, command, cwd);
+            }
+            // Lets the CLI say it was turned away, rather than that there's no app.
+            Ok(Inbound::Register { .. }) => {
+                let mut write = write;
+                let _ = writeln!(write, "{}", json!({ "type": "rejected" }));
             }
             _ => {}
         }
@@ -415,18 +401,12 @@ mod tests {
     }
 
     #[test]
-    fn paths_and_control_file() {
+    fn paths_and_agents() {
         assert_eq!(data_dir(Some("/x"), Some("/h")), PathBuf::from("/x/peak"));
         assert_eq!(data_dir(Some(""), Some("/h")), PathBuf::from("/h/.local/share/peak"));
         assert_eq!(data_dir(None, None), std::env::temp_dir().join("peak"));
         assert!(default_data_dir().ends_with("peak"));
         let dir = tempfile::tempdir().unwrap();
-        assert!(read_control_file(dir.path()).is_none());
-        let cf = ControlFile { addr: "127.0.0.1:1".into(), secret: "s".into() };
-        let path = write_control_file(dir.path(), &cf).unwrap();
-        use std::os::unix::fs::PermissionsExt;
-        assert_eq!(fs::metadata(&path).unwrap().permissions().mode() & 0o777, 0o600);
-        assert_eq!(read_control_file(dir.path()), Some(cf));
         let env = install_agents(dir.path(), "127.0.0.1:1").unwrap();
         assert!(fs::read_to_string(env.node_agent.unwrap()).unwrap().contains("PEAK_AGENT_ADDR"));
         assert!(env.python_dir.unwrap().join("sitecustomize.py").exists());
@@ -514,9 +494,11 @@ mod tests {
     #[test]
     fn cli_registers_and_streams() {
         let (m, hub, seen) = setup();
-        // Wrong secret is ignored.
+        // A wrong secret is told so, and goes no further.
         let (mut bad, mut bad_r) = connect(&hub);
         writeln!(bad, r#"{{"type":"register","secret":"x","command":"c","cwd":"/"}}"#).unwrap();
+        let reply: Value = serde_json::from_str(&bad_r.next().unwrap().unwrap()).unwrap();
+        assert_eq!(reply["type"], "rejected");
         assert!(bad_r.next().is_none());
 
         let (mut c, mut r) = connect(&hub);

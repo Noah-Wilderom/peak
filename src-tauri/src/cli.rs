@@ -4,7 +4,7 @@
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::TcpStream;
 use std::os::unix::process::ExitStatusExt;
-use std::path::Path;
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use serde_json::{Value, json};
 
-use crate::hub::read_control_file;
+use crate::discovery::{Candidate, Here, Record, Standing, discover, start_ticks};
 use crate::runner::pump_lines;
 use std::os::unix::process::CommandExt;
 
@@ -76,42 +76,127 @@ impl Link {
 
 type Env = Vec<(String, String)>;
 
-/// Connect to a running app and register the command. Returns the link and
-/// the environment for the child (agent variables).
-fn register(data_dir: &Path, command: &str, cwd: &str) -> Option<(Arc<Link>, Env)> {
-    let cf = read_control_file(data_dir)?;
-    let addr = cf.addr.parse().ok()?;
-    let stream = TcpStream::connect_timeout(&addr, Duration::from_millis(500)).ok()?;
-    stream.set_read_timeout(Some(Duration::from_secs(2))).ok()?;
-    let mut w = stream.try_clone().ok()?;
-    writeln!(w, "{}", json!({ "type": "register", "secret": cf.secret, "command": command, "cwd": cwd })).ok()?;
+/// How long an app gets to answer. Only a frozen app makes a command wait this long.
+const ANSWER_TIMEOUT: Duration = Duration::from_secs(3);
+
+/// Why one app couldn't take this command.
+#[derive(Debug, PartialEq)]
+enum Failure {
+    Refused(String),
+    NoAnswer,
+    Rejected,
+    BadReply,
+}
+
+impl From<io::Error> for Failure {
+    fn from(e: io::Error) -> Failure {
+        match e.kind() {
+            io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut => Failure::NoAnswer,
+            _ => Failure::Refused(e.to_string()),
+        }
+    }
+}
+
+/// Register the command with one app. Returns the link and the child's environment (agent variables).
+fn register_with(record: &Record, command: &str, cwd: &str) -> Result<(Arc<Link>, Env), Failure> {
+    let addr = record.addr.parse().map_err(|_| Failure::BadReply)?;
+    let stream = TcpStream::connect_timeout(&addr, ANSWER_TIMEOUT)?;
+    stream.set_read_timeout(Some(ANSWER_TIMEOUT))?;
+    let mut w = stream.try_clone()?;
+    writeln!(w, "{}", json!({ "type": "register", "secret": record.secret, "command": command, "cwd": cwd }))?;
     let mut line = String::new();
-    BufReader::new(stream.try_clone().ok()?).read_line(&mut line).ok()?;
-    let reply: Value = serde_json::from_str(&line).ok()?;
-    if reply["type"] != "registered" {
-        return None;
+    let read = BufReader::new(stream.try_clone()?).read_line(&mut line)?;
+    // An older app closes the connection on a wrong secret instead of answering.
+    if read == 0 {
+        return Err(Failure::Rejected);
+    }
+    let reply: Value = serde_json::from_str(&line).map_err(|_| Failure::BadReply)?;
+    match reply["type"].as_str() {
+        Some("registered") => {}
+        Some("rejected") => return Err(Failure::Rejected),
+        _ => return Err(Failure::BadReply),
     }
     let env = reply["env"]
         .as_array()
         .map(|kv| kv.iter().filter_map(|p| Some((p[0].as_str()?.to_string(), p[1].as_str()?.to_string()))).collect())
         .unwrap_or_default();
-    stream.set_read_timeout(None).ok()?;
-    Some((Arc::new(Link { stream: Mutex::new(stream) }), env))
+    stream.set_read_timeout(None)?;
+    Ok((Arc::new(Link { stream: Mutex::new(stream) }), env))
 }
 
-/// Run `command`; output goes to `out`/`err` (the terminal) and, when the app
-/// is running, to peak as well. Returns the exit code to propagate.
-pub fn run<O, E>(command: &str, data_dir: &Path, out: O, err: E) -> io::Result<i32>
+/// What to tell the user about an app that couldn't take the command. `None`: an older
+/// app's record with nothing listening, which just means that app has gone.
+fn describe(c: &Candidate, failure: &Failure) -> Option<String> {
+    let addr = &c.record.addr;
+    Some(match (c.standing, c.record.pid, failure) {
+        (Standing::Live, Some(pid), Failure::NoAnswer) => format!("the app is open (PID {pid}) but isn't answering"),
+        (Standing::Live, Some(pid), Failure::Refused(e)) => {
+            format!("the app is open (PID {pid}) but can't be reached at {addr}: {e}")
+        }
+        (Standing::Live, Some(pid), Failure::Rejected) => format!("the app (PID {pid}) turned this connection away"),
+        (Standing::Live, Some(pid), Failure::BadReply) => {
+            format!("the app (PID {pid}) gave a reply this version can't read")
+        }
+        (_, _, Failure::Refused(_)) => return None,
+        (_, _, Failure::NoAnswer) => format!("something at {addr}, from {}, isn't answering", c.path.display()),
+        (_, _, Failure::Rejected) => format!("the app at {addr} turned this connection away"),
+        (_, _, Failure::BadReply) => {
+            format!("something at {addr}, from {}, doesn't answer like Peak", c.path.display())
+        }
+    })
+}
+
+/// Find an open app and register with it, or say exactly why not.
+fn connect(
+    dirs: &[PathBuf],
+    here: &Here,
+    command: &str,
+    cwd: &str,
+) -> Result<(Arc<Link>, Env, Option<String>), String> {
+    let found = discover(dirs, here, &start_ticks);
+    let mut problems = found.obstacles;
+    let apps = found.candidates.iter().filter(|c| c.standing == Standing::Live).count();
+    let mut failed = vec![];
+    for c in &found.candidates {
+        match register_with(&c.record, command, cwd) {
+            Ok((link, env)) => {
+                let note = (apps > 1).then(|| {
+                    format!("{apps} Peak apps are open; this run is in the one with PID {}", c.record.pid.unwrap_or(0))
+                });
+                return Ok((link, env, note));
+            }
+            Err(f) => failed.extend(describe(c, &f)),
+        }
+    }
+    // An app that failed to answer says more than a record that couldn't be read.
+    failed.append(&mut problems);
+    Err(failed
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| format!("the app isn't running on {} for {}", here.host, here.user)))
+}
+
+/// Run `command`; output goes to `out`/`err` (the terminal) and, when an app
+/// can take it, to peak as well. Returns the exit code to propagate.
+pub fn run<O, E>(command: &str, dirs: &[PathBuf], out: O, err: E) -> io::Result<i32>
 where
     O: Write + Send + 'static,
     E: Write + Send + 'static,
 {
     let cwd = std::env::current_dir().map(|p| p.display().to_string()).unwrap_or_default();
-    let link = register(data_dir, command, &cwd);
     let mut err = err;
-    if link.is_none() {
-        writeln!(err, "peak: the app isn't running — running without monitoring")?;
-    }
+    let link = match connect(dirs, &Here::detect(), command, &cwd) {
+        Ok((link, env, note)) => {
+            if let Some(note) = note {
+                writeln!(err, "peak: {note}")?;
+            }
+            Some((link, env))
+        }
+        Err(why) => {
+            writeln!(err, "peak: {why} — running without monitoring")?;
+            None
+        }
+    };
     let mut cmd = Command::new("/bin/sh");
     cmd.arg("-c").arg(command).stdin(Stdio::inherit()).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some((_, env)) = &link {
@@ -153,7 +238,7 @@ where
     Ok(exit_code(status.code(), status.signal()))
 }
 
-pub fn main(cli: Cli, data_dir: &Path) -> i32 {
+pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
     match cli {
         Cli::Help => {
             println!("{USAGE}");
@@ -174,7 +259,7 @@ pub fn main(cli: Cli, data_dir: &Path) -> i32 {
                 }
             }
         }
-        Cli::Run(command) => match run(&command, data_dir, io::stdout(), io::stderr()) {
+        Cli::Run(command) => match run(&command, dirs, io::stdout(), io::stderr()) {
             Ok(code) => code,
             Err(e) => {
                 eprintln!("peak: {e}");
@@ -187,12 +272,26 @@ pub fn main(cli: Cli, data_dir: &Path) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hub::{ControlFile, Hub, write_control_file};
+    use crate::discovery::{Publication, default_dirs};
+    use crate::hub::Hub;
     use crate::model::Status;
     use crate::monitor::{AgentEnv, Monitor};
     use crate::procfs::ProcFs;
 
     fn ignore_proc(_: crate::model::Proc) {}
+
+    /// A record as an older app wrote it: an address, a secret and nothing to verify.
+    fn old_record(dir: &std::path::Path, addr: String, secret: &str) -> Vec<PathBuf> {
+        std::fs::write(dir.join("control.json"), json!({ "addr": addr, "secret": secret }).to_string()).unwrap();
+        vec![dir.to_path_buf()]
+    }
+
+    /// This test process, published as an open app.
+    fn publish(dir: &std::path::Path, addr: String, secret: &str) -> Vec<PathBuf> {
+        let dirs = vec![dir.to_path_buf()];
+        assert!(Publication::new(addr, secret.into(), &dirs, &Here::detect()).publish().is_empty());
+        dirs
+    }
 
     fn s(v: &[&str]) -> Vec<String> {
         v.iter().map(|x| x.to_string()).collect()
@@ -243,17 +342,141 @@ mod tests {
     #[test]
     fn runs_without_the_app() {
         let dir = tempfile::tempdir().unwrap();
+        let dirs = vec![dir.path().to_path_buf()];
         let (out, err) = (Buf::default(), Buf::default());
-        let code = run("echo hi; echo bad >&2; exit 4", dir.path(), out.clone(), err.clone()).unwrap();
+        let code = run("echo hi; echo bad >&2; exit 4", &dirs, out.clone(), err.clone()).unwrap();
         assert_eq!(code, 4);
         assert_eq!(out.text(), "hi\n");
-        assert!(err.text().contains("isn't running"));
+        let here = Here::detect();
+        assert!(err.text().starts_with(&format!(
+            "peak: the app isn't running on {} for {} — running without monitoring\n",
+            here.host, here.user
+        )));
         assert!(err.text().contains("bad"));
-        // A stale control file behaves the same.
-        write_control_file(dir.path(), &ControlFile { addr: "127.0.0.1:1".into(), secret: "x".into() }).unwrap();
-        assert_eq!(run("true", dir.path(), Buf::default(), Buf::default()).unwrap(), 0);
-        write_control_file(dir.path(), &ControlFile { addr: "not an addr".into(), secret: "x".into() }).unwrap();
-        assert_eq!(run("true", dir.path(), Buf::default(), Buf::default()).unwrap(), 0);
+        // An older app's record with nothing listening means the same.
+        let err = Buf::default();
+        old_record(dir.path(), "127.0.0.1:1".into(), "x");
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(err.text().contains("isn't running"));
+    }
+
+    #[test]
+    fn tells_a_bad_record_from_no_app() {
+        let dir = tempfile::tempdir().unwrap();
+        let dirs = vec![dir.path().to_path_buf()];
+        std::fs::write(dir.path().join("control.json"), "{ not json").unwrap();
+        let err = Buf::default();
+        assert_eq!(run("exit 2", &dirs, Buf::default(), err.clone()).unwrap(), 2);
+        assert!(err.text().contains("couldn't read") && err.text().contains("without monitoring"), "{}", err.text());
+        let err = Buf::default();
+        old_record(dir.path(), "not an addr".into(), "x");
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(err.text().contains("doesn't answer like Peak"), "{}", err.text());
+    }
+
+    #[test]
+    fn describes_each_failure() {
+        let live = Candidate {
+            record: Record { addr: "a:1".into(), pid: Some(5), ..Default::default() },
+            standing: Standing::Live,
+            path: "/r".into(),
+        };
+        let old = Candidate { standing: Standing::Unverified, ..live.clone() };
+        let said = |c: &Candidate, f: Failure| describe(c, &f);
+        assert_eq!(said(&live, Failure::NoAnswer).unwrap(), "the app is open (PID 5) but isn't answering");
+        assert!(said(&live, Failure::Refused("nope".into())).unwrap().contains("can't be reached at a:1: nope"));
+        assert!(said(&live, Failure::Rejected).unwrap().contains("turned this connection away"));
+        assert!(said(&live, Failure::BadReply).unwrap().contains("can't read"));
+        assert_eq!(said(&old, Failure::Refused("nope".into())), None);
+        assert!(said(&old, Failure::NoAnswer).unwrap().contains("isn't answering"));
+        assert!(said(&old, Failure::Rejected).unwrap().contains("turned this connection away"));
+        assert!(said(&old, Failure::BadReply).unwrap().contains("doesn't answer like Peak"));
+        assert_eq!(Failure::from(io::Error::from(io::ErrorKind::WouldBlock)), Failure::NoAnswer);
+    }
+
+    #[test]
+    fn reports_an_app_that_stopped_answering() {
+        use std::net::TcpListener;
+        let dir = tempfile::tempdir().unwrap();
+        let l = TcpListener::bind("127.0.0.1:0").unwrap();
+        // Accepted by the kernel, never read: what a frozen app looks like.
+        let dirs = publish(dir.path(), l.local_addr().unwrap().to_string(), "s");
+        let err = Buf::default();
+        assert_eq!(run("exit 6", &dirs, Buf::default(), err.clone()).unwrap(), 6);
+        assert!(
+            err.text().contains(&format!("the app is open (PID {}) but isn't answering", std::process::id())),
+            "{}",
+            err.text()
+        );
+        drop(l);
+    }
+
+    #[test]
+    fn says_which_app_when_several_are_open() {
+        let dir = tempfile::tempdir().unwrap();
+        let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
+        let hub = Hub::start(m, "sek".into(), Arc::new(ignore_proc)).unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "sek");
+        // A second live app in the records. It's this same process, under another name.
+        let here = Here::detect();
+        let second = Record {
+            addr: "127.0.0.1:1".into(),
+            secret: "other".into(),
+            pid: Some(std::process::id()),
+            start_ticks: start_ticks(std::process::id()),
+            boot_id: Some(here.boot_id.clone()),
+            pid_ns: Some(here.pid_ns.clone()),
+            net_ns: Some(here.net_ns.clone()),
+            host: Some(here.host.clone()),
+            data_dir: Some("/elsewhere".into()),
+            started_at: Some(1),
+        };
+        std::fs::write(dir.path().join("instances/other.json"), serde_json::to_string(&second).unwrap()).unwrap();
+        let err = Buf::default();
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(
+            err.text().starts_with(&format!(
+                "peak: 2 Peak apps are open; this run is in the one with PID {}",
+                std::process::id()
+            )),
+            "{}",
+            err.text()
+        );
+    }
+
+    #[test]
+    fn passes_over_an_app_that_cant_take_it() {
+        let dir = tempfile::tempdir().unwrap();
+        let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
+        let hub = Hub::start(m.clone(), "sek".into(), Arc::new(ignore_proc)).unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "sek");
+        let here = Here::detect();
+        let closed = Record {
+            addr: "127.0.0.1:1".into(),
+            secret: "x".into(),
+            pid: Some(std::process::id()),
+            start_ticks: start_ticks(std::process::id()),
+            boot_id: Some(here.boot_id.clone()),
+            pid_ns: Some(here.pid_ns.clone()),
+            net_ns: Some(here.net_ns.clone()),
+            host: Some(here.host.clone()),
+            data_dir: Some(dir.path().display().to_string()),
+            started_at: Some(u64::MAX),
+        };
+        std::fs::write(dir.path().join("instances/first.json"), serde_json::to_string(&closed).unwrap()).unwrap();
+        let err = Buf::default();
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(!err.text().contains("without monitoring"), "{}", err.text());
+    }
+
+    #[test]
+    fn says_an_open_apps_port_is_closed() {
+        let dir = tempfile::tempdir().unwrap();
+        let dirs = publish(dir.path(), "127.0.0.1:1".into(), "s");
+        let err = Buf::default();
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(err.text().contains("but can't be reached at 127.0.0.1:1"), "{}", err.text());
+        assert!(!default_dirs().is_empty());
     }
 
     #[test]
@@ -261,9 +484,9 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let m = Monitor::new(ProcFs::default(), AgentEnv { addr: "127.0.0.1:9".into(), ..Default::default() }).shared();
         let hub = Hub::start(m.clone(), "sek".into(), Arc::new(ignore_proc)).unwrap();
-        write_control_file(dir.path(), &ControlFile { addr: hub.addr().to_string(), secret: "sek".into() }).unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "sek");
         let out = Buf::default();
-        let code = run("echo $PEAK_AGENT_ADDR; echo line2", dir.path(), out.clone(), Buf::default()).unwrap();
+        let code = run("echo $PEAK_AGENT_ADDR; echo line2", &dirs, out.clone(), Buf::default()).unwrap();
         assert_eq!(code, 0);
         assert_eq!(out.text(), "127.0.0.1:9\nline2\n");
         let ended = (0..200).find_map(|_| {
@@ -277,25 +500,55 @@ mod tests {
     }
 
     #[test]
+    fn still_works_with_an_older_apps_record() {
+        let dir = tempfile::tempdir().unwrap();
+        let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
+        let hub = Hub::start(m, "sek".into(), Arc::new(ignore_proc)).unwrap();
+        let dirs = old_record(dir.path(), hub.addr().to_string(), "sek");
+        let err = Buf::default();
+        assert_eq!(run("exit 3", &dirs, Buf::default(), err.clone()).unwrap(), 3);
+        assert_eq!(err.text(), "");
+    }
+
+    #[test]
     fn wrong_secret_falls_back() {
         let dir = tempfile::tempdir().unwrap();
         let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
         let hub = Hub::start(m, "right".into(), Arc::new(ignore_proc)).unwrap();
-        write_control_file(dir.path(), &ControlFile { addr: hub.addr().to_string(), secret: "wrong".into() }).unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "wrong");
         let err = Buf::default();
-        assert_eq!(run("exit 0", dir.path(), Buf::default(), err.clone()).unwrap(), 0);
-        assert!(err.text().contains("isn't running"));
+        assert_eq!(run("exit 0", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        assert!(err.text().contains("turned this connection away"), "{}", err.text());
+        assert!(err.text().contains("without monitoring"));
+    }
+
+    #[test]
+    fn an_older_app_hanging_up_counts_as_turned_away() {
+        use std::net::TcpListener;
+        let dir = tempfile::tempdir().unwrap();
+        let l = TcpListener::bind("127.0.0.1:0").unwrap();
+        let dirs = old_record(dir.path(), l.local_addr().unwrap().to_string(), "s");
+        let server = thread::spawn(move || {
+            let (s, _) = l.accept().unwrap();
+            let mut line = String::new();
+            BufReader::new(s.try_clone().unwrap()).read_line(&mut line).unwrap();
+        });
+        let err = Buf::default();
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
+        server.join().unwrap();
+        assert!(err.text().contains("turned this connection away"), "{}", err.text());
     }
 
     #[test]
     fn help_and_spawn_errors() {
         let dir = tempfile::tempdir().unwrap();
-        assert_eq!(main(Cli::Help, dir.path()), 0);
+        let dirs = vec![dir.path().to_path_buf()];
+        assert_eq!(main(Cli::Help, &dirs), 0);
         #[cfg(peak_embedded_collector)]
-        assert_eq!(main(Cli::Collector, dir.path()), 0, "this build can name its collector");
-        assert_eq!(main(Cli::Run("exit 5".into()), dir.path()), 5);
+        assert_eq!(main(Cli::Collector, &dirs), 0, "this build can name its collector");
+        assert_eq!(main(Cli::Run("exit 5".into()), &dirs), 5);
         // A NUL byte can't be passed to exec.
-        assert_eq!(main(Cli::Run("a\0b".into()), dir.path()), 127);
+        assert_eq!(main(Cli::Run("a\0b".into()), &dirs), 127);
     }
 
     #[test]
@@ -303,8 +556,7 @@ mod tests {
         use std::net::TcpListener;
         let dir = tempfile::tempdir().unwrap();
         let l = TcpListener::bind("127.0.0.1:0").unwrap();
-        write_control_file(dir.path(), &ControlFile { addr: l.local_addr().unwrap().to_string(), secret: "s".into() })
-            .unwrap();
+        let dirs = old_record(dir.path(), l.local_addr().unwrap().to_string(), "s");
         let server = thread::spawn(move || {
             let (s, _) = l.accept().unwrap();
             let mut line = String::new();
@@ -312,8 +564,8 @@ mod tests {
             writeln!(&s, "{}", json!({"type": "nope"})).unwrap();
         });
         let err = Buf::default();
-        assert_eq!(run("true", dir.path(), Buf::default(), err.clone()).unwrap(), 0);
+        assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
         server.join().unwrap();
-        assert!(err.text().contains("isn't running"));
+        assert!(err.text().contains("doesn't answer like Peak"), "{}", err.text());
     }
 }

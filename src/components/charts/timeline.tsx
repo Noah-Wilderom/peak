@@ -88,7 +88,8 @@ export function useTimelineChart() {
   const glide = useTimeDomain(proc, view, paused)
   const [from, to] = held ? [held.from, held.to] : glide
   const [sel, setSel] = useState<{ a: number; b: number; x: number } | null>(null)
-  const pressed = useRef(false)
+  // Where the pointer went down. The selection can start later than the press.
+  const pressed = useRef<number | null>(null)
   // A chart can go away mid-drag, and nothing else would release the others.
   useEffect(() => () => setHeld(null), [setHeld])
 
@@ -110,7 +111,7 @@ export function useTimelineChart() {
   }
 
   const release = () => {
-    pressed.current = false
+    pressed.current = null
     setSel(null)
     setHeld(null)
   }
@@ -120,7 +121,7 @@ export function useTimelineChart() {
     syncMethod: "value" as const,
     onMouseDown: (s: MouseHandlerDataParam, e: React.MouseEvent) => {
       const x = label(s)
-      pressed.current = true
+      pressed.current = e.clientX
       setHeld({ from, to, proc })
       if (Number.isFinite(x)) setSel({ a: x, b: x, x: e.clientX })
     },
@@ -130,7 +131,7 @@ export function useTimelineChart() {
       // if it's only starting, it starts with the first reading.
       const x = label(s)
       if (sel) setSel({ ...sel, b: Number.isFinite(x) ? x : e.clientX > sel.x ? to : from })
-      else if (pressed.current && Number.isFinite(x)) setSel({ a: x, b: x, x: e.clientX })
+      else if (pressed.current !== null && Number.isFinite(x)) setSel({ a: x, b: x, x: pressed.current })
     },
     onMouseUp: (_: MouseHandlerDataParam, e: React.MouseEvent) => {
       // Pointer positions snap to samples, which can sit just past the plot's edges.

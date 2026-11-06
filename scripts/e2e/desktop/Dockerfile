@@ -6,8 +6,9 @@ FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libwebkit2gtk-4.1-0 webkit2gtk-driver libayatana-appindicator3-1 librsvg2-2 \
       xvfb xauth dbus dbus-x11 ca-certificates dunst \
-      openssh-server openssh-client python3 procps fonts-dejavu-core curl xz-utils \
+      openssh-server openssh-client python3 procps sudo fonts-dejavu-core curl xz-utils \
     && rm -rf /var/lib/apt/lists/* \
     && curl -fsSL https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.xz | tar xJ -C /usr/local --strip-components=1 \
     && rm -f /usr/share/dbus-1/services/*dunst* \
-    && useradd -m tester && mkdir -p /run/sshd
+    && useradd -m tester && useradd -m other && mkdir -p /run/sshd \
+    && echo "tester ALL=(other) NOPASSWD:SETENV: ALL" > /etc/sudoers.d/tester

@@ -49,6 +49,7 @@ src-tauri/                    workspace root; package `peak` is the desktop app
     transport.rs              ssh/docker/kubectl commands, collector install, discovery parsers
     service.rs                monitor + hub + db + remote; Tauri commands call this
     cli.rs                    `peak run -- <cmd>`
+    discovery.rs              how the CLI finds an open app: per-app records, identity checks
     lib.rs                    Tauri commands/events (thin), app setup, tick thread
   tests/live_*.rs             live validation, #[ignore]d (see REMOTE-VALIDATION.md)
   agents/                     peak-agent.cjs, python/sitecustomize.py, tests/
@@ -91,6 +92,7 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **Spawned children must not inherit ignored signals.** `runner::reset_signals` runs in `pre_exec`.
 - **`Monitor` lock scope.** `tick` holds it while reading `/proc`. Remote I/O never goes near it.
 - **`now_ms()` is anchored once and advanced monotonically,** so clock changes don't break rates. `wall_ms()` reads the clock.
+- **Finding the app.** Each open app writes `instances/<pid>-<start ticks>.json` to the data directory named by the environment and to the one named by the OS account, and restores them every 10s if they vanish. `control.json` is only for an older `peak` on the PATH. A record's process is checked before its port gets the secret. An app started with a temporary `XDG_DATA_HOME` is therefore still visible to that user's other shells, though a CLI prefers the app sharing its data directory.
 - **Hub tokens are run ids**, so the hub stays localhost-only, on whichever machine it runs.
 - **Serde and internally tagged enums:** integer map keys fail through them (`ServerFrame`), so `child_names` uses strings.
 - **`kubectl auth can-i` needs `--subresource`:** `pods/log` would ask about a pod named `log`.
@@ -125,6 +127,7 @@ cd src-tauri && cargo test --workspace
 cd src-tauri && cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|live_\w+)\.rs$' --fail-under-lines 99
 task test:live               # live SSH, Docker, Kubernetes against disposable environments
 scripts/e2e/desktop/run.sh   # the real desktop binary with real backends, in containers (see its header)
+PEAK_E2E_SCRIPT=cli-discovery.mjs NO_DIND=1 NO_K3S=1 PEAK_E2E_ALT_CLI=<binary> scripts/e2e/desktop/run.sh ...   # real CLI to an already open real app
 PEAK_TOOLS=<dir> scripts/verify-all.sh   # all of the above and the browser walkthrough, with a dated log
 ```
 
@@ -135,7 +138,8 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 
 All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. The build/launch fix and the 1s
 and 10s chart windows are accepted and published as `5a1f57be524a0b7fcad2fb38838257a8f62e1419` (see
-[`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md) for evidence and limits). What remains is outside what this machine could validate:
+[`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md) for evidence and limits). The CLI discovery fix is verified and uncommitted,
+waiting on PM acceptance and publishing. What remains is outside what this machine could validate:
 
 1. Close the live gaps in [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md), starting with SSH to a real second machine.
 2. Build and validate arm64. The collector already travels inside the app binary, including in installers.

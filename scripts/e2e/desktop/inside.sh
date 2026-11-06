@@ -22,5 +22,5 @@ exec su --preserve-environment tester -c '
   export DOCKER_HOST=tcp://peak-live-dind:2375 KUBECONFIG=/opt/peak/cli/kubeconfig
   export WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 XDG_DATA_HOME=$HOME/.local/share
   cd /opt/e2e
-  dbus-run-session -- xvfb-run -a -s "-screen 0 1440x950x24" node desktop.mjs
+  dbus-run-session -- xvfb-run -a -s "-screen 0 1440x950x24" node "${PEAK_E2E_SCRIPT:-desktop.mjs}"
 '

@@ -68,6 +68,7 @@ PID=$(ss -ltnp 2>/dev/null | grep ':1420 ' | grep -oE 'pid=[0-9]+' | head -1 | c
 
 gate desktop-binary bash -c "bun run build && cd src-tauri && cargo build --features tauri/custom-protocol"
 TAIL=60 gate desktop-real scripts/e2e/desktop/run.sh src-tauri/target/debug/peak "$TOOLS/tauri-driver/bin/tauri-driver" - "$TOOLS/bin/kubectl" "$SHOTS/desktop"
+TAIL=40 gate cli-to-open-app env PEAK_E2E_SCRIPT=cli-discovery.mjs NO_DIND=1 NO_K3S=1 PEAK_E2E_ALT_CLI=src-tauri/target/debug/peak scripts/e2e/desktop/run.sh src-tauri/target/debug/peak "$TOOLS/tauri-driver/bin/tauri-driver" - "$TOOLS/bin/kubectl" "$SHOTS/desktop"
 [ -f "$SHOTS/desktop/notifications-received.log" ] && cp "$SHOTS/desktop/notifications-received.log" "$OUT/"
 
 echo; echo "leftover disposable containers: $(docker ps -a --filter name=peak-live --format '{{.Names}}' | wc -l)"

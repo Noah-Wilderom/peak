@@ -258,6 +258,24 @@ describe("drag and click in short windows", () => {
     expect(c.current.held).toBeNull()
   })
 
+  it("doesn't mistake a drag for a click when its first reading comes at the end", () => {
+    const end = started + 39 * TICK_MS
+    const setView = vi.fn()
+    const onJump = vi.fn()
+    const c = chartOf(run(40), { kind: "live", range: "1s" }, "elapsed", true, { setView, onJump })
+    const event = (clientX: number) => ({ clientX }) as React.MouseEvent
+    act(() => c.current.chart.onMouseDown({} as never, event(100)))
+    act(() => c.current.chart.onMouseMove({ activeLabel: end - 100 } as never, event(700)))
+    act(() => c.current.chart.onMouseUp({} as never, event(700)))
+    expect(onJump).not.toHaveBeenCalled()
+    expect(setView).not.toHaveBeenCalled()
+    // A press and release in one place is still a click, whenever its reading came.
+    act(() => c.current.chart.onMouseDown({} as never, event(300)))
+    act(() => c.current.chart.onMouseMove({ activeLabel: end - 500 } as never, event(301)))
+    act(() => c.current.chart.onMouseUp({} as never, event(301)))
+    expect(onJump).toHaveBeenCalledWith(end - 500)
+  })
+
   it("does not zoom a 10s window across a single sample interval", async () => {
     const setView = vi.fn()
     const { container } = render(
