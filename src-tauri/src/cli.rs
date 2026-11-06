@@ -259,6 +259,18 @@ where
     Ok(exit_code(ended.code, ended.signal))
 }
 
+/// Which collector this build copies to a target of `arch`. It's a Linux program, so it can
+/// only say its own version where this machine can run it.
+fn collector_line(arch: &str) -> Result<String, String> {
+    let path = crate::transport::local_collector(&crate::transport::Tools::default(), arch)?;
+    if !cfg!(target_os = "linux") {
+        return Ok(format!("{arch}: {} (for Linux targets)", path.display()));
+    }
+    let version = Command::new(&path).arg("version").output();
+    let version = version.map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
+    Ok(format!("{arch}: {} ({})", path.display(), version.unwrap_or_else(|e| e.to_string())))
+}
+
 pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
     match cli {
         Cli::Help => {
@@ -269,21 +281,16 @@ pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
             println!("{}", crate::release::InstallInfo::detect().line());
             0
         }
-        Cli::Collector => {
-            let arch = std::env::consts::ARCH;
-            match crate::transport::local_collector(&crate::transport::Tools::default(), arch) {
-                Ok(path) => {
-                    let version = Command::new(&path).arg("version").output();
-                    let version = version.map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
-                    println!("{arch}: {} ({})", path.display(), version.unwrap_or_else(|e| e.to_string()));
-                    0
-                }
-                Err(e) => {
-                    eprintln!("peak: {e}");
-                    1
-                }
+        Cli::Collector => match collector_line(std::env::consts::ARCH) {
+            Ok(line) => {
+                println!("{line}");
+                0
             }
-        }
+            Err(e) => {
+                eprintln!("peak: {e}");
+                1
+            }
+        },
         Cli::Run(command) => match run(&command, dirs, io::stdout(), io::stderr()) {
             Ok(code) => code,
             Err(e) => {
@@ -565,6 +572,11 @@ mod tests {
         assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
         server.join().unwrap();
         assert!(err.text().contains("turned this connection away"), "{}", err.text());
+    }
+
+    #[test]
+    fn says_when_there_is_no_collector_for_an_architecture() {
+        assert!(collector_line("riscv64").unwrap_err().contains("riscv64"));
     }
 
     #[test]

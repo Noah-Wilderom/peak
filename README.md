@@ -38,6 +38,7 @@ Use it the same way everywhere: open the app, then run `peak run -- <command>` i
 | CPU split into user and system, threads, page faults | Yes | Yes | Yes |
 | Memory composition (anonymous, file, shared), swap per process | Yes | No | No |
 | File and socket handle counts, listening ports | Yes | No: shown as not tracked | No: shown as not tracked |
+| Stopping a command lets it clean up | Yes | Only if it has a window | Yes |
 | Memory pressure (PSI) | Yes | No | No |
 | Load average | Yes | No: left out | Yes |
 | Remote targets (SSH, Docker, Kubernetes on Linux machines) | Yes | Built in, not yet validated live | Built in, not yet validated live |

@@ -564,6 +564,12 @@ mod tests {
         let blocker = dir.path().join("blocker");
         std::fs::write(&blocker, "").unwrap();
         assert!(Db::open(&blocker.join("sub/peak.db")).is_err());
+        // Settings saved before update checks existed keep their values, with checks on.
+        let older = r#"{"retentionDays":3,"maxRuns":9,"alertsEnabled":false,"notifications":false,"alertMemoryMib":1.0,"alertCpuPercent":2.0,"alertCpuSeconds":3.0}"#;
+        db.conn.execute("UPDATE settings SET value = ?1", [older]).unwrap();
+        let upgraded = db.settings();
+        assert_eq!((upgraded.retention_days, upgraded.alerts_enabled), (3, false));
+        assert!(upgraded.check_for_updates);
         // Settings that fail to parse fall back to defaults.
         db.conn.execute("UPDATE settings SET value = 'nope'", []).unwrap();
         assert_eq!(db.settings(), Settings::default());

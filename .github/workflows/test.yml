@@ -63,7 +63,9 @@ jobs:
       # Core modules are covered by tests; lib.rs/main.rs are thin glue. The live_*
       # files are test harnesses for real infrastructure (see docs/REMOTE-VALIDATION.md).
       - run: cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
-      - run: cargo llvm-cov report --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --summary-only
+      # Even when the gate fails, say by how much.
+      - if: always()
+        run: cargo llvm-cov report --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --summary-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:

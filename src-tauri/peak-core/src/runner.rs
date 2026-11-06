@@ -200,13 +200,17 @@ pub fn appimage_env_fixes(vars: impl Iterator<Item = (String, String)>) -> Vec<(
 pub fn host_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
     let mut c = Command::new(program);
     let vars = std::env::vars_os().filter_map(|(k, v)| Some((k.into_string().ok()?, v.into_string().ok()?)));
-    for (k, v) in appimage_env_fixes(vars) {
+    apply_env_fixes(&mut c, appimage_env_fixes(vars));
+    c
+}
+
+fn apply_env_fixes(c: &mut Command, fixes: Vec<(String, Option<String>)>) {
+    for (k, v) in fixes {
         match v {
             Some(v) => c.env(k, v),
             None => c.env_remove(k),
         };
     }
-    c
 }
 
 /// Give the child its own process group, so it can be stopped with what it started.
@@ -286,8 +290,9 @@ pub fn alive(pid: u32) -> bool {
     signal_pid(pid, 0)
 }
 
-/// The nearest Windows has: SIGKILL ends the process tree now; anything else asks it to
-/// close, which programs without a window may ignore, so a stop escalates as it does elsewhere.
+/// The nearest Windows has: SIGKILL ends the process tree now; anything else asks it to close.
+/// A program with no window can't be asked, and taskkill says so, so that ends it outright:
+/// on Windows such a program gets no chance to clean up when stopped.
 #[cfg(windows)]
 fn taskkill(pid: u32, tree: bool, force: bool) -> bool {
     let mut c = Command::new("taskkill");
@@ -304,12 +309,12 @@ fn taskkill(pid: u32, tree: bool, force: bool) -> bool {
 
 #[cfg(windows)]
 pub fn signal_group(pid: u32, sig: i32) -> bool {
-    taskkill(pid, true, sig == SIGKILL)
+    (sig != SIGKILL && taskkill(pid, true, false)) || taskkill(pid, true, true)
 }
 
 #[cfg(windows)]
 pub fn signal_pid(pid: u32, sig: i32) -> bool {
-    taskkill(pid, false, sig == SIGKILL)
+    (sig != SIGKILL && taskkill(pid, false, false)) || taskkill(pid, false, true)
 }
 
 #[cfg(windows)]
@@ -364,6 +369,15 @@ mod tests {
         // Outside an AppImage there's nothing to undo.
         assert!(appimage_env_fixes(vars(&[("PATH", "/usr/bin"), ("OWD", "/x")]).into_iter()).is_empty());
         assert!(appimage_env_fixes(vars(&[("APPDIR", "")]).into_iter()).is_empty());
+    }
+
+    #[test]
+    fn applies_the_fixes_to_a_command() {
+        let mut c = Command::new("/bin/sh");
+        c.args(["-c", "echo \"$FIXED|$GONE\""]).env("GONE", "here");
+        apply_env_fixes(&mut c, vec![("FIXED".into(), Some("/usr/bin".into())), ("GONE".into(), None)]);
+        let out = c.output().unwrap();
+        assert_eq!(String::from_utf8_lossy(&out.stdout).trim(), "/usr/bin|");
     }
 
     #[test]

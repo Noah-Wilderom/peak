@@ -91,12 +91,15 @@ pub fn data_dir(xdg: Option<&str>, home: Option<&str>) -> PathBuf {
 }
 
 /// `peak` in the per-user application data directory for a given home.
+#[cfg(target_os = "macos")]
 pub fn data_dir_in_home(home: &Path) -> PathBuf {
-    if cfg!(target_os = "macos") {
-        home.join("Library/Application Support/peak")
-    } else {
-        home.join(".local/share/peak")
-    }
+    home.join("Library/Application Support/peak")
+}
+
+/// `peak` in the per-user application data directory for a given home.
+#[cfg(not(target_os = "macos"))]
+pub fn data_dir_in_home(home: &Path) -> PathBuf {
+    home.join(".local/share/peak")
 }
 
 #[cfg(target_os = "linux")]

@@ -9,8 +9,11 @@ theme.init();
 // Only the disposable builds that prove the update path set this. It presses the same
 // buttons a person would, where there's no WebDriver to do it (macOS).
 if (import.meta.env.VITE_PEAK_E2E_AUTOUPDATE) {
-  void import("@/lib/update-proof").then(function pass(m) {
-    void m.updateProofPass().finally(() => setTimeout(() => pass(m), 3000));
+  void import("@/lib/update-proof").then((m) => {
+    m.recordProofFailures();
+    (function pass() {
+      void m.updateProofPass().finally(() => setTimeout(pass, 3000));
+    })();
   });
 }
 

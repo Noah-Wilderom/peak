@@ -84,7 +84,12 @@ jobs:
         shell: bash
         run: |
           PUB=$(node -p "require('./src-tauri/tauri.conf.json').plugins.updater.pubkey")
-          for sig in artifacts/*.sig; do node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB"; done
+          checked=0
+          for sig in artifacts/*.sig; do
+            node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+            checked=$((checked + 1))
+          done
+          [ "$checked" -gt 0 ]
       - name: Smoke test the packaged app
         shell: bash
         env:

@@ -444,6 +444,12 @@ mod tests {
     }
 
     #[test]
+    fn the_test_connector_connects_to_nothing() {
+        let spec = crate::remote::TargetSpec { id: "t".into(), ..Default::default() };
+        assert!(NoConnector.connect(&spec).is_err());
+    }
+
+    #[test]
     fn deletes_prunes_and_reports_storage() {
         let s = service();
         let a = monitor::capture(&s.monitor, "exit 0", "/tmp").unwrap();

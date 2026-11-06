@@ -99,7 +99,11 @@ pub fn launch_dir(appdir: Option<&OsStr>, owd: Option<&OsStr>) -> Option<PathBuf
 
 /// The first thing the command line does.
 pub fn restore_launch_dir() {
-    if let Some(dir) = launch_dir(std::env::var_os("APPDIR").as_deref(), std::env::var_os("OWD").as_deref()) {
+    enter(launch_dir(std::env::var_os("APPDIR").as_deref(), std::env::var_os("OWD").as_deref()));
+}
+
+fn enter(dir: Option<PathBuf>) {
+    if let Some(dir) = dir {
         let _ = std::env::set_current_dir(dir);
     }
 }
@@ -136,6 +140,14 @@ mod tests {
         assert_eq!(launch_dir(Some(OsStr::new("")), Some(owd)), None);
         assert_eq!(launch_dir(Some(app), Some(OsStr::new(""))), None);
         restore_launch_dir();
+        // The working directory is shared across this test process, so put it back.
+        let here = std::env::current_dir().unwrap();
+        let d = tempfile::tempdir().unwrap();
+        enter(Some(d.path().to_path_buf()));
+        assert_eq!(std::env::current_dir().unwrap().canonicalize().unwrap(), d.path().canonicalize().unwrap());
+        enter(Some(here.clone()));
+        enter(None);
+        assert_eq!(std::env::current_dir().unwrap(), here);
     }
 
     #[test]

@@ -1,0 +1,23 @@
+# commit 03f6ccf Update proof / Upgrade (linux): success. job 128169240101
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+  PEAK_SMOKE_PLATFORM: linux
+  PEAK_PROOF_TARGET: x86_64-unknown-linux-gnu
+ok   the base version is installed peak 9.0.0 (AppImage, commit 03f6ccfbae2714d5569063c13e29f6b2fc76bf34)
+ok   a run recorded before the update history-1794001683100-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 3, artifact 0
+ok   malformed: nothing installed, app alive feed 3, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 7, artifact 6
+ok   truncated: nothing installed, app alive feed 6, artifact 5
+ok   tampered: nothing installed, app alive feed 6, artifact 5
+ok   wrong-key: nothing installed, app alive feed 5, artifact 5
+ok   downloaded from the feed feed 1, artifact 1
+ok   the old app exited and a new one started 11652 -> 11754
+ok   the installed copy is the new version peak 9.0.1 (AppImage, commit 03f6ccfbae2714d5569063c13e29f6b2fc76bf34)
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 7
+ok   the new app monitors the CLI post-1794002082672-err
+ok   that workload finished with its own exit code exit 9
+PROOF OK

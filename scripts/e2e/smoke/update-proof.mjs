@@ -10,7 +10,7 @@ import { spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
 import { dirname } from "node:path"
 import { createServer } from "node:http"
-import { IS_WINDOWS, PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, readdirSync, shot, sleep, storedRun, tmpdir, waitFor, workload, writeFileSync } from "./lib.mjs"
+import { IS_WINDOWS, PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, proofFailures, readFileSync, readdirSync, shot, sleep, storedRun, tmpdir, waitFor, workload, writeFileSync } from "./lib.mjs"
 import { buildPair } from "./build-pair.mjs"
 
 const out = process.argv[2]
@@ -121,6 +121,7 @@ const fresh = await waitFor("the updated app to relaunch", () => {
   log(`feed ${hits.feed}, artifact ${hits.artifact}; old app alive: ${pidAlive(old.pid)}; records: ${JSON.stringify(liveApps().map((i) => i.pid))}`)
   log(await installedVersion())
   shot(out, "update-timeout")
+  log(`what the app said went wrong:\n${proofFailures().join("\n")}`)
   log(IS_WINDOWS ? spawnSync("tasklist", { encoding: "utf8" }).stdout : spawnSync("ps", ["aux"], { encoding: "utf8" }).stdout)
   log(readdirSync(dirname(paths().gui)).join(" "))
   throw e

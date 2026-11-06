@@ -4,6 +4,8 @@
 // The format is minisign: Ed25519 over the file's BLAKE2b-512, then over signature + comment.
 import { createHash, createPublicKey, verify } from "node:crypto"
 import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+import { pathToFileURL } from "node:url"
 
 const ED25519_SPKI = Buffer.from("302a300506032b6570032100", "hex")
 const decode = (b64) => Buffer.from(b64.trim(), "base64").toString("utf8").trim().split("\n")
@@ -24,7 +26,7 @@ export function check(fileBytes, sigB64, pubB64) {
   return trusted
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const [file, sig, pub] = process.argv.slice(2)
   try {
     console.log(`signature ok: ${check(readFileSync(file), readFileSync(sig, "utf8"), pub)}`)

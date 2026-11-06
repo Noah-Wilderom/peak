@@ -104,10 +104,13 @@ fn a_finished_process_no_longer_counts_as_running() {
     let line = if cfg!(windows) { ["cmd", "/C", "exit 0"] } else { ["sh", "-c", "exit 0"] };
     let mut child = std::process::Command::new(line[0]).args(&line[1..]).spawn().unwrap();
     let pid = child.id();
-    // Not reaped yet, so on Unix it's a zombie.
+    // Not reaped yet, so on Linux it's a zombie. Only Linux can tell a zombie from a live process.
     sleep(Duration::from_millis(500));
-    assert_eq!(start_ticks(pid), None);
+    if cfg!(target_os = "linux") {
+        assert_eq!(start_ticks(pid), None);
+    }
     child.wait().unwrap();
+    assert_eq!(start_ticks(pid), None);
 }
 
 #[test]

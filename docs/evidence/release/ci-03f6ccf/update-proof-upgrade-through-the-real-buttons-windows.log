@@ -1,0 +1,7 @@
+# commit 03f6ccf Update proof / Upgrade through the real buttons (windows): failure. job 128169240229
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+can not find the supplied binary path C:/Program Files/Git/msedgedriver.exe. This is currently required.
+PROBLEMS: 1
+##[error]Process completed with exit code 1.

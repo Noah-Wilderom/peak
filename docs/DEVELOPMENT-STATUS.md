@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 21:35 UTC
-- **State:** first packaged release for Linux, Windows and macOS **in progress**. First native CI ran on `187f415`: Linux and both Macs pass the real signed upgrade; Windows doesn't yet. Fixes are uncommitted, waiting on a push. See "Current scope".
+- **Last update:** 2026-11-06 22:12 UTC
+- **State:** first packaged release **in progress**. On `03f6ccf`, production packages for all four targets build, sign and pass native install, GUI, CLI and sampling smoke tests. Real signed upgrades pass on Linux and both Macs. **The Windows upgrade still fails, cause unknown.** Fixes and diagnostics are uncommitted, waiting on a push.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,13 +12,38 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: not complete. Linux and both Macs have passed the real upgrade on native CI, Windows hasn't, and the smoke tests haven't yet run on Windows or macOS.**
+**Status: not complete. The Windows upgrade hasn't worked yet, its native tests haven't passed, and there's no public destination.**
 
 **Blockers, in order.**
 
 1. **The repository is private, so nothing can reach users.** Anonymous clients can't read a private repository's release assets, so the updater and `install.sh` would get 404s. **Decision needed: make `Noah-Wilderom/peak` public, or publish to a separate public releases repository.** The endpoint is compiled in, so this comes before the first tag. Details: `docs/RELEASING.md`.
 2. **Native CI needs another round.** See "Next action".
 3. **OS trust isn't set up.** Without Apple Developer ID and notarization, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Whether to buy these or ship with the warnings is the user's call; the release works either way, and `docs/RELEASING.md` says exactly how.
+
+**Second native CI, on `03f6ccf`** (Update proof 42298320417, Release 42298320510, Tests 42298320480; summaries in `docs/evidence/release/ci-03f6ccf/`, screenshots in `screens/`):
+
+| Job | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Production package, signature, install, app, separate CLI, real samples | **Pass** | **Pass** | **Pass** | **Pass** |
+| Real signed upgrade | **Pass** | **Fail** | **Pass** | **Pass** |
+| Failure cases in that proof | **Pass** | **Pass** | **Pass** | **Pass** |
+| Upgrade through real buttons | **Pass** | Never started: no driver | Not possible | Not possible |
+| Native core tests | Covered by **Tests** | **One failure** | **Pass** | **One failure** |
+
+I looked at the smoke screenshots: Windows and both Macs show the real UI with a real memory curve, thread count and exit status from a run started by a separate CLI process.
+
+**Windows upgrade: what's now known.** My installer-lock theory is **not supported**. In the timed-out run the app had made 98 feed requests and 97 downloads, was still running at 9.0.0, and no `peak-cli.old.*` file existed. So the installer never ran, and the failure comes after the download starts and before the installer launches. The renaming hook stays, because it's still right for a running `peak-cli`, but it's unproven. The signature is good: the same-format production artifact verifies here. The app's error wasn't visible, so proof builds now record it in their own history, and the harness prints it on timeout. The next run should name the cause.
+
+**Other failures and fixes, uncommitted, Linux-tested only:**
+- **Backend gate failed on CI** though it passed locally at 99.02%; the CI figure was hidden because the report step was skipped. Added tests, including that settings saved by an older version keep their values, so it's now **99.21%** locally, and the report always prints.
+- **Windows stop:** a program with no window can't be asked to close, and `taskkill` refuses. It now ends it outright. **On Windows, stopping such a program gives it no chance to clean up.**
+- **macOS x64 test** assumed zombies are detectable, which only Linux can do reliably. Windows and macOS now check after the process is reaped. Consequence: there a zombie still counts as running until reaped.
+- **The independent signature check silently did nothing on Windows.** Its main-script test can't match Windows paths, so that step passed without checking. Fixed, and the workflow now fails if nothing printed "signature ok". **So `03f6ccf`'s Windows "signature" step isn't evidence**; I checked that artifact by hand.
+- **`peak collector`** tried to run the Linux collector on Windows and macOS, and printed an OS error. It now says it's for Linux targets. Collectors for both architectures are embedded there, and the tests confirm they're Linux binaries; they've never run from those hosts.
+- **Windows button job:** the runner has no Edge driver. The job now downloads one matching its WebView2.
+- **Icons:** the app was shipping Tauri's default icon. It now has Peak's logo everywhere, from `src-tauri/icons/source.svg`.
+
+Local gates on this tree: backend 99.21% lines, frontend 100% with 295 tests.
 
 **First native CI, on `187f415`** (Update proof 42291210049, Release 42291210277; summaries in `docs/evidence/release/ci-187f415/`):
 
@@ -408,8 +433,8 @@ checkout; nothing was lost. No further limit since.
 ## Next action
 
 **PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including the new `.gitattributes` and `docs/evidence/release/ci-187f415/`. Don't tag. No secret changes are needed.
-2. Send me back here. I'll read the runs and fix what they find. **Update proof**, **Release** and **Tests** should all start on that push.
+1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-03f6ccf/`, `docs/evidence/release/screens/`, `public/peak.svg` and `src-tauri/icons/`.
+2. Send me back here. I'll read what the Windows run says went wrong and fix it.
 
 **Still needed from the user, without blocking CI:** where to publish (public source or a public releases-only repository; the update URL is compiled in, so before the first tag), and whether to buy OS trust.
 

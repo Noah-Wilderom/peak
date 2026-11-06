@@ -149,6 +149,17 @@ export function storedRun(id) {
   }
 }
 
+/** What the app's proof mode recorded going wrong. */
+export function proofFailures() {
+  const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })
+  try {
+    const rows = db.prepare("SELECT text FROM logs WHERE text LIKE 'update-proof-failure %'").all()
+    return [...new Set(rows.map((r) => Buffer.from(r.text.split(" ").at(-1), "base64").toString()))]
+  } finally {
+    db.close()
+  }
+}
+
 export function shot(out, name) {
   mkdirSync(out, { recursive: true })
   const file = join(out, `${name}.png`)

@@ -31,18 +31,19 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
-| Package builds and signs | CI | **Not yet** | **Not yet** | **Not yet** |
-| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | **Not yet** | **Not yet** | **Not yet** |
-| Two-version signed update and failure cases (`update-proof.mjs`) | CI | **Failure cases only; upgrade failed** | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | Local | **Not yet** | Not possible: no WebDriver for macOS webviews | Not possible |
-| Native tests (`tests/platform.rs`, `native.rs`) | Local, without `native.rs` | **Failed on one test** | CI | **Not yet** |
-| Rust type-checks for this OS | Yes | Yes | Yes | Yes |
+| Package builds and signs | CI | CI | CI | CI |
+| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
+| Updater signature checked independently | CI | By hand on the artifact; the CI step was skipping itself | CI | CI |
+| Two-version signed update (`update-proof.mjs`) | CI | **Fails** | CI | CI |
+| Failure cases in that proof | CI | CI | CI | CI |
+| Update through real buttons (`update-ui.mjs`) | CI | **Not yet** | Not possible: no WebDriver for macOS webviews | Not possible |
+| Native tests (`tests/platform.rs`, `native.rs`) | Local, without `native.rs` | **One failure** | CI | **One failure** |
 | Remote targets from this OS | Yes, earlier live suites | **Not run** | **Not run** | **Not run** |
 | OS code signing and notarization | Not applicable | **None configured** | **Ad-hoc only** | **Ad-hoc only** |
 
-"CI" means a native GitHub runner on `187f415`, and a later commit needs them again.
+"CI" means a native GitHub runner on `03f6ccf`. Every later commit needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/` and `ci-03f6ccf/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
 
 ## Secrets
 

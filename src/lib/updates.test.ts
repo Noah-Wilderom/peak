@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { Update } from "@tauri-apps/plugin-updater"
-import { updateProofPass } from "@/lib/update-proof"
+import { recordProofFailures, updateProofPass } from "@/lib/update-proof"
 import { Updates, browserInfo, defaultDeps, updates as shared, type InstallInfo, type UpdateDeps } from "@/lib/updates"
 import { monitor } from "@/lib/monitor"
 
@@ -249,6 +249,25 @@ describe("the shared instance", () => {
     const stop = shared.start()
     await vi.waitFor(() => expect(shared.getSnapshot().info).toEqual(browserInfo))
     stop()
+  })
+})
+
+describe("recordProofFailures", () => {
+  it("writes each new failure once, and nothing else", async () => {
+    const capture = vi.spyOn(monitor, "capture").mockResolvedValue({} as never)
+    let notify = () => {}
+    vi.spyOn(shared, "subscribe").mockImplementation((l) => ((notify = l), () => {}))
+    const snapshot = vi.spyOn(shared, "getSnapshot").mockReturnValue({ stage: "checking", info: null })
+    recordProofFailures()
+    notify()
+    expect(capture).not.toHaveBeenCalled()
+    snapshot.mockReturnValue({ stage: "failed", during: "restart", message: "boom", info: null })
+    notify()
+    notify()
+    expect(capture).toHaveBeenCalledTimes(1)
+    const line = capture.mock.calls[0][0]
+    expect(JSON.parse(atob(line.split(" ").at(-1)!))).toEqual({ during: "restart", message: "boom" })
+    vi.restoreAllMocks()
   })
 })
 
