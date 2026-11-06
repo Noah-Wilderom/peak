@@ -1,29 +1,127 @@
 # Peak project management
 
 PM-owned orchestration record. The PM directs outcomes and acceptance; Claude owns
-implementation and technical decisions. Scope is all eleven original handoff
-milestones, with five-minute checkpoints and automatic quota recovery.
+implementation and technical decisions. The eleven original handoff milestones are
+accepted and delivered. The user's Docker collector-availability follow-up is also
+accepted and delivered; its five-minute checkpoint schedule is now disabled.
 
 ## Current assignment
 
-- Last PM update: 2026-11-06 08:33:31 UTC.
-- Last scheduled checkpoint: 2026-11-06 05:45:43 UTC. At that checkpoint the
-  supplemental results were pending and ordinal 4 was assigned; acceptance below
-  records their subsequent completion.
-- Lifecycle: **accepted** at 2026-11-06 05:50:41 UTC. All eleven original milestones and
-  required local validation are complete. Ordinal 4 completed at 05:47:02.125 UTC;
-  terminal task/thread reads confirm no active or pending child work. Supplemental
-  logs close both CI-contract gaps. The continuous goal remains intentionally paused.
+- Last PM update: 2026-11-06 10:35:25 UTC.
+- Last scheduled checkpoint: 2026-11-06 10:30:46 UTC. Reviewed progress artifacts
+  only; ordinal 5 remains active with no delivered terminal/completion event.
+- Lifecycle: **accepted and delivered**, at 2026-11-06 10:35:25 UTC. Ordinal 5
+  completed at 10:32:17.713 UTC; acceptance was recorded at 10:33:49 UTC. The result
+  was read with `t3_thread_read`; terminal task status confirms no pending child
+  work/question/approval and the unchanged requested Claude settings. No new quota
+  failure. The fix is pushed to master and the same checkpoint schedule is disabled.
+  The continuous goal stays intentionally paused.
 - Provider/model: `claudeAgent` / `claude-opus-5-5`.
 - Options: `effort: medium`, `fastMode: false`.
 - One developer, shared checkout. No parallel developers or model substitution.
 - Developer thread ID: `thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023`.
-- Current task ID: `node:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Athread-send%3A976849b3-e7d7-43a2-bdf2-a65306f4d5bd`.
-- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:4`.
-- Current continuation clientRequestId: `976849b3-e7d7-43a2-bdf2-a65306f4d5bd`.
+- Current task ID: `node:delegated-task:command%3Amcp%3A6968e4b5-5586-4c2e-8091-dbdfefa2af43%3Athread-send%3A11f5d9f1-4103-4d55-8b41-cdc6ae065b70`.
+- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:5`.
+- Current continuation clientRequestId: `11f5d9f1-4103-4d55-8b41-cdc6ae065b70`.
+- User-clarification steer clientRequestId: `250c96ba-6df8-48d0-9f2b-d95ba24f2d3a`.
 - Developer link: <t3-thread://v2/a02307de-aaa1-4a4e-9e29-59098cb7feae/thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023>
 
-## Acceptance: complete
+## Current bug and acceptance criteria
+
+User report: Docker target `sportboekernl-laravel.test-1` shows "Couldn't connect"
+and "no peak-collector build for x86_64 is available". The user confirmed launching
+Peak with **`task dev`**. PM inspected setup/progress documentation and Taskfile only:
+the normal development launch did not prepare a collector, while prior live tests
+explicitly supplied one. This indicates a first-run setup gap; technical diagnosis
+and the durable fix belong to Claude.
+
+- Make the ordinary documented `task dev` path prepare and locate a supported
+  collector. Validate from a clean start with private collector overrides unset
+  and no pre-existing collector, then exercise a real disposable Docker connection.
+  An out-of-band prebuild cannot stand in for this clean-start evidence.
+- Supported build/distribution workflows need a usable collector path or an
+  accurate, explicit setup outcome. Preserve honest platform/capability limits,
+  compatibility and existing Docker/SSH/Kubernetes behavior.
+- Record meaningful regression coverage and affected required checks, preserving
+  frontend 100% and backend 99% gates. Document any remaining external/live limits.
+- The named user container is read-only for investigation. Do not stop, restart,
+  delete, recreate or otherwise change it; use disposable fixtures for validation.
+- Claude updates DEVELOPMENT-STATUS/HANDOFF/REMOTE-VALIDATION as appropriate,
+  including exact commands/results and current next action. PM reviews artifacts
+  only, accepts verified outcomes and handles the authorized master delivery.
+- 10:00 UTC artifact checkpoint: DEVELOPMENT-STATUS (09:59 update) records a
+  baseline reproduction at `dfa4dd3`, identifies the missing normal-startup
+  collector preparation, and reports the fix implemented. Clean-start `task dev`
+  and real disposable Docker validation are still in progress. These are developer
+  progress claims, not final acceptance; PM has not inspected implementation or
+  run tests, polled the developer, or sent a routine status message.
+- 10:30 UTC artifact checkpoint: HANDOFF now documents the collector travelling
+  inside the app binary; REMOTE-VALIDATION reports a real `.deb` build, unpacking
+  and Docker exercise under Xvfb. These document updates are progress claims;
+  final clean-start `task dev`, regression/gate evidence and a completion event
+  remain required for acceptance. No active-thread query or message was sent.
+- Saved next action: user pulls latest master, restarts `task dev`, then presses
+  Connect on the existing target. No further developer turn or scheduled check is
+  required for this accepted fix. Remaining platform/live limits stay documented.
+
+## Collector bug acceptance: complete; delivered to master
+
+Accepted at 2026-11-06 10:33:49 UTC, after reading the completed child's result and all eight
+logs in `docs/evidence/collector-bug/`. The task is terminal with no pending child
+runs. Provider/model/options remain exactly as requested.
+
+- Log 1 reproduces the user's exact error at `dfa4dd3`, then proves the old-build
+  `task collector:build` workaround connects without an app restart.
+- Log 2, final code: `task dev` starts with no node_modules, target directory,
+  collector files or PEAK_COLLECTORS override, with the musl target removed.
+  It adds the target automatically, builds/launches in 125s, and its collector
+  diagnostic exits 0.
+- Log 5, final code: the exact clean-start binary (SHA-256 prefix
+  `db26a7bc36b02b7e`) passes real Docker UI totals, logs, collector connection and
+  attach/detach with no collector supplied separately.
+- Log 3 connects with real samples to disposable Alpine and a disposable container
+  from the reporter's `sail-8.5/app` image. The user's own container is unchanged.
+- Logs 4 and 6: all 24 desktop steps (including SSH/Docker/Kubernetes) pass without
+  a collector supplied separately; a real unpacked .deb also passes Docker through
+  the real window. These precede the last build-setting isolation edit; logs
+  2, 5 and 8 run on the final code.
+- Log 7: absent/unbuildable collector produces the documented debug warning and
+  actionable diagnostic; release and CI's strict guard refuse with exit 101.
+  A deliberate opt-out is explicit. No unsupported remote success is claimed.
+- Log 8, final code, no override and `PEAK_REQUIRE_COLLECTOR=1`: formatting,
+  workspace/all-target clippy, independent collector build, 155 backend tests,
+  **99.10% lines** (7126 counted, 64 uncovered; bundled module 100%), live SSH
+  3/3 and live Docker 4/4 all pass. The existing 99% threshold and coverage filter
+  remain. CI now requires a collector, including under its coverage wrapper.
+- Git scope confirms frontend source/dependencies/config and agent files are
+  unchanged, so their prior 100%/passing evidence applies. File metadata confirms
+  backend edits precede the affected checks and final clean-start runs.
+- PM read evidence, setup documentation and CI policy; PM did not read product
+  implementation or run implementation/tests. Fetched origin/master matches HEAD
+  before publishing (0/0 divergence); whitespace validation passes.
+
+Limits are explicit: x86-64 Linux only; no direct connection to the user's container;
+the dev build/launch ran here, while its real window ran under Xvfb in a container
+with static frontend assets because the host lacks system WebKit. The .deb was
+unpacked, not package-manager installed; no rpm/AppImage, arm64 or GitHub Actions
+run is claimed. Targets retain an existing collector while version/protocol match.
+These do not invalidate the verified missing-build fix.
+
+## Collector fix delivery
+
+- Fix commit: `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047` (`fix: bundle the collector with desktop builds`).
+- Pushed to `origin/master` with a normal fast-forward push. Independent
+  `git ls-remote origin refs/heads/master` returned that exact SHA.
+- Source, regression/setup changes and all eight evidence logs are committed.
+  This PM record and the progress-document delivery receipt are published in a
+  following documentation commit; `git log` records that receipt.
+- At 2026-11-06 10:35:25 UTC, disabling the recorded schedule returned
+  `enabled: false`, `nextRunAt: null`. No continuous goal was resumed or completed.
+- No production deployment, PR or external communication was performed. The user's
+  workload was unchanged. Final remote/working-tree verification follows publication
+  of the documentation receipt.
+
+## Original scope acceptance: complete (historical)
 
 All eleven feature milestones are accepted against `docs/ACCEPTANCE.md`, using
 `docs/DEVELOPMENT-STATUS.md`'s milestone matrix, actual verification/notification
@@ -111,8 +209,10 @@ real protocols, engines and processes, distinct from fixtures and the browser
 simulation. No other-machine production environment was used. Remaining limits in
 `REMOTE-VALIDATION.md` are explicit: real networks/clocks/reboots, arm64, remote
 Docker/Desktop, shellless/hidepid/cgroup-v1 live cases, managed/large Kubernetes,
-application-pod metric availability, native desktop-shell display and packaged
-installers/collector bundling. They are not falsely claimed tested. Later research
+application-pod metric availability and native desktop-shell display. The current
+follow-up closes collector bundling and proves an unpacked .deb against Docker;
+package-manager installation and other package formats remain unvalidated. They
+are not falsely claimed tested. Later research
 options (ephemeral debug containers, sidecars, DaemonSets, listener transports,
 native provider API clients, durable remote jobs) are outside the original plan.
 
@@ -146,6 +246,18 @@ CPU sampling semantics and unavailable metrics must remain honestly labeled.
 - Ordinal 3 completed at 05:40:59.198 UTC. No pending child work or quota error.
   Ordinal 4 completed at 05:47:02.125 UTC and closed both CI evidence gaps. All
   requested model settings were retained; no further quota failure occurred.
+- At 08:33 UTC the user requested pushing everything to master. PM committed the
+  accepted scope as `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876` and pushed origin/master;
+  remote SHA, 0/0 divergence and a clean checkout were verified.
+- At 09:51:57 UTC ordinal 5 started on the SAME developer thread to fix the user's
+  Docker missing-collector report. At 09:55 UTC the user's `task dev` answer was
+  delivered as a steer to that active run, not a queued turn. Configuration stays
+  `claudeAgent` / `claude-opus-5-5`, medium, fastMode false. No new quota event.
+- Ordinal 5 completed at 10:32:17.713 UTC. PM read its terminal result immediately,
+  inspected all bug evidence and accepted the fix at 2026-11-06 10:33:49 UTC. Publishing
+  is PM work under the user's standing master instruction; no extra developer.
+- At 10:35 UTC the accepted collector fix was pushed to origin/master and its SHA
+  independently verified. The five-minute schedule was then disabled.
 
 If a new terminal usage failure arrives, set `quota_wait`, record its **new** exact
 reset facts (do not reuse the historical 03:20 reset), and resume the same developer
@@ -157,23 +269,29 @@ known terminal. Never infer quota availability from a send being accepted.
 
 - Schedule ID: `scheduled-task:command:mcp:5b5e17b5-d3da-458c-863e-dd3006d2ce12:schedule-task:28dc3ab8-d9aa-45d1-94fa-a5f2cf7e9bce`.
 - Bound PM thread: `56b6e6e0-c0a4-4731-8a5c-bb3021cf2717`.
-- Enabled: **false**, disabled after verified project acceptance. No next run.
-  The prior interval was 300000 ms (five minutes).
+- Enabled: **false**, disabled at 10:35 UTC after the collector bug passed
+  acceptance and its fix was pushed to master. Tool confirmation: no next run.
+- The same schedule had been re-enabled for this follow-up at a 300000 ms
+  (five-minute) interval. Historical acceptance did not prematurely stop it.
 - Read progress artifacts on active checks. Do not poll/interrupt the active
   developer or consume Claude quota for unchanged-status messages.
 - Completion events drive lifecycle changes and implementation continuations.
   Keep current task/run IDs above updated after each accepted continuation.
 - The user paused the **continuous goal loop only**. Development and this
   automation remain authorized. Do not reactivate the goal loop or mark the
-  paused goal complete. On verified project acceptance, disable this schedule
-  and report completion. Honor an explicit development/automation stop separately.
+  paused goal complete. On verified current-bug acceptance and requested master
+  delivery, disable this schedule and report completion. Honor an explicit
+  development/automation stop separately.
 - Do not disable checks while required validation remains missing.
 
 ## Boundaries
 
 At 08:33 UTC the user authorized committing the accepted work and pushing it to
 `master`. This supersedes the earlier no-commit/no-push boundary for this delivery.
-Consult git history and the remote branch for the resulting commit. Production
+The accepted scope was pushed as `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`.
+Keep the verified bug fix delivered to master under the user's standing publishing
+instruction; PM handles git logistics after acceptance, without force-pushing.
+Production
 deployments, external communications and PR creation remain outside this request.
 Preserve unrelated work. The developer cleaned its disposable
 environments; shared Docker build cache was left alone. Product code and technical

@@ -4,13 +4,14 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-06 10:31 UTC
-- **State:** original delivery committed and pushed. **Collector-availability bug fixed and verified**, awaiting PM commit.
-- **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. This bug's fix is uncommitted in the checkout; commit and push are with the PM.
+- **State:** original delivery and the verified collector-availability fix are committed and pushed.
+- **PM delivery update:** 2026-11-06 10:35:25 UTC. Fix: `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047` on `origin/master`; the checkpoint schedule is disabled.
+- **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current bug: "no peak-collector build for x86_64 is available"
 
 Reported on Docker target `sportboekernl-laravel.test-1`, launched with `task dev`. **Status: fixed and verified. The fix is
-uncommitted; commit and push are with the PM.**
+committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.**
 
 **Cause.** `task dev` runs `bun run tauri dev`, which builds only the `peak` package. Nothing built `peak-collector`, so the
 lookup found nothing. The accepted validation always supplied one through `PEAK_COLLECTORS`, so it never hit this.
@@ -71,7 +72,7 @@ new CI guard, coverage builds would have silently dropped the collector.
 `*.log` is ignored by git, so new evidence logs wouldn't have been picked up by a normal `git add`. `.gitignore` now keeps
 `docs/evidence/**/*.log`, so this bug's logs appear in `git status`.
 
-**Next action:** PM commit and push. Then the reporter pulls and runs `task dev`, and presses Connect on the existing target.
+**Next action:** the reporter pulls latest master, restarts `task dev`, and presses Connect on the existing target.
 
 ## Final verification (of delivery `dfa4dd3`)
 
