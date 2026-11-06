@@ -4,27 +4,141 @@ PM-owned orchestration record. The PM directs outcomes and acceptance; Claude ow
 implementation and technical decisions. The eleven original handoff milestones are
 accepted and delivered. The Docker collector follow-up is also accepted and delivered.
 The build-to-launch/PATH follow-up and requested 1s/10s chart viewing windows are
-also accepted and delivered. The checkpoint schedule is disabled.
+also accepted and delivered. The CLI/app-discovery fix for reproduced cases is
+accepted and delivered; reporter-specific confirmation follows update/retry.
+The checkpoint schedule is disabled.
 
 ## Current assignment
 
-- Last PM update: 2026-11-06 11:40:57 UTC.
-- Last scheduled checkpoint: 2026-11-06 11:34:53 UTC, before the completion event.
-  Ordinal 6 completed at 11:37:02.700 UTC; acceptance/delivery are recorded below.
-- Lifecycle: **accepted and delivered**, at 2026-11-06 11:40:57 UTC. Ordinal 6 completed
-  at 11:37:02.700 UTC; PM inspected the terminal result and final evidence, accepted
-  both outcomes and pushed them to master. No pending child work/question/approval;
-  requested Claude model/settings are unchanged. No new quota failure. The same
-  schedule is disabled; the continuous goal stays intentionally paused.
+- Last PM update: 2026-11-06 14:56:54 UTC.
+- Last scheduled checkpoint: 2026-11-06 14:47:40 UTC, before the terminal event.
+  Ordinal 7 completed at 14:50:39.997 UTC; acceptance/delivery are recorded below.
+- Lifecycle: **accepted and delivered**, at 2026-11-06 14:56:54 UTC. Ordinal 7 completed
+  at 14:50:39.997 UTC. Reproduced discovery defects pass the inspected real-app
+  evidence and gates; the fix is committed/pushed and remote SHA verified. The
+  user's exact cause remains unconfirmed pending update/restart/retry. No pending
+  child work/question/approval or new quota failure; required model/settings remain
+  unchanged. Schedule disabled; the continuous goal stays intentionally paused.
 - Provider/model: `claudeAgent` / `claude-opus-5-5`.
 - Options: `effort: medium`, `fastMode: false`.
 - One developer, shared checkout. No parallel developers or model substitution.
 - Developer thread ID: `thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023`.
-- Current task ID: `node:delegated-task:command%3Amcp%3A6968e4b5-5586-4c2e-8091-dbdfefa2af43%3Athread-send%3A5fc419e5-2438-4313-9d42-550f19252ad6`.
-- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:6`.
-- Current continuation clientRequestId: `5fc419e5-2438-4313-9d42-550f19252ad6`.
-- Chart scope steer clientRequestId: `71ea06b4-bd9a-4778-89cb-31b24cf54571`.
+- Current task ID: `node:delegated-task:command%3Amcp%3Add9fd3bf-0e6f-4879-8850-e400f85dd327%3Athread-send%3Ac151610c-0a25-4f95-8f72-50eb0f26fd6f`.
+- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:7`.
+- Current continuation clientRequestId: `c151610c-0a25-4f95-8f72-50eb0f26fd6f`.
 - Developer link: <t3-thread://v2/a02307de-aaa1-4a4e-9e29-59098cb7feae/thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023>
+
+## CLI-discovery acceptance: complete; delivered to master
+
+Accepted at 2026-11-06 14:55:12 UTC for independently reproduced failures matching the reported
+symptom. This does not claim direct confirmation of the user's own launch/setup:
+their command/launch clarification remains unanswered and their app was not found
+on this host/account. PM inspected the final child result and all six logs in
+`docs/evidence/cli-discovery/`.
+
+- Baseline `d1d67db`: a real open app plus separate CLI processes reproduces nine
+  failures, including closing a second instance hiding the first, differing data
+  directories, missing/corrupt records, misleading frozen-app errors and sending
+  a dead app's secret to a reused port. The failing evidence is retained.
+- Final release and debug app/CLI harnesses each pass **20/20**. Monitored cases
+  start the actual CLI separately and show Running in the already open app, then
+  verify output and intentional exit 7 in both places. Cases cover PATH/relative/
+  installed/other-build CLIs, other working directories, differing shell data
+  directories, absent HOME, instance close/reopen/crash/restart, corrupt/missing
+  records, freeze/thaw, multiple apps, other users and genuine no-app fallback.
+- Final release SHA-256:
+  `0b2fc826ba39f067cd502e69726af36eb046404d43ec3d29c3b318dfce5f9708`.
+  Final debug SHA-256:
+  `e7e210a549a8832ba1d3ecd26077ed5cf5de88ef055a6f160f22da155594c932`.
+- Endpoint identity/ownership and secret isolation are preserved: port-reuse and
+  other-user cases pass; no-app/frozen/corrupt cases retain workload output and
+  exit semantics while giving the correct diagnostic instead of a false absence.
+  Real dead-port probes receive no secret after the fix.
+- Backend gates: fmt/clippy/independent collector build exit 0; **173 tests**
+  (95+78), **99.14% lines** (7679 counted, 66 uncovered), coverage exit 0 under
+  PEAK_REQUIRE_COLLECTOR=1. Frontend: typecheck/build exit 0; **255 tests**,
+  **100% statements/branches/functions/lines**, unchanged thresholds.
+- A chart drag/click regression introduced in the previous delivery was found,
+  fixed and given a reproducing test. Final native regressions pass **12/12**,
+  including capture, agents, existing chart interactions, 1s/10s and SSH collector
+  lifecycle/reconnect. Evidence distinguishes intentional nonzero workload exits
+  from failed checks; all final harness/check stages exit 0.
+- Git metadata matches final source timings to the relevant checks; dependency/
+  coverage/CI policies are unchanged. Fetched master matches HEAD before delivery
+  (0/0 divergence). PM inspected docs/results/metadata only, not product code, and
+  did not run implementation/tests.
+
+Limits remain explicit: the real windows ran under Xvfb in disposable containers.
+The debug binary used its normal dev URL with a test-served frontend; literal
+`task dev` and `task peak:install` were not rerun, and install output was
+represented by a copied binary in the disposable account. Legacy-version binary
+interop, reboot, cross-network-namespace and shared-home/other-host cases have
+unit evidence only. Flatpak/strict snap and a native desktop were not tested.
+Docker/Kubernetes window steps, browser mock and the full verification wrapper
+were not repeated; changed hub/CLI/chart paths have the affected gates and native
+regressions above. The wrapper now includes the new harness.
+
+User next action after delivery: close existing Peak instances when ready to
+restart, update/reinstall, reopen the updated app, then retry the CLI on the same
+host/user. An older running app cannot write the new discovery records. If the
+symptom persists, the new diagnostic plus exact launch/CLI command identifies the
+remaining case. No user's app/workload, profiles, install or sportboekernl
+containers were modified by validation.
+
+## CLI-discovery delivery
+
+- Fix commit: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` (`fix: tie CLI discovery to live app instances`).
+- Pushed with a normal fast-forward push to origin/master; independent
+  `git ls-remote origin refs/heads/master` returned the exact commit SHA.
+- Product/setup/docs and all six evidence logs are committed. This final PM record
+  and publication receipts follow in a documentation commit; git history records it.
+- Product/docs whitespace validation passes. Raw captured log whitespace is
+  preserved with the original failed baseline and passing final runs.
+- At 2026-11-06 14:56:54 UTC, disabling the existing schedule returned
+  `enabled: false`, `nextRunAt: null`. No goal-loop reactivation/completion.
+- User follow-through: close old Peak instances when ready to restart, pull and
+  reinstall, reopen the updated app, and retry the CLI from the same host/user.
+  If still failing, supply the new error line and exact CLI/app-launch commands.
+  Exact reporter cause remains unconfirmed; no unsupported user-host success claim.
+- No production deployment, PR or external communication was performed. User
+  workloads/profiles/install were preserved. Final remote/clean-checkout verification
+  follows publication of the receipts.
+
+## CLI-discovery scope and investigation history (accepted)
+
+User reports: "the cli keeps saying the isnt running while it is running".
+PM interprets this as the app-not-running warning despite an open desktop app.
+The exact CLI command and app launch method were requested asynchronously and are
+still pending; independent work on normal documented workflows is authorized.
+
+- Baseline: clean shared checkout at `d1d67db0e4c600726bb300f87aca2e54a252c696`.
+  PM read setup/progress docs and git/thread/config metadata, not implementation.
+  Prior thread was terminal, with no active/pending request, before ordinal 7.
+- Claude owns diagnosis and the durable fix. Primary acceptance: independently
+  start the real app, invoke the actual CLI in a separate shell/process with
+  documented commands and no private discovery override, and confirm the workload
+  is registered and monitored in that already open app with correct output/exit
+  semantics. Fixtures or GUI-launched capture alone are insufficient.
+- Cover supported installed/release and development/build CLI combinations where
+  relevant, different working directories, app restart and stale-state handling.
+  Preserve per-user authentication/isolation, genuine no-app behavior and existing
+  monitoring/collector/chart functionality. Explain discovery/connection failures
+  accurately; a wording-only change does not fix an undiscoverable open app.
+- Use owned disposable apps/processes for validation. Do not kill/restart the user's
+  open app, modify real profiles/system installation or touch sportboekernl
+  containers/workloads.
+- Require meaningful regressions and affected checks, retaining backend 99% and
+  frontend 100% gates. Document actual live evidence and environment limitations,
+  plus a verified immediate workaround if available. Avoid unrelated repetition.
+- Claude updates DEVELOPMENT-STATUS and relevant docs; PM owns this record and
+  authorized master commit/push after acceptance.
+- User clarification remains pending. Relay it once to the same developer as useful
+  context when received; do not block independent work or send routine status
+  messages.
+- Saved next action: user updates/reinstalls and reopens Peak before retrying the
+  CLI on the same host/user. Relay the new diagnostic/launch details if failure
+  persists. The reproduced acceptance scope is delivered; no additional developer
+  or scheduled check is required unless new facts reopen work.
 
 ## Launch/PATH and chart acceptance: complete; delivered to master
 
@@ -405,6 +519,19 @@ CPU sampling semantics and unavailable metrics must remain honestly labeled.
   2026-11-06 11:39:35 UTC. The requested Claude model/medium/fastMode false are confirmed.
 - At 11:40 UTC both accepted follow-ups were pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`;
   remote SHA verified, then the same five-minute schedule was disabled.
+- At 14:02 UTC PM recorded the new CLI/app-discovery report. The same developer
+  thread was confirmed terminal before continuing; configuration read confirms
+  claudeAgent / claude-opus-5-5 / medium / fastMode false. Ordinal 7 was accepted
+  for implementation, and the same five-minute schedule was re-enabled. No model
+  substitution, extra developer or goal-loop reactivation.
+- Ordinal 7 completed at 14:50:39.997 UTC without a quota interruption. PM read the
+  terminal child result and all final logs, confirmed the original required model
+  configuration and no pending child work, and accepted at 2026-11-06 14:55:12 UTC.
+  Exact reporter setup is unconfirmed; verified reproduced discovery defects are
+  the accepted scope, with update/restart and new diagnostics as follow-through.
+- At 14:56 UTC the CLI-discovery fix was pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`;
+  its remote SHA was independently verified, then the same schedule was disabled.
+  The user's exact launch/setup still needs their update/retry or diagnostic.
 
 If a new terminal usage failure arrives, set `quota_wait`, record its **new** exact
 reset facts (do not reuse the historical 03:20 reset), and resume the same developer
@@ -416,10 +543,11 @@ known terminal. Never infer quota availability from a send being accepted.
 
 - Schedule ID: `scheduled-task:command:mcp:5b5e17b5-d3da-458c-863e-dd3006d2ce12:schedule-task:28dc3ab8-d9aa-45d1-94fa-a5f2cf7e9bce`.
 - Bound PM thread: `56b6e6e0-c0a4-4731-8a5c-bb3021cf2717`.
-- Enabled: **false**, disabled at 11:40 UTC after BOTH launch/PATH and chart scope
-  passed acceptance and were pushed to master. Tool confirms no next run.
-- The same schedule used a 300000 ms (five-minute) interval. Neither historical
-  acceptance nor an intermediate item prematurely stopped it.
+- Enabled: **false**, disabled at 14:56 UTC after the reproduced CLI discovery
+  defects passed acceptance and the fix was pushed to master. Tool confirms no
+  next run. Interval while enabled was 300000 ms (five minutes).
+- Historical acceptance did not prematurely close ordinal 7; current real-app
+  results and gates were inspected before acceptance/delivery.
 - Read progress artifacts on active checks. Do not poll/interrupt the active
   developer or consume Claude quota for unchanged-status messages.
 - Completion events drive lifecycle changes and implementation continuations.

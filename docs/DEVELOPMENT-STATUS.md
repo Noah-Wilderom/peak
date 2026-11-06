@@ -4,13 +4,13 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-06 14:50 UTC
-- **State:** delivered and pushed through `d1d67db`. **A new fix is uncommitted and ready for PM acceptance:** "the CLI says the app isn't running while it is", below.
-- **PM delivery update:** 2026-11-06 11:40:57 UTC. Both follow-ups: `5a1f57be524a0b7fcad2fb38838257a8f62e1419` on `origin/master`; remote SHA verified and checkpoints disabled.
+- **State:** the reproduced CLI/app-discovery defects are accepted and pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`. Reporter-specific confirmation follows update/retry.
+- **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
-## Current bug: "the cli keeps saying the app isn't running while it is running"
+## Accepted discovery fix: "the cli keeps saying the app isn't running while it is running"
 
-**Status: fixed and verified on real builds, uncommitted. The user's own failure hasn't been seen directly.** The exact command and launch method are still pending from the user.
+**Status: accepted and pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`. The user's own failure hasn't been seen directly.** The exact command and launch method are still pending from the user.
 
 **This host can't show the user's case.** It has no Peak process, `~/.local/share/peak` has no `control.json` or `peak.db`, and it has no system WebKit. So the user's app isn't running here under this account. I inspected read-only and touched nothing of theirs.
 
@@ -333,4 +333,6 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** accept the CLI discovery fix, then commit and publish to `master`. It's uncommitted in this checkout, alongside your own `docs/PROJECT-MANAGEMENT.md`. Then have the user close any open Peak, update and retry, since a running older app doesn't write the new records. If it still fails, the new message names the reason: relay that line and their launch command. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.
+The CLI discovery fix is accepted and pushed. Close old Peak instances when ready to restart, pull latest master, run `task peak:install`, reopen the updated app and retry the CLI on the same machine/user. If it still fails, report the new error line plus the CLI and app-launch commands. Reporter-specific confirmation remains pending; no continuous goal or scheduled checkpoint is active.
+
+The broader open platform/live gaps remain in `docs/REMOTE-VALIDATION.md`.
