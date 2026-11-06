@@ -1,0 +1,20 @@
+# commit 187f415 Update proof / Upgrade (windows): failure. job 128144799448
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+    Finished 1 updater signature at:
+    Finished 1 updater signature at:
+ok   the base version is installed peak 9.0.0 (source build, commit 187f415eb98564e7e153c57919bc6b718a642584)
+ok   a run recorded before the update history-1793999132954-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 3, artifact 0
+ok   malformed: nothing installed, app alive feed 3, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 7, artifact 6
+ok   truncated: nothing installed, app alive feed 6, artifact 5
+ok   tampered: nothing installed, app alive feed 7, artifact 5
+ok   wrong-key: nothing installed, app alive feed 7, artifact 6
+  throw new Error(`timed out waiting for ${what}`)
+Error: timed out waiting for the updated app to relaunch
+##[error]Process completed with exit code 1.

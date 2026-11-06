@@ -56,13 +56,62 @@ jobs:
           path: proof-output
           if-no-files-found: warn
 
+  ui:
+    name: Upgrade through the real buttons (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux, target: x86_64-unknown-linux-gnu }
+          - { os: windows-latest, platform: windows, target: x86_64-pc-windows-msvc }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}, x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ui-${{ matrix.target }}
+      - name: Linux system libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev build-essential xvfb libfuse2 webkit2gtk-driver
+      - run: bun install --frozen-lockfile
+      - run: cargo install tauri-driver --locked
+      - name: Drive the update
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_PROOF_TARGET: ${{ matrix.target }}
+        run: |
+          export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+            WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/update-ui.mjs ui-output
+          else
+            # The runner's Edge driver has to match its WebView2; both come from the image.
+            PEAK_NATIVE_DRIVER="$EDGEWEBDRIVER/msedgedriver.exe" node scripts/e2e/desktop/update-ui.mjs ui-output
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: update-ui-${{ matrix.platform }}
+          path: ui-output
+          if-no-files-found: warn
+
   platform-tests:
     name: Core tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, macos-15-intel]
     defaults:
       run:
         working-directory: src-tauri
@@ -78,6 +127,6 @@ jobs:
       - name: Build frontend
         working-directory: .
         run: bun install --frozen-lockfile && bun run build
-      - run: cargo test --workspace
+      - run: cargo test --workspace --no-fail-fast
         env:
           PEAK_REQUIRE_COLLECTOR: "1"

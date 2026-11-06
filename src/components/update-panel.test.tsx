@@ -41,7 +41,7 @@ describe("UpdateProgress", () => {
 
   it("shows verification and quiet states", () => {
     const a = show({ stage: "installing", version: "0.2.0", info: null })
-    expect(screen.getByText("Verifying and installing Peak 0.2.0…")).toBeInTheDocument()
+    expect(screen.getByText("Verifying Peak 0.2.0…")).toBeInTheDocument()
     a.unmount()
     const b = show({ stage: "checking", info: null })
     expect(screen.getByText("Checking for updates…")).toBeInTheDocument()
@@ -56,17 +56,23 @@ describe("UpdateProgress", () => {
   it("restarts straight away when nothing would be stopped", async () => {
     vi.spyOn(updates, "running").mockResolvedValue([])
     const restart = vi.spyOn(updates, "restart").mockResolvedValue()
-    show({ stage: "ready", version: "0.2.0", info: null })
+    show({ stage: "ready", version: "0.2.0", pending: false, info: null })
     expect(screen.getByText(/Nothing restarts until you say so/)).toBeInTheDocument()
     expect(restart).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole("button", { name: /Restart now/ }))
     expect(restart).toHaveBeenCalledTimes(1)
   })
 
+  it("says when installing waits for the restart", () => {
+    show({ stage: "ready", version: "0.2.0", pending: true, info: null })
+    expect(screen.getByText("Peak 0.2.0 is downloaded and verified.")).toBeInTheDocument()
+    expect(screen.getByText(/It installs when you restart/)).toBeInTheDocument()
+  })
+
   it("names what a restart would stop, and lets you decline", async () => {
     vi.spyOn(updates, "running").mockResolvedValue(["npm test", "sleep 100"])
     const restart = vi.spyOn(updates, "restart").mockResolvedValue()
-    show({ stage: "ready", version: "0.2.0", info: null })
+    show({ stage: "ready", version: "0.2.0", pending: false, info: null })
     await userEvent.click(screen.getByRole("button", { name: /Restart now/ }))
     expect(await screen.findByText("Restarting stops these 2 commands:")).toBeInTheDocument()
     expect(screen.getByText("npm test")).toBeInTheDocument()
@@ -81,7 +87,7 @@ describe("UpdateProgress", () => {
   it("names a single command, and restarts if it can't tell what's running", async () => {
     const running = vi.spyOn(updates, "running").mockResolvedValue(["npm test"])
     const restart = vi.spyOn(updates, "restart").mockResolvedValue()
-    show({ stage: "ready", version: "0.2.0", info: null })
+    show({ stage: "ready", version: "0.2.0", pending: false, info: null })
     await userEvent.click(screen.getByRole("button", { name: /Restart now/ }))
     expect(await screen.findByText("Restarting stops this command:")).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Not now" }))
@@ -131,7 +137,7 @@ describe("UpdateNotice", () => {
   })
 
   it("can't be dismissed once an update is under way", () => {
-    setState({ stage: "ready", version: "0.2.0", info: null })
+    setState({ stage: "ready", version: "0.2.0", pending: false, info: null })
     render(<UpdateNotice />)
     expect(screen.queryByRole("button", { name: "Later" })).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: /Restart now/ })).toBeInTheDocument()

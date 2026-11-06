@@ -1,0 +1,3 @@
+# commit 187f415 Release / Build (windows): failure. job 128144801081
+TypeError: Cannot read properties of null (reading '2')
+##[error]Process completed with exit code 1.

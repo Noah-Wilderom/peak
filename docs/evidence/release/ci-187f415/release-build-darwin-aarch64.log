@@ -1,0 +1,4 @@
+# commit 187f415 Release / Build (darwin-aarch64): failure. job 128144800654
+failed to bundle project: failed codesign application: failed to run command security import -f pkcs12: failed to import the signing certificate as a PKCS#12 (.p12) file; the certificate must be a PKCS#12 (.p12
+       Error failed to bundle project: failed codesign application: failed to run command security import -f pkcs12: failed to import the signing certificate as a PKCS#12 (.p12) file; the certificate must be a 
+##[error]Process completed with exit code 1.

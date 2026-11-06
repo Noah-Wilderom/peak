@@ -560,7 +560,10 @@ mod tests {
         // Reopening keeps everything.
         let db = Db::open(&path).unwrap();
         assert_eq!(db.settings().retention_days, 7);
-        assert!(Db::open(Path::new("/proc/definitely/not/writable/peak.db")).is_err());
+        // Its parent can't be created, because a file is in the way.
+        let blocker = dir.path().join("blocker");
+        std::fs::write(&blocker, "").unwrap();
+        assert!(Db::open(&blocker.join("sub/peak.db")).is_err());
         // Settings that fail to parse fall back to defaults.
         db.conn.execute("UPDATE settings SET value = 'nope'", []).unwrap();
         assert_eq!(db.settings(), Settings::default());

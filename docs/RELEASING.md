@@ -6,6 +6,7 @@
 - **Build:** `.github/workflows/release.yml` builds each platform natively, signs the updater artifacts, checks the signatures with a separate implementation (`scripts/release/verify-signature.mjs`), then installs and smoke tests the result (`scripts/e2e/smoke/smoke.mjs`).
 - **Publish:** a tag also makes a **draft** GitHub release, with every artifact, `SHA256SUMS`, `install.sh` and `latest.json`.
 - **Update channel:** apps read `https://github.com/Noah-Wilderom/peak/releases/latest/download/latest.json`. GitHub's `latest` skips drafts and pre-releases, so **building and drafting can't reach users. Publishing the draft is the one act that advances the channel.**
+- **Windows:** the installer ends the running app, so it downloads and verifies first, and installs only when the user restarts.
 - **Proof:** `.github/workflows/update-proof.yml` upgrades between two real builds on each OS with a throwaway key and a localhost feed, so it needs no secrets and can't touch the channel. It runs on `release-validation/**` branches.
 
 ## Artifacts
@@ -30,16 +31,18 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
-| Package builds and signs | Local, Ubuntu 22.04 | **Not run** | **Not run** | **Not run** |
-| Install, GUI, separate CLI, real samples (`smoke.mjs`) | Local | **Not run** | **Not run** | **Not run** |
-| Two-version signed update and failure cases (`update-proof.mjs`) | Local | **Not run** | **Not run** | **Not run** |
-| Update through real buttons (`update-ui.mjs`) | Local | **Not run** | Not possible: no WebDriver for macOS webviews | Not possible |
-| Native tests (`tests/platform.rs`, `native.rs`) | Local, without `native.rs` | **Not run** | **Not run** | Not in the workflow |
+| Package builds and signs | CI | **Not yet** | **Not yet** | **Not yet** |
+| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | **Not yet** | **Not yet** | **Not yet** |
+| Two-version signed update and failure cases (`update-proof.mjs`) | CI | **Failure cases only; upgrade failed** | CI | CI |
+| Update through real buttons (`update-ui.mjs`) | Local | **Not yet** | Not possible: no WebDriver for macOS webviews | Not possible |
+| Native tests (`tests/platform.rs`, `native.rs`) | Local, without `native.rs` | **Failed on one test** | CI | **Not yet** |
 | Rust type-checks for this OS | Yes | Yes | Yes | Yes |
 | Remote targets from this OS | Yes, earlier live suites | **Not run** | **Not run** | **Not run** |
 | OS code signing and notarization | Not applicable | **None configured** | **Ad-hoc only** | **Ad-hoc only** |
 
-Evidence so far: `docs/evidence/release/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
+"CI" means a native GitHub runner on `187f415`, and a later commit needs them again.
+
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
 
 ## Secrets
 

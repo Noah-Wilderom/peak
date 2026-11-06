@@ -28,13 +28,6 @@ jobs:
     env:
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-      # Optional. Without them macOS is ad-hoc signed and Windows unsigned; see docs/RELEASING.md.
-      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -48,6 +41,25 @@ jobs:
         with:
           workspaces: src-tauri
           key: ${{ matrix.target }}
+      # Only when configured: an empty value would make the bundler try to import nothing.
+      # Without them macOS is ad-hoc signed; see docs/RELEASING.md.
+      - name: Apple trust, if configured
+        if: startsWith(matrix.platform, 'darwin')
+        shell: bash
+        env:
+          CERT: ${{ secrets.APPLE_CERTIFICATE }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          AID: ${{ secrets.APPLE_ID }}
+          APASS: ${{ secrets.APPLE_PASSWORD }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$CERT" ]; then
+            { echo "APPLE_CERTIFICATE=$CERT"; echo "APPLE_CERTIFICATE_PASSWORD=$CERT_PASSWORD"; echo "APPLE_SIGNING_IDENTITY=$IDENTITY"; } >> "$GITHUB_ENV"
+          fi
+          if [ -n "$AID" ]; then
+            { echo "APPLE_ID=$AID"; echo "APPLE_PASSWORD=$APASS"; echo "APPLE_TEAM_ID=$TEAM"; } >> "$GITHUB_ENV"
+          fi
       - name: Check the tag matches the version
         shell: bash
         run: node scripts/release/version.mjs check ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}

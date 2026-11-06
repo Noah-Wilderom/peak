@@ -57,6 +57,11 @@ impl InstallKind {
     }
 }
 
+/// The Windows installer leaves this next to what it installed.
+fn installer_beside(exe: &Path) -> bool {
+    exe.with_file_name("uninstall.exe").exists()
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct InstallInfo {
     pub version: String,
@@ -68,7 +73,10 @@ pub struct InstallInfo {
 impl InstallInfo {
     pub fn detect() -> InstallInfo {
         let exe = std::env::current_exe().ok();
-        let kind = InstallKind::of(bundle_type(), std::env::var_os("APPIMAGE").as_deref(), exe.as_deref());
+        // Only the main program gets stamped, so `peak-cli.exe` goes by what's installed beside it.
+        let beside = cfg!(windows) && exe.as_deref().is_some_and(installer_beside);
+        let bundle = bundle_type().or(beside.then_some(BundleType::Nsis));
+        let kind = InstallKind::of(bundle, std::env::var_os("APPIMAGE").as_deref(), exe.as_deref());
         InstallInfo {
             version: env!("CARGO_PKG_VERSION").to_string(),
             commit: env!("PEAK_BUILD_COMMIT").to_string(),
@@ -128,6 +136,15 @@ mod tests {
         assert_eq!(launch_dir(Some(OsStr::new("")), Some(owd)), None);
         assert_eq!(launch_dir(Some(app), Some(OsStr::new(""))), None);
         restore_launch_dir();
+    }
+
+    #[test]
+    fn recognises_a_windows_install_by_its_uninstaller() {
+        let d = tempfile::tempdir().unwrap();
+        let exe = d.path().join("peak-cli.exe");
+        assert!(!installer_beside(&exe));
+        std::fs::write(d.path().join("uninstall.exe"), "").unwrap();
+        assert!(installer_beside(&exe));
     }
 
     #[test]

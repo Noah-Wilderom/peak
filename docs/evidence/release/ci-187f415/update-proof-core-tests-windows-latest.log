@@ -1,0 +1,5 @@
+# commit 187f415 Update proof / Core tests (windows-latest): failure. job 128144799248
+thread 'db::tests::settings_storage_and_files' (4116) panicked at src\db.rs:563:9:
+assertion failed: Db::open(Path::new("/proc/definitely/not/writable/peak.db")).is_err()
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+##[error]Process completed with exit code 1.

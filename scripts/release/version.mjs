@@ -12,7 +12,7 @@ const CARGO = ["src-tauri/Cargo.toml", "src-tauri/peak-core/Cargo.toml", "src-ta
 const LOCKED = ["peak", "peak-core", "peak-collector"]
 const JSONS = ["package.json", "src-tauri/tauri.conf.json"]
 const cargoVersion = /^version = "([^"]+)"/m
-const lockEntry = (name) => new RegExp(`(name = "${name}"\\nversion = ")([^"]+)(")`)
+const lockEntry = (name) => new RegExp(`(name = "${name}"\\r?\\nversion = ")([^"]+)(")`)
 
 function versions() {
   const found = {}

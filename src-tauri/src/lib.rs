@@ -50,6 +50,14 @@ fn running_captures(state: State<'_>) -> Vec<String> {
     state.monitor.lock().unwrap().running_spawned()
 }
 
+/// What closing does. A Windows installer ends the app without any of the usual exit steps.
+#[tauri::command]
+fn prepare_restart(state: State<'_>, publication: tauri::State<'_, Arc<discovery::Publication>>) {
+    publication.retire();
+    state.monitor.lock().unwrap().shutdown();
+    state.remote.shutdown();
+}
+
 #[tauri::command]
 fn get_state(state: State<'_>) -> AppState {
     state.full_state()
@@ -361,6 +369,7 @@ pub fn run() {
             get_state,
             install_info,
             running_captures,
+            prepare_restart,
             capture,
             attach,
             list_attachable,

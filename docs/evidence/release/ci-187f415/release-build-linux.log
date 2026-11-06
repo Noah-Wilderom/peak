@@ -1,0 +1,19 @@
+# commit 187f415 Release / Build (linux): success. job 128144800183
+    Finished 2 bundles at:
+    Finished 2 updater signatures at:
+peak_0.1.0_amd64.AppImage
+peak_0.1.0_amd64.deb
+signature ok: timestamp:1793998486	file:peak_0.1.0_amd64.AppImage	version:0.1.0
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+  PEAK_SMOKE_PLATFORM: linux
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 187f415eb98564e7e153c57919bc6b718a642584)
+ok   names its bundled collector x86_64: /home/runner/.local/share/peak/collectors/x86_64-1c4268c50b8138c9/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmlby3q for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place DahTWZ
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1793998532650-err
+ok   the app recorded real samples and the exit samples 9, max rss 131436544, exit 7
+SMOKE OK

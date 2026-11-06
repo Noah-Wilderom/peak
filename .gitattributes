@@ -1,0 +1,5 @@
+# Scripts, manifests and installer hooks are read byte-for-byte, so keep LF on every OS.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

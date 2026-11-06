@@ -13,7 +13,8 @@ const appimage: InstallInfo = { version: "0.1.0", commit: "abc", kind: "appimage
 type Event = Parameters<Parameters<Update["downloadAndInstall"]>[0] & object>[0]
 
 function fakeUpdate(install: (cb: (e: Event) => void) => Promise<void> = async () => {}, body: string | null = "notes") {
-  return { version: "0.2.0", body, downloadAndInstall: vi.fn((cb: (e: Event) => void) => install(cb)) } as unknown as Update
+  const run = vi.fn((cb: (e: Event) => void) => install(cb))
+  return { version: "0.2.0", body, downloadAndInstall: run, download: run, install: vi.fn(async () => {}) } as unknown as Update
 }
 
 function setup(over: Partial<UpdateDeps> = {}) {
@@ -22,6 +23,7 @@ function setup(over: Partial<UpdateDeps> = {}) {
     check: vi.fn(async () => null),
     relaunch: vi.fn(async () => {}),
     running: vi.fn(async () => []),
+    prepareRestart: vi.fn(async () => {}),
     enabled: vi.fn(async () => true),
     ...over,
   }
@@ -78,13 +80,35 @@ describe("Updates", () => {
       expect.objectContaining({ stage: "downloading", done: 40, total: 100 }),
       expect.objectContaining({ stage: "installing", version: "0.2.0" }),
     ])
-    expect(u.getSnapshot()).toMatchObject({ stage: "ready", version: "0.2.0" })
+    expect(u.getSnapshot()).toMatchObject({ stage: "ready", version: "0.2.0", pending: false })
     expect(deps.relaunch).not.toHaveBeenCalled()
     // Nothing more to look for until it's restarted.
     await u.checkNow()
     expect(deps.check).toHaveBeenCalledTimes(1)
     await u.install()
     expect(update.downloadAndInstall).toHaveBeenCalledTimes(1)
+  })
+
+  it("on Windows, only installs at the restart, after stopping what it would stop", async () => {
+    const calls: string[] = []
+    const update = fakeUpdate(async (cb) => cb({ event: "Finished" }))
+    vi.mocked(update.install).mockImplementation(async () => void calls.push("install"))
+    const { u, deps } = setup({
+      info: vi.fn(async () => ({ ...appimage, kind: "nsis" as const })),
+      check: vi.fn(async () => update),
+      prepareRestart: vi.fn(async () => void calls.push("prepare")),
+      relaunch: vi.fn(async () => void calls.push("relaunch")),
+    })
+    u.start()()
+    await vi.waitFor(() => expect(u.getSnapshot().info?.kind).toBe("nsis"))
+    await u.checkNow()
+    await u.install()
+    expect(u.getSnapshot()).toMatchObject({ stage: "ready", pending: true })
+    expect(update.download).toHaveBeenCalled()
+    expect(update.install).not.toHaveBeenCalled()
+    expect(deps.prepareRestart).not.toHaveBeenCalled()
+    await u.restart()
+    expect(calls).toEqual(["prepare", "install", "relaunch"])
   })
 
   it("copes with an unknown download size", async () => {
@@ -204,6 +228,8 @@ describe("the real dependencies", () => {
     await defaultDeps.relaunch()
     expect(relaunch).toHaveBeenCalled()
     await expect(defaultDeps.running()).resolves.toEqual(["cmd"])
+    await defaultDeps.prepareRestart()
+    expect(invoke).toHaveBeenCalledWith("prepare_restart")
     expect(invoke).toHaveBeenCalledWith("running_captures")
     const settings = vi.spyOn(monitor, "getSettings").mockResolvedValue({ checkForUpdates: false } as never)
     await expect(defaultDeps.enabled()).resolves.toBe(false)
@@ -231,7 +257,7 @@ describe("updateProofPass", () => {
     const check = vi.spyOn(shared, "checkNow").mockResolvedValue()
     const install = vi.spyOn(shared, "install").mockResolvedValue()
     const restart = vi.spyOn(shared, "restart").mockResolvedValue()
-    const snapshot = vi.spyOn(shared, "getSnapshot").mockReturnValue({ stage: "ready", version: "2", info: null })
+    const snapshot = vi.spyOn(shared, "getSnapshot").mockReturnValue({ stage: "ready", version: "2", pending: false, info: null })
     await updateProofPass()
     expect(restart).toHaveBeenCalledTimes(1)
     snapshot.mockReturnValue({ stage: "current", info: null })

@@ -80,12 +80,14 @@ export function UpdateProgress({ state }: { state: UpdateState }) {
         </div>
       )
     case "installing":
-      return <p className="text-sm font-semibold">Verifying and installing Peak {state.version}…</p>
+      return <p className="text-sm font-semibold">Verifying Peak {state.version}…</p>
     case "ready":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">Peak {state.version} is installed.</p>
-          <p className="text-xs text-muted-foreground">It starts the next time Peak does. Nothing restarts until you say so.</p>
+          <p className="text-sm font-semibold">Peak {state.version} is {state.pending ? "downloaded and verified" : "installed"}.</p>
+          <p className="text-xs text-muted-foreground">
+            {state.pending ? "It installs when you restart." : "It starts the next time Peak does."} Nothing restarts until you say so.
+          </p>
           <div>
             <RestartButton />
           </div>

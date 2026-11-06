@@ -1,6 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core"
 import { relaunch } from "@tauri-apps/plugin-process"
-import { check, type Update } from "@tauri-apps/plugin-updater"
+import { check, type DownloadEvent, type Update } from "@tauri-apps/plugin-updater"
 import { monitor } from "@/lib/monitor"
 
 /** How this copy was installed, which decides whether it can update itself. */
@@ -20,7 +20,8 @@ export type UpdateStage =
   | { stage: "available"; version: string; notes: string }
   | { stage: "downloading"; version: string; done: number; total: number | null }
   | { stage: "installing"; version: string }
-  | { stage: "ready"; version: string }
+  /** `pending`: downloaded and verified, and installing it is what restarts the app. */
+  | { stage: "ready"; version: string; pending: boolean }
   | { stage: "failed"; during: "check" | "install" | "restart"; message: string; version?: string }
 
 export type UpdateState = UpdateStage & { info: InstallInfo | null }
@@ -30,6 +31,8 @@ export interface UpdateDeps {
   check: () => Promise<Update | null>
   relaunch: () => Promise<void>
   running: () => Promise<string[]>
+  /** Stops what a restart stops, for an installer that ends the app abruptly. */
+  prepareRestart: () => Promise<void>
   enabled: () => Promise<boolean>
 }
 
@@ -120,14 +123,19 @@ export class Updates {
     let done = 0
     let total: number | null = null
     this.set({ stage: "downloading", version, done, total })
+    const progress = (ev: DownloadEvent) => {
+      if (ev.event === "Started") total = ev.data.contentLength ?? null
+      if (ev.event === "Progress") done += ev.data.chunkLength
+      if (ev.event === "Finished") this.set({ stage: "installing", version })
+      else this.set({ stage: "downloading", version, done, total })
+    }
     try {
-      await update.downloadAndInstall((ev) => {
-        if (ev.event === "Started") total = ev.data.contentLength ?? null
-        if (ev.event === "Progress") done += ev.data.chunkLength
-        if (ev.event === "Finished") this.set({ stage: "installing", version })
-        else this.set({ stage: "downloading", version, done, total })
-      })
-      this.set({ stage: "ready", version })
+      // A Windows installer ends the running app the moment it starts, so it has to wait
+      // until the user chooses to restart. Everywhere else the file can be replaced now.
+      const pending = this.state.info?.kind === "nsis"
+      if (pending) await update.download(progress)
+      else await update.downloadAndInstall(progress)
+      this.set({ stage: "ready", version, pending })
     } catch (e) {
       this.set({ stage: "failed", during: "install", message: explain(e), version })
     }
@@ -138,6 +146,10 @@ export class Updates {
 
   async restart() {
     try {
+      if (this.state.stage === "ready" && this.state.pending) {
+        await this.deps.prepareRestart()
+        await this.update!.install()
+      }
       await this.deps.relaunch()
     } catch (e) {
       const version = this.state.stage === "ready" ? this.state.version : undefined
@@ -153,6 +165,7 @@ export const defaultDeps: UpdateDeps = {
   check: () => check({ timeout: 30_000 }),
   relaunch,
   running: () => invoke<string[]>("running_captures"),
+  prepareRestart: () => invoke<void>("prepare_restart"),
   enabled: () => monitor.getSettings().then((s) => s.checkForUpdates),
 }
 

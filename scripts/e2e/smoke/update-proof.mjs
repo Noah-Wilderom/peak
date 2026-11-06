@@ -6,9 +6,11 @@
 //
 // The proof builds set VITE_PEAK_E2E_AUTOUPDATE, which presses the update buttons on a timer, as
 // there's no WebDriver on macOS. Everything underneath is the real plugin and real flow.
+import { spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
+import { dirname } from "node:path"
 import { createServer } from "node:http"
-import { PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, storedRun, tmpdir, waitFor, workload, writeFileSync } from "./lib.mjs"
+import { IS_WINDOWS, PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, readdirSync, shot, sleep, storedRun, tmpdir, waitFor, workload, writeFileSync } from "./lib.mjs"
 import { buildPair } from "./build-pair.mjs"
 
 const out = process.argv[2]
@@ -114,7 +116,15 @@ log("feed up, waiting for the update")
 const fresh = await waitFor("the updated app to relaunch", () => {
   const n = liveApps().find((i) => i.pid !== old.pid)
   return n && !pidAlive(old.pid) ? n : null
-}, 300_000)
+}, 300_000).catch(async (e) => {
+  // What was going on, for whoever reads this log.
+  log(`feed ${hits.feed}, artifact ${hits.artifact}; old app alive: ${pidAlive(old.pid)}; records: ${JSON.stringify(liveApps().map((i) => i.pid))}`)
+  log(await installedVersion())
+  shot(out, "update-timeout")
+  log(IS_WINDOWS ? spawnSync("tasklist", { encoding: "utf8" }).stdout : spawnSync("ps", ["aux"], { encoding: "utf8" }).stdout)
+  log(readdirSync(dirname(paths().gui)).join(" "))
+  throw e
+})
 check("downloaded from the feed", hits.artifact > 0, `feed ${hits.feed}, artifact ${hits.artifact}`)
 check("the old app exited and a new one started", fresh.pid !== old.pid, `${old.pid} -> ${fresh.pid}`)
 const after = await installedVersion()

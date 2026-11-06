@@ -5,13 +5,15 @@
 import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { createServer } from "node:http"
-import { PLATFORM, closeApps, dataDir, install, join, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
+import { IS_WINDOWS, PLATFORM, closeApps, dataDir, install, join, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
 import { buildPair } from "../smoke/build-pair.mjs"
 import { DatabaseSync } from "node:sqlite"
 
 const out = process.argv[2]
 mkdirSync(out, { recursive: true })
 const [BASE, NEXT, PORT] = ["9.0.0", "9.0.1", 18766]
+const HELD = IS_WINDOWS ? "ping -n 300 127.0.0.1" : "sleep 300"
+const HELD_SEEN = new RegExp(HELD.replace(/\./g, "\\."))
 const work = mkdtempSync(join(tmpdir(), "peak-ui-"))
 const { baseDir, artifactName, artifactBytes, goodSig, key } = buildPair({ work, BASE, NEXT, PORT, autoUpdate: false })
 const problems = []
@@ -88,7 +90,7 @@ const server = createServer((req, res) => {
 const serve = () => new Promise((r) => server.listen(PORT, "127.0.0.1", r))
 const hash = () => createHash("sha256").update(readFileSync(paths().gui)).digest("hex")
 
-const driver = spawn(process.env.PEAK_TAURI_DRIVER, ["--native-driver", "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })
+const driver = spawn(process.env.PEAK_TAURI_DRIVER, ["--native-driver", IS_WINDOWS ? process.env.PEAK_NATIVE_DRIVER : "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })
 for (let i = 0; i < 100; i++) {
   try {
     await wd("GET", "/status")
@@ -161,10 +163,10 @@ try {
   await step("a command captured in the app, to see a restart treat it fairly", async () => {
     await click("^Capture$")
     await see(/Capture a process/)
-    await js(`const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; const i = document.querySelector('input[placeholder="bun run build"]'); s.call(i, 'sleep 300'); i.dispatchEvent(new Event('input', { bubbles: true }))`)
+    await js(`const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; const i = document.querySelector('input[placeholder="bun run build"]'); s.call(i, arguments[0]); i.dispatchEvent(new Event('input', { bubbles: true }))`, [HELD])
     await sleep(100)
     await click("^Run and capture")
-    await see(/sleep 300/)
+    await see(HELD_SEEN)
     await sleep(1500)
   })
   const oldPid = liveApps()[0]?.pid
@@ -174,17 +176,19 @@ try {
     await click("Download and install")
     await see(/Downloading Peak 9\.0\.1/, 8000)
     await shot("u5-downloading")
-    await see(/Peak 9\.0\.1 is installed/, 60000)
+    // Windows waits to install until the restart, because its installer ends the app.
+    await see(IS_WINDOWS ? /Peak 9\.0\.1 is downloaded and verified/ : /Peak 9\.0\.1 is installed/, 60000)
     await see(/Nothing restarts until you say so/)
     await shot("u6-installed")
     await sleep(4000)
     if (!pidAlive(oldPid)) throw new Error("restarted without being asked")
-    if (hash() === before) throw new Error("the file on disk wasn't replaced")
+    if (!IS_WINDOWS && hash() === before) throw new Error("the file on disk wasn't replaced")
+    if (IS_WINDOWS && hash() !== before) throw new Error("installed before being asked")
   })
   await step("a restart names what it would stop, and can be declined", async () => {
     await click("Restart now")
     await see(/Restarting stops this command/)
-    await see(/sleep 300/)
+    await see(HELD_SEEN)
     await shot("u7-confirm")
     await click("^Not now$")
     await sleep(1000)
@@ -214,10 +218,10 @@ try {
     await shot("u8-after")
     await click("Close")
     await click("^History$")
-    await see(/sleep 300/)
+    await see(HELD_SEEN)
     await shot("u9-history")
     const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })
-    const n = db.prepare("SELECT COUNT(*) n FROM runs WHERE command = 'sleep 300'").get().n
+    const n = db.prepare("SELECT COUNT(*) n FROM runs WHERE command = ?").get(HELD).n
     db.close()
     if (n !== 1) throw new Error(`runs: ${n}`)
   })
