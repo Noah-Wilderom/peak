@@ -2,31 +2,167 @@
 
 PM-owned orchestration record. The PM directs outcomes and acceptance; Claude owns
 implementation and technical decisions. The eleven original handoff milestones are
-accepted and delivered. The user's Docker collector-availability follow-up is also
-accepted and delivered; its five-minute checkpoint schedule is now disabled.
+accepted and delivered. The Docker collector follow-up is also accepted and delivered.
+The build-to-launch/PATH follow-up and requested 1s/10s chart viewing windows are
+also accepted and delivered. The checkpoint schedule is disabled.
 
 ## Current assignment
 
-- Last PM update: 2026-11-06 10:35:25 UTC.
-- Last scheduled checkpoint: 2026-11-06 10:30:46 UTC. Reviewed progress artifacts
-  only; ordinal 5 remains active with no delivered terminal/completion event.
-- Lifecycle: **accepted and delivered**, at 2026-11-06 10:35:25 UTC. Ordinal 5
-  completed at 10:32:17.713 UTC; acceptance was recorded at 10:33:49 UTC. The result
-  was read with `t3_thread_read`; terminal task status confirms no pending child
-  work/question/approval and the unchanged requested Claude settings. No new quota
-  failure. The fix is pushed to master and the same checkpoint schedule is disabled.
-  The continuous goal stays intentionally paused.
+- Last PM update: 2026-11-06 11:40:57 UTC.
+- Last scheduled checkpoint: 2026-11-06 11:34:53 UTC, before the completion event.
+  Ordinal 6 completed at 11:37:02.700 UTC; acceptance/delivery are recorded below.
+- Lifecycle: **accepted and delivered**, at 2026-11-06 11:40:57 UTC. Ordinal 6 completed
+  at 11:37:02.700 UTC; PM inspected the terminal result and final evidence, accepted
+  both outcomes and pushed them to master. No pending child work/question/approval;
+  requested Claude model/settings are unchanged. No new quota failure. The same
+  schedule is disabled; the continuous goal stays intentionally paused.
 - Provider/model: `claudeAgent` / `claude-opus-5-5`.
 - Options: `effort: medium`, `fastMode: false`.
 - One developer, shared checkout. No parallel developers or model substitution.
 - Developer thread ID: `thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023`.
-- Current task ID: `node:delegated-task:command%3Amcp%3A6968e4b5-5586-4c2e-8091-dbdfefa2af43%3Athread-send%3A11f5d9f1-4103-4d55-8b41-cdc6ae065b70`.
-- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:5`.
-- Current continuation clientRequestId: `11f5d9f1-4103-4d55-8b41-cdc6ae065b70`.
-- User-clarification steer clientRequestId: `250c96ba-6df8-48d0-9f2b-d95ba24f2d3a`.
+- Current task ID: `node:delegated-task:command%3Amcp%3A6968e4b5-5586-4c2e-8091-dbdfefa2af43%3Athread-send%3A5fc419e5-2438-4313-9d42-550f19252ad6`.
+- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:6`.
+- Current continuation clientRequestId: `5fc419e5-2438-4313-9d42-550f19252ad6`.
+- Chart scope steer clientRequestId: `71ea06b4-bd9a-4778-89cb-31b24cf54571`.
 - Developer link: <t3-thread://v2/a02307de-aaa1-4a4e-9e29-59098cb7feae/thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023>
 
-## Current bug and acceptance criteria
+## Launch/PATH and chart acceptance: complete; delivered to master
+
+Accepted at 2026-11-06 11:39:35 UTC. PM read the delivered terminal result and all six logs in
+`docs/evidence/build-to-launch/` and `docs/evidence/charts-1s-10s/`.
+
+- The launch reproduction records shell exit 127 and a blank debug window with no
+  dev server. A standalone release build and temporary install work; the installed
+  copy opens and captures a real command in a real window without a dev server.
+- Documented steps pass from a fresh export with no node_modules/build and no
+  `peak` on PATH. The build explains the executable path and installation step.
+  Temporary installations validate absent/present PATH, a shadowing binary,
+  defaults, explicit destinations and missing-build guidance. Real user profiles
+  and the real install are unchanged. `task dev`/embedded collector are preserved.
+- Final frontend gates: **254 tests in 30 files**, exit 0; **100% statements,
+  branches, functions and lines**, with unchanged thresholds. Typecheck/build
+  exit 0. All 15 Chromium walkthrough steps pass; its data is explicitly simulated.
+- Final real desktop chart run, 11:31:49–11:32:42 UTC, binary SHA-256
+  `6087af8e207a062495b8f220873544a62c30a0a9868500f02b7b8a5f1ee37c69`:
+  both presets use real /proc samples, linked axes/live movement and actual drags,
+  including a 950ms zoom in a 1s window. Existing capture/marker/drag/click/stop
+  regressions pass with that same binary at 11:35:45–11:36:28 UTC.
+- PM inspected saved real-window screenshots for both presets: visible range
+  controls, tenths in the 1s axis and labels/tooltips consistent with recorded data.
+  Final evidence replaces the earlier REAL_WINDOW_RESULT placeholder.
+- Git metadata confirms frontend edits/tests precede the final checks/window run.
+  Rust/backend, dependency files and coverage/CI policy are unchanged; existing
+  backend evidence (99.10%) applies. Backend/remote/agent suites were not repeated
+  because their implementation is unchanged; affected chart interactions were.
+- No implementation/tests were run by PM, and PM did not read product code.
+  Acceptance uses results, docs, screenshots and git metadata. Fetched master
+  matches local HEAD before publishing (0/0). Product/docs whitespace checks pass;
+  the two captured trailing spaces in the raw real-window log are preserved.
+
+Known limitation accepted explicitly: on a moving live 1s window, Recharts can
+briefly suppress the tooltip when its selected real sample lies outside the plot.
+The developer reports 12/59 blank sampled frames in software Chromium; no wrong
+sample/value is claimed, and 10s/longer/stored-run probes did not blank. Freeze,
+zoom or a stored run gives a steady reading. This is an honest disclosed display
+limitation, not a claim of uninterrupted hover. Pointer-edge/drag failures found
+in real runs were fixed and validated. Sampling remains 500ms (2–3 real samples
+per live 1s window); no fabricated higher-frequency data.
+
+Live-window evidence is under Xvfb in disposable containers, not a native desktop
+or GPU guarantee. Install tests use temporary destinations; no .desktop entry or
+GitHub Actions run is claimed. Existing remote/platform limits remain documented.
+
+## Launch/PATH and chart delivery
+
+- Feature commit: `5a1f57be524a0b7fcad2fb38838257a8f62e1419`
+  (`feat: add short chart windows and standalone installation`).
+- Pushed to origin/master with a normal fast-forward push; independent
+  `git ls-remote origin refs/heads/master` returned that exact SHA.
+- Source, setup/docs and all six new evidence logs are committed. This final PM
+  record and publication receipts are saved in the following documentation commit.
+- At 2026-11-06 11:40:57 UTC, disabling the existing schedule returned
+  `enabled: false`, `nextRunAt: null`. No continuous goal was resumed/completed.
+- User next steps: pull latest master, use `task peak:install` and follow its PATH
+  guidance for bare `peak`; use `task dev` for development. Both chart ranges are
+  available in the shared range selector.
+- The live 1s tooltip limitation above is disclosed; Freeze/zoom is available for
+  a steady reading. No production deployment, PR or external communication.
+- Final remote/clean-checkout verification follows publication of these receipts.
+
+## Chart scope and checkpoint history (accepted)
+
+User request: "we also need a 10 seconds and 1 second timeframe for the charts".
+PM interprets this as selectable visible time spans and stated that interpretation
+to the user. The new scope was delivered to the same running developer as a steer.
+
+- Offer **1s** and **10s** viewing windows alongside existing chart timeframe options,
+  wherever the current timeframe control is used. This is chart duration, not a
+  change to sampling/refresh cadence.
+- Selection must show the requested duration using actual recorded samples. Keep
+  linked ranges, live advancement, stored runs, zoom/pan, axes and tooltips correct,
+  including short or sparse data. Preserve existing timeframe options/design.
+- Require meaningful selection/time-boundary/live-advancement validation plus
+  affected frontend checks with the unchanged **100% coverage** gate, typecheck and
+  build. Run backend checks if backend scope changes; do not lower the 99% gate.
+- Claude records the new scope and actual evidence in DEVELOPMENT-STATUS/HANDOFF.
+  PM retains acceptance/publishing. No extra agents, threads or reviews.
+- 11:24 UTC artifact checkpoint: DEVELOPMENT-STATUS (11:22) and HANDOFF now mark
+  launch/PATH and both chart windows implemented and ready for acceptance. Notes
+  report 252 frontend tests with unchanged 100% thresholds, typecheck/build and
+  Chromium/mock flows passing. The chart section still contains a
+  `REAL_WINDOW_RESULT` placeholder; no completion event has arrived. Final evidence
+  must be read before accepting or publishing. Notes also disclose brief blank
+  tooltips on a moving live 1s chart; preserve and assess that limitation against
+  correctness requirements at acceptance. No active-thread query or message sent.
+- 11:29 UTC artifact checkpoint: the chart notes now describe a real-window finding
+  where a pointer with no sample reading dropped a short-window drag/press. They
+  report corrected edge/hold behavior. The `REAL_WINDOW_RESULT` placeholder remains;
+  final evidence and affected checks must cover the latest change before acceptance.
+  No completion event, active-thread query or routine message.
+- Saved next action: user pulls latest master and selects 1s/10s as needed. Both
+  items are accepted/pushed; no additional developer turn or scheduled check is
+  required. The known tooltip/desktop/platform limits remain documented.
+
+## Build/PATH scope and checkpoint history (accepted)
+
+User transcript: `task peak:build` successfully runs
+`cargo build --manifest-path src-tauri/Cargo.toml`; entering `peak` then gives
+`bash: command not found: peak`. README mentions the built CLI by bare name,
+while the Taskfile only compiles it. PM inspected setup docs/Taskfile and git
+metadata, not implementation. Checkout was clean at
+`5a273028672380c66f03937cc3090c0bd0900615` before this assignment.
+
+- Users following documented build/launch/install steps must have a working command
+  to launch the app and use its CLI. Explain compilation versus PATH installation
+  accurately; do not imply a bare command exists solely because compilation passed.
+- Claude owns diagnosis and the proportionate docs/setup/task improvement. Preserve
+  `task dev` and the embedded collector. Provide a verified immediate user command.
+- Validate documented steps with `peak` initially absent from PATH, and any
+  installation flow in temporary user-owned destinations. Do not alter user shell
+  profiles, system paths or the user's Docker workload.
+- Use checks relevant to the actual change, preserving frontend 100% and backend
+  99% gates. Do not repeat unrelated expensive suites for docs/task-only work.
+  Record exact evidence and environment limitations in DEVELOPMENT-STATUS.
+- Immediate PM guidance: use `task dev` for development. The earlier direct-debug
+  binary command invokes the program, but its window still needs the dev server;
+  PM is correcting that distinction for the user. Standalone build/install steps
+  in the updated docs remain subject to the developer's final validation.
+- 10:51 UTC artifact checkpoint: README/HANDOFF now distinguish building from PATH
+  installation, document a release app with embedded frontend, and add an explicit
+  `task peak:install` flow. These remain progress claims, not accepted/published
+  instructions. No terminal event, active-thread polling or follow-up message.
+- 10:59 UTC artifact checkpoint: DEVELOPMENT-STATUS (10:57) records the PATH fix
+  implemented, installed-window validation next, and chart presets in progress.
+  PM read `docs/evidence/build-to-launch/2-documented-steps.log`: a clean standalone
+  build succeeds; explicit-path CLI/collector work; temporary installation warns
+  when absent from PATH, bare `peak` works after the documented shell setup, and
+  shadowed-command/no-build cases are explained. Real user profiles/install are
+  unchanged. This is partial working-copy evidence; both outcomes still await
+  completion and acceptance. No active-thread query or message was sent.
+- Saved next action: user runs `task peak:install` and follows its PATH guidance
+  for bare `peak`, or uses `task dev` for development. No new reviewer/developer.
+
+## Collector bug scope and acceptance criteria (historical)
 
 User report: Docker target `sportboekernl-laravel.test-1` shows "Couldn't connect"
 and "no peak-collector build for x86_64 is available". The user confirmed launching
@@ -258,6 +394,17 @@ CPU sampling semantics and unavailable metrics must remain honestly labeled.
   is PM work under the user's standing master instruction; no extra developer.
 - At 10:35 UTC the accepted collector fix was pushed to origin/master and its SHA
   independently verified. The five-minute schedule was then disabled.
+- At 10:39 UTC PM recorded the subsequent build/PATH user report and the accepted
+  ordinal 6 continuation on the SAME thread. Configuration remains unchanged.
+  The same schedule is re-enabled for this new issue; no continuous goal is resumed.
+- At 10:50 UTC PM recorded the user's 1s/10s chart scope as a successful steer into
+  the running ordinal 6. The same schedule prompt now requires both launch/PATH and
+  chart outcomes before completion/delivery; the goal loop remains paused.
+- Ordinal 6 completed at 11:37:02.700 UTC with both items verified, no pending child
+  work and no quota interruption. PM inspected all final evidence and accepted at
+  2026-11-06 11:39:35 UTC. The requested Claude model/medium/fastMode false are confirmed.
+- At 11:40 UTC both accepted follow-ups were pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`;
+  remote SHA verified, then the same five-minute schedule was disabled.
 
 If a new terminal usage failure arrives, set `quota_wait`, record its **new** exact
 reset facts (do not reuse the historical 03:20 reset), and resume the same developer
@@ -269,10 +416,10 @@ known terminal. Never infer quota availability from a send being accepted.
 
 - Schedule ID: `scheduled-task:command:mcp:5b5e17b5-d3da-458c-863e-dd3006d2ce12:schedule-task:28dc3ab8-d9aa-45d1-94fa-a5f2cf7e9bce`.
 - Bound PM thread: `56b6e6e0-c0a4-4731-8a5c-bb3021cf2717`.
-- Enabled: **false**, disabled at 10:35 UTC after the collector bug passed
-  acceptance and its fix was pushed to master. Tool confirmation: no next run.
-- The same schedule had been re-enabled for this follow-up at a 300000 ms
-  (five-minute) interval. Historical acceptance did not prematurely stop it.
+- Enabled: **false**, disabled at 11:40 UTC after BOTH launch/PATH and chart scope
+  passed acceptance and were pushed to master. Tool confirms no next run.
+- The same schedule used a 300000 ms (five-minute) interval. Neither historical
+  acceptance nor an intermediate item prematurely stopped it.
 - Read progress artifacts on active checks. Do not poll/interrupt the active
   developer or consume Claude quota for unchanged-status messages.
 - Completion events drive lifecycle changes and implementation continuations.
@@ -289,8 +436,9 @@ known terminal. Never infer quota availability from a send being accepted.
 At 08:33 UTC the user authorized committing the accepted work and pushing it to
 `master`. This supersedes the earlier no-commit/no-push boundary for this delivery.
 The accepted scope was pushed as `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`.
-Keep the verified bug fix delivered to master under the user's standing publishing
-instruction; PM handles git logistics after acceptance, without force-pushing.
+Keep verified follow-up fixes delivered to master under the user's standing
+publishing instruction; PM handles git logistics after acceptance, without
+force-pushing.
 Production
 deployments, external communications and PR creation remain outside this request.
 Preserve unrelated work. The developer cleaned its disposable

@@ -134,8 +134,8 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 ## What's next
 
 All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. The build/launch fix and the 1s
-and 10s chart windows are verified and uncommitted, waiting on PM acceptance and publishing (see
-[`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md)). What remains is outside what this machine could validate:
+and 10s chart windows are accepted and published as `5a1f57be524a0b7fcad2fb38838257a8f62e1419` (see
+[`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md) for evidence and limits). What remains is outside what this machine could validate:
 
 1. Close the live gaps in [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md), starting with SSH to a real second machine.
 2. Build and validate arm64. The collector already travels inside the app binary, including in installers.

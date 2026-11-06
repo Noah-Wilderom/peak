@@ -4,13 +4,13 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-06 11:36 UTC
-- **State:** delivered and pushed through `5a27302`. **Two uncommitted items are ready for PM acceptance:** the build/launch/PATH fix and the 1s and 10s chart windows, both below.
-- **PM delivery update:** 2026-11-06 10:35:25 UTC. Fix: `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047` on `origin/master`; the checkpoint schedule is disabled.
+- **State:** both follow-ups are accepted and pushed: standalone build/launch/install and the 1s/10s chart windows.
+- **PM delivery update:** 2026-11-06 11:40:57 UTC. Both follow-ups: `5a1f57be524a0b7fcad2fb38838257a8f62e1419` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current issue: `task peak:build`, then `peak`: "command not found"
 
-**Status: fixed and verified, uncommitted.** Backend code is unchanged, so backend gates didn't need to run for this item.
+**Status: accepted and pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`.** Backend code is unchanged, so backend gates didn't need to run for this item.
 
 **Cause.** Two separate things. Building never puts anything on `PATH`, and nothing said so. Worse, `task peak:build` made a
 debug binary whose window loads from the dev server, so calling it directly gave a window with no UI.
@@ -48,7 +48,7 @@ Also run by hand: `task cpu DURATION=1s` in `examples/` with the existing debug 
 
 ## Current scope: 1s and 10s chart timeframes
 
-**Status: implemented and verified, uncommitted.** Requested as "we also need a 10 seconds and 1 second timeframe for the charts".
+**Status: accepted and pushed as `5a1f57be524a0b7fcad2fb38838257a8f62e1419`.** Requested as "we also need a 10 seconds and 1 second timeframe for the charts".
 Frontend only: sampling stays at 500ms and nothing in the backend changed, so backend gates don't apply.
 
 `1s` and `10s` now come first in the range control on Overview, Memory and Resources, ahead of the unchanged `30s 1m 5m 15m 1h All`.
@@ -280,4 +280,4 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** accept the build/launch fix and the 1s and 10s windows, then commit and publish them to `master`. Both are uncommitted in this checkout, alongside PM's own `docs/PROJECT-MANAGEMENT.md`. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.
+Both follow-ups are accepted and pushed. Pull latest master; use `task peak:install` and its PATH guidance for bare `peak`, or `task dev` for development, and select 1s/10s in the charts. The documented live-tooltip limit remains. Further work is the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.
