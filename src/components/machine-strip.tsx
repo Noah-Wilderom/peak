@@ -27,7 +27,7 @@ export function MachineStrip({ sample, active, onOpen }: { sample: SystemSample;
       </span>
       <span className="mt-1.5 flex justify-between text-[11px] text-muted-foreground tabular-nums">
         <span>CPU {formatPercent(sample.cpu)}</span>
-        <span>Load {sample.load1.toFixed(2)}</span>
+        {sample.load1 >= 0 && <span>Load {sample.load1.toFixed(2)}</span>}
       </span>
     </button>
   )

@@ -5,6 +5,8 @@
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
+
+use crate::runner::host_command;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -151,7 +153,7 @@ fn exec_command(tools: &Tools, spec: &TargetSpec, argv: &[String], interactive: 
             if spec.host.is_empty() {
                 return Err("no SSH host was given".into());
             }
-            let mut c = Command::new(&tools.ssh);
+            let mut c = host_command(&tools.ssh);
             // -T: structured data needs no terminal. BatchMode: never hang on a password prompt.
             c.args(["-T", "-o", "BatchMode=yes", "-o", "ServerAliveInterval=5", "-o", "ServerAliveCountMax=3"]);
             c.args(&tools.ssh_options);
@@ -171,7 +173,7 @@ fn exec_command(tools: &Tools, spec: &TargetSpec, argv: &[String], interactive: 
             if spec.container.is_empty() {
                 return Err("no container was chosen".into());
             }
-            let mut c = Command::new(&tools.docker);
+            let mut c = host_command(&tools.docker);
             if !spec.context.is_empty() {
                 c.arg("--context").arg(&spec.context);
             }
@@ -203,7 +205,7 @@ fn exec_command(tools: &Tools, spec: &TargetSpec, argv: &[String], interactive: 
 }
 
 fn kubectl(tools: &Tools, spec: &TargetSpec) -> Command {
-    let mut c = Command::new(&tools.kubectl);
+    let mut c = host_command(&tools.kubectl);
     if !spec.context.is_empty() {
         c.arg("--context").arg(&spec.context);
     }
@@ -254,7 +256,7 @@ fn is_ssh_failure(message: &str) -> bool {
 
 fn target_arch(tools: &Tools, spec: &TargetSpec) -> Result<String, String> {
     if spec.kind == Some(TargetKind::Docker) {
-        let mut c = Command::new(&tools.docker);
+        let mut c = host_command(&tools.docker);
         if !spec.context.is_empty() {
             c.arg("--context").arg(&spec.context);
         }
@@ -282,7 +284,7 @@ fn install_collector(tools: &Tools, spec: &TargetSpec, path: &str) -> Result<(),
                 d = q(dir),
                 p = q(path)
             );
-            let mut c = Command::new(&tools.ssh);
+            let mut c = host_command(&tools.ssh);
             c.args(["-T", "-o", "BatchMode=yes"]).args(&tools.ssh_options);
             if let Some(port) = spec.port {
                 c.arg("-p").arg(port.to_string());
@@ -293,7 +295,7 @@ fn install_collector(tools: &Tools, spec: &TargetSpec, path: &str) -> Result<(),
         Some(TargetKind::Docker) => {
             // docker cp needs no shell inside the image. A read-only root or a stopped
             // container fails here, and the error says so; nothing else is attempted.
-            let mut c = Command::new(&tools.docker);
+            let mut c = host_command(&tools.docker);
             if !spec.context.is_empty() {
                 c.arg("--context").arg(&spec.context);
             }
@@ -604,7 +606,7 @@ pub fn parse_kube_top(out: &str, pod: &str) -> Vec<KubeMetrics> {
 }
 
 fn docker(tools: &Tools, context: &str) -> Command {
-    let mut c = Command::new(&tools.docker);
+    let mut c = host_command(&tools.docker);
     if !context.is_empty() {
         c.arg("--context").arg(context);
     }
@@ -612,7 +614,7 @@ fn docker(tools: &Tools, context: &str) -> Command {
 }
 
 pub fn docker_contexts(tools: &Tools) -> Result<Vec<String>, String> {
-    let mut c = Command::new(&tools.docker);
+    let mut c = host_command(&tools.docker);
     c.args(["context", "ls", "--format", "{{.Name}}"]);
     Ok(run(c, COMMAND_TIMEOUT, None)?.lines().map(str::to_string).filter(|s| !s.is_empty()).collect())
 }
@@ -656,7 +658,7 @@ fn combined(mut cmd: Command) -> Result<String, String> {
 }
 
 pub fn kube_contexts(tools: &Tools) -> Result<Vec<String>, String> {
-    let mut c = Command::new(&tools.kubectl);
+    let mut c = host_command(&tools.kubectl);
     c.args(["config", "get-contexts", "-o", "name"]);
     Ok(run(c, COMMAND_TIMEOUT, None)?.lines().map(str::to_string).filter(|s| !s.is_empty()).collect())
 }
@@ -739,7 +741,7 @@ pub fn pipe_to(mut cmd: Command, payload: &[u8]) -> std::io::Result<String> {
     Ok(String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use std::os::unix::fs::PermissionsExt;
@@ -1017,7 +1019,7 @@ mod tests {
 
         let without = Tools { collectors: None, data_dir: data.clone(), ..Default::default() };
         assert!(local_collector(&without, "riscv64").unwrap_err().contains("riscv64"));
-        #[cfg(peak_embedded_collector)]
+        #[cfg(any(peak_collector_x86_64, peak_collector_aarch64))]
         {
             let arch = crate::bundled::embedded_arch().unwrap();
             let found = local_collector(&without, arch).unwrap();

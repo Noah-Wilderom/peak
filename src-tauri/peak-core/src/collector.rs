@@ -359,7 +359,7 @@ where
     let _ = writer.join();
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use std::io::{BufReader, PipeReader, PipeWriter};

@@ -10,6 +10,7 @@ import { monitor, type Proc, type SystemSample, type TargetState } from "@/lib/m
 import { viewData } from "@/lib/series"
 import { formatBytes, formatDuration } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { useUpdates } from "@/components/update-panel"
 
 export type NavPage = "history" | "settings" | "machine" | "targets"
 
@@ -28,6 +29,7 @@ interface ProcessListProps {
 
 export function ProcessList({ procs, selectedId, capturing, page, onNavigate, machine, targets, onCapture, onSelect }: ProcessListProps) {
   const [query, setQuery] = useState("")
+  const { info } = useUpdates()
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return procs
@@ -42,6 +44,11 @@ export function ProcessList({ procs, selectedId, capturing, page, onNavigate, ma
 
   return (
     <aside className="flex h-full w-[300px] shrink-0 flex-col border-r border-border bg-background">
+      {info?.kind === "browser" && (
+        <p className="border-b border-border bg-secondary px-5 py-2 text-xs text-muted-foreground">
+          Browser demo with simulated data. `peak` commands can't connect to it: use the installed app for real processes.
+        </p>
+      )}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
           <Logo />

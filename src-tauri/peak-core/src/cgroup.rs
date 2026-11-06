@@ -80,7 +80,7 @@ pub fn own_limits() -> CgroupLimits {
     read_limits(Path::new("/sys/fs/cgroup"), &fs::read_to_string("/proc/self/cgroup").unwrap_or_default())
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
 

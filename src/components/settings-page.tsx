@@ -11,6 +11,7 @@ import { theme, type ThemeChoice } from "@/lib/theme"
 import { monitor, type Settings, type StorageInfo } from "@/lib/monitor"
 import { formatBytes, formatCount } from "@/lib/format"
 import { nativeNotify, notificationStatus } from "@/lib/notify"
+import { UpdateSection, useUpdates } from "@/components/update-panel"
 
 /** A whole number field value; anything else (including blank) counts as 0, meaning "off". */
 function toCount(value: string) {
@@ -20,6 +21,7 @@ function toCount(value: string) {
 
 export function SettingsPage({ onClose }: { onClose: () => void }) {
   const { choice } = useTheme()
+  const updatable = useUpdates().info?.updatable
   const [saved, setSaved] = useState<Settings | null>(null)
   const [draft, setDraft] = useState<Settings | null>(null)
   const [storage, setStorage] = useState<StorageInfo | null>(null)
@@ -100,6 +102,14 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
 
+        <Card title="About and updates.">
+          <UpdateSection />
+          {draft && updatable && (
+            <Row label="Check for updates automatically" hint="On start and every 6 hours. Installing always asks first.">
+              <Toggle label="Check for updates automatically" value={draft.checkForUpdates} onChange={(checkForUpdates) => set({ checkForUpdates })} />
+            </Row>
+          )}
+        </Card>
         <Card title="Appearance.">
           <Row label="Theme">
             <Segmented<ThemeChoice>

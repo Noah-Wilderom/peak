@@ -185,6 +185,13 @@ pub struct Settings {
     pub alert_cpu_percent: f64,
     /// ... for this many seconds (0 = off).
     pub alert_cpu_seconds: f64,
+    /// Look for a new release on start and every few hours. Installing always asks.
+    #[serde(default = "enabled")]
+    pub check_for_updates: bool,
+}
+
+fn enabled() -> bool {
+    true
 }
 
 impl Default for Settings {
@@ -197,6 +204,7 @@ impl Default for Settings {
             alert_memory_mib: 0.0,
             alert_cpu_percent: 90.0,
             alert_cpu_seconds: 0.0,
+            check_for_updates: true,
         }
     }
 }

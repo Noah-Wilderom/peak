@@ -4,7 +4,12 @@
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match peak_lib::cli::parse_args(&args) {
-        Some(cli) => std::process::exit(peak_lib::cli::main(cli, &peak_lib::discovery::default_dirs())),
+        Some(cli) => {
+            // Only here: the window needs the directory the AppImage launcher chose, because
+            // the bundled WebKit finds its helpers relative to it.
+            peak_lib::release::restore_launch_dir();
+            std::process::exit(peak_lib::cli::main(cli, &peak_lib::discovery::default_dirs()))
+        }
         None => peak_lib::run(),
     }
 }

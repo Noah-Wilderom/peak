@@ -63,7 +63,7 @@ describe("SettingsPage", () => {
     await user.click(save)
     expect(set).toHaveBeenCalledWith({
       retentionDays: 7, maxRuns: 0, alertsEnabled: false, notifications: false,
-      alertMemoryMib: 512, alertCpuPercent: 150, alertCpuSeconds: 5,
+      alertMemoryMib: 512, alertCpuPercent: 150, alertCpuSeconds: 5, checkForUpdates: true,
     })
     await waitFor(() => expect(storage.mock.calls.length, "retention may have removed runs").toBeGreaterThan(before))
     expect(await screen.findByText("Settings saved")).toBeInTheDocument()
@@ -143,5 +143,18 @@ describe("SettingsPage", () => {
     )
     expect(await screen.findByText("Couldn't load settings")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "Save settings" })).not.toBeInTheDocument()
+  })
+
+  it("offers automatic update checks only where this copy can update itself", async () => {
+    const { updates } = await import("@/lib/updates")
+    const snapshot = vi.spyOn(updates, "getSnapshot")
+    snapshot.mockReturnValue({ stage: "idle", info: { version: "1.0.0", commit: "abc", kind: "appimage", updatable: true } })
+    const { set, user } = setup()
+    const toggle = await screen.findByRole("radio", { name: "Check for updates automatically off" })
+    expect(screen.getByText("Peak 1.0.0")).toBeInTheDocument()
+    await user.click(toggle)
+    await user.click(screen.getByRole("button", { name: "Save settings" }))
+    await waitFor(() => expect(set).toHaveBeenCalledWith(expect.objectContaining({ checkForUpdates: false })))
+    snapshot.mockRestore()
   })
 })

@@ -1,0 +1,21 @@
+# recorded 2026-11-06T20:17:55Z, PEAK_REQUIRE_COLLECTOR=1
+fmt exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+clippy exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.78s
+collector exit=0
+test result: ok. 99 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.73s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.40s
+peak-core/src/runner.rs            606                14    97.69%          50                 0   100.00%         283                 3    98.94%    
+src/bundled.rs                     204                 4    98.04%          15                 0   100.00%          71                 0   100.00%    
+src/discovery.rs                   908                 4    99.56%          60                 1    98.33%         382                 1    99.74%    
+src/release.rs                     210                 2    99.05%          16                 0   100.00%         102                 1    99.02%    
+TOTAL                            18072               324    98.21%        1115                30    97.31%        7883                74    99.06%    
+coverage exit=0

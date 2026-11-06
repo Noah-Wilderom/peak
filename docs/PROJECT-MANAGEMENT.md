@@ -5,28 +5,243 @@ implementation and technical decisions. The eleven original handoff milestones a
 accepted and delivered. The Docker collector follow-up is also accepted and delivered.
 The build-to-launch/PATH follow-up and requested 1s/10s chart viewing windows are
 also accepted and delivered. The CLI/app-discovery fix for reproduced cases is
-accepted and delivered; reporter-specific confirmation follows update/retry.
-The checkpoint schedule is disabled.
+accepted and delivered. Current work is actual packaged releases, automated builds
+and automatic updates. Five-minute checkpoints are re-enabled.
 
 ## Current assignment
 
-- Last PM update: 2026-11-06 14:56:54 UTC.
-- Last scheduled checkpoint: 2026-11-06 14:47:40 UTC, before the terminal event.
-  Ordinal 7 completed at 14:50:39.997 UTC; acceptance/delivery are recorded below.
-- Lifecycle: **accepted and delivered**, at 2026-11-06 14:56:54 UTC. Ordinal 7 completed
-  at 14:50:39.997 UTC. Reproduced discovery defects pass the inspected real-app
-  evidence and gates; the fix is committed/pushed and remote SHA verified. The
-  user's exact cause remains unconfirmed pending update/restart/retry. No pending
-  child work/question/approval or new quota failure; required model/settings remain
-  unchanged. Schedule disabled; the continuous goal stays intentionally paused.
+- Last PM update: 2026-11-06 20:46:08 UTC.
+- Last scheduled checkpoint: 2026-11-06 20:44:01 UTC, followed immediately by the
+  delivered ordinal 8 terminal event at 20:44:04.957 UTC. PM read the child's final
+  result through t3_thread_read, then task_status confirmed completed,
+  result_available, no pending child runs/requests and the required model/options.
+- Lifecycle: **pm_logistics**. Ordinal 8 is terminal, not active: Linux is verified
+  locally, while native Windows/macOS CI and public release delivery remain open.
+  PM is preparing the developer's requested validation branch and private updater
+  signing-secret provisioning, then will resume implementation on the SAME thread.
+  No new quota interruption. Linux/Windows/macOS and publication after verification
+  remain confirmed; the continuous goal stays intentionally paused.
 - Provider/model: `claudeAgent` / `claude-opus-5-5`.
 - Options: `effort: medium`, `fastMode: false`.
 - One developer, shared checkout. No parallel developers or model substitution.
 - Developer thread ID: `thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023`.
-- Current task ID: `node:delegated-task:command%3Amcp%3Add9fd3bf-0e6f-4879-8850-e400f85dd327%3Athread-send%3Ac151610c-0a25-4f95-8f72-50eb0f26fd6f`.
-- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:7`.
-- Current continuation clientRequestId: `c151610c-0a25-4f95-8f72-50eb0f26fd6f`.
+- Current task ID: `node:delegated-task:command%3Amcp%3Af823dfd4-b4a9-4e67-9130-32fd63eee07d%3Athread-send%3A933394ea-c2fa-4ad3-b47f-1845fb6b47e4`.
+- Current run ID: `run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A5b5e17b5-d3da-458c-863e-dd3006d2ce12%253Adelegate-task%253A963c3a47-13b4-465d-a29d-20a8f2c7a023:ordinal:8`.
+- Current continuation clientRequestId: `933394ea-c2fa-4ad3-b47f-1845fb6b47e4`.
+- Context-clarification steer clientRequestId: `d35b652c-2297-4b9a-a545-f1821cdb1625`.
+- Product-decision steer clientRequestId: `b4daa871-9b38-4fd0-9547-0f999773de71`.
 - Developer link: <t3-thread://v2/a02307de-aaa1-4a4e-9e29-59098cb7feae/thread:delegated-task:command%3Amcp%3A5b5e17b5-d3da-458c-863e-dd3006d2ce12%3Adelegate-task%3A963c3a47-13b4-465d-a29d-20a8f2c7a023>
+
+## Current scope: packaged releases, automated builds and automatic updates
+
+User request: make actual releases/builds, including auto updates. Baseline is a
+clean shared checkout at `159737d6d6195ab33937609b994cf7baf77cdc02`. Authenticated
+`gh release list --repo Noah-Wilderom/peak` returned `[]`; the local tag list is
+empty. Actual remote tags/versioning still belong to the developer's preparation.
+The GitHub connector catalog has no release-management action; authenticated gh is
+available for release logistics.
+
+### Product decisions confirmed
+
+The user answered both questions explicitly:
+1. **Linux, Windows and macOS** for the first release.
+2. **Publish the verified release**, rather than leaving a draft for review.
+
+Answers were steered successfully into the SAME active ordinal 8. The initial
+Linux baseline work remains useful but is not the full delivery. Produce genuine
+usable artifacts for all three platforms, with an explicit architecture/capability
+matrix and native build/functional evidence; a built installer alone is not proof
+that its application works.
+
+Publishing the verified first release to the existing repository, its tags/assets/
+update feed, and necessary CI/signing-secret logistics is authorized. Complete the
+concrete candidate and required checks before publishing; do not ask a generic
+publishing-permission question again. Genuinely missing account-owned signing/
+notarization credentials use private request_secret after exact needs are concrete.
+Never claim signing/notarization/platform tests that did not run.
+
+### In-progress release evidence: partial, not final acceptance
+
+At 19:48 UTC PM read `docs/evidence/release/1-linux-update-proof-first.log`,
+recorded 19:47:16 UTC against the uncommitted tree on baseline `159737d`.
+It reports a real AppImage update from test versions 9.0.0 to 9.0.1 in an Ubuntu
+22.04 chroot with FUSE/Xvfb, a throwaway signing key and localhost feed, ending
+`PROOF OK`. Recorded cases cover offline/no-update/server errors/malformed feed,
+missing/truncated/tampered artifacts and wrong key, then successful download,
+restart and installed-version change. History and samples survive; a `peak run`
+workload survives the restart, the new app monitors a subsequent CLI command,
+and the workload's own exit 9 is preserved. This first log does not establish
+settings persistence; the later UI log below covers that outcome.
+
+At 20:33 UTC the first proof file is replaced by
+`docs/evidence/release/1-linux-update-proof.log`, whose header says final code,
+uncommitted on `159737d`. The repeat ends `PROOF OK` and `PROOF-EXIT=0`, preserving
+the same negative cases, actual 9.0.0-to-9.0.1 installed-version change, history,
+CLI-workload survival, subsequent CLI monitoring and workload exit 9. This is a
+fresh Linux result only; final candidate attribution and all-platform acceptance
+still require the developer's terminal handover and outstanding required checks.
+
+At 20:03 UTC PM read `docs/evidence/release/2-linux-update-ui.log`, recorded
+20:00:16 UTC. Real packaged AppImages, windows/buttons, FUSE/Xvfb, Ubuntu 22.04
+chroot, throwaway key and localhost feed: `ALL OK (linux)`. It records automatic
+discovery with download waiting for consent, progress/signature/install feedback,
+restart confirmation naming affected commands and supporting decline, successful
+new-version relaunch, and preserved history/settings. Offline/no-update/tampered
+download UI cases also pass. Neither Linux log establishes Windows/macOS support,
+final candidate gates or public delivery. All-platform acceptance remains open.
+
+At 20:38 UTC log 2 contains a fresh UI run recorded 20:37:53 UTC, labeled final
+code. It again ends `ALL OK (linux)`, including restart confirmation/decline and
+the new app reopening with history/settings.
+
+At 20:13 UTC PM read the in-progress
+`docs/evidence/release/3-cli-discovery-installed-appimage.log`, started 20:13:01 UTC.
+It identifies a production-key candidate AppImage installed under real FUSE in
+the Ubuntu 22.04 chroot, with a real window and independently invoked CLI.
+Initial no-app, PATH, relative-path/different-directory, installed-copy,
+other-build CLI and differing environment cases report correct output/exit
+behavior. At the 20:18 checkpoint the log is complete, ending `EXIT=1` at
+20:14:27 UTC: one frozen-app (SIGSTOP) case received an empty diagnostic where
+"open ... isn't answering" was required. Subsequent thaw, isolation, restart,
+stale-record/port-reuse and corrupt-record cases pass. That initial suite was not
+accepted. At 20:38 UTC the same log preserves that failure and appends passing
+frozen/thawed steps on final code, ending `ALL OK`. The harness had stopped the
+AppImage mount process instead of the application; after correction the frozen
+app reports its real PID as open but not answering, retains workload exit 3,
+then monitors a command with its own exit 7 after thawing. This supplies the
+previously missing negative-case evidence, subject to final candidate handover.
+An initial tauri-driver GLIBC_2.39 loader diagnostic also remains in the log and
+requires a final explanation of its disposition and the actual harness.
+
+At 20:18 UTC PM read `docs/evidence/release/4-backend-gates.log`, recorded
+20:17:55 UTC with `PEAK_REQUIRE_COLLECTOR=1`: fmt, clippy and independent collector
+build exit 0; test groups 99 + 6 + 80 pass. Coverage exits 0 at **99.06% lines**
+(7883 counted, 74 uncovered), meeting the existing 99% gate. This is backend
+evidence only; it does not replace installed-app acceptance, frontend gates,
+native Windows/macOS validation or public-release acceptance.
+
+At 20:23 UTC PM read `docs/evidence/release/5-cross-target-checks.log`, recorded
+20:18:42 UTC: Rust type checks exit 0 for `aarch64-apple-darwin`,
+`x86_64-apple-darwin` and `x86_64-pc-windows-gnu` from Linux. The log explicitly
+states C steps were stubbed and nothing was linked or run. This is portability
+type-check evidence only, not native builds, usable platform artifacts, installed
+GUI/CLI behavior or packaged-update proof on Windows/macOS.
+
+At 20:38 UTC PM read in-progress `docs/evidence/release/6-frontend-gates.log`,
+recorded 20:38:16 UTC: typecheck exits 0. Coverage/build final results are not yet
+present, so no full frontend gate pass is accepted from this partial log.
+
+### Ordinal 8 terminal handover and validation staging
+
+Terminal result: **completed 2026-11-06T20:44:04.957Z**, with overall release scope
+explicitly incomplete. PM read the final result, final progress docs and all eight
+release evidence logs. The frontend log now finishes with typecheck/build exit 0,
+**292 tests / 32 files**, and **100% statements/branches/functions/lines**.
+Backend evidence is 185 tests (99+6+80), **99.06% lines**, unchanged 99% threshold.
+The developer reports the new five-line `peak-cli.rs` entry point excluded alongside
+existing entry points; this measurement change is recorded, not hidden as an
+unchanged exclusion list.
+
+Browser mock log 7 passes 15 simulated-data steps. Installed AppImage window log 8
+passes eight real capture/chart/agent steps, exit 0, including 1s/10s real samples.
+Its initial tauri-driver GLIBC diagnostic is retained; final harness attribution
+remains to be clarified in the continuation. CLI log 3 retains the original failed
+frozen check and its passing harness-corrected replacement. Linux local evidence
+is sufficient to stage the candidate for native CI, not to publish a release.
+
+The developer requests a commit/push to **release-validation/0.1.0**, no tag, to
+run native builds and real packaged-update proof on four targets. PM will preserve
+master and unrelated changes, verify the remote branch SHA, provision only the two
+existing updater signing secrets privately from files, then resume the same
+developer for CI failures and remaining acceptance. No release/tag/feed advance.
+
+Updater key directory permissions checked: 700; key/password files: 600, outside
+the repository. No secret contents were read into tool output. Persistent recovery
+material remains there; an off-server backup is still required. The developer's
+Linux 0.1.0 dry-run artifacts carry a dirty commit and must not be published.
+
+Public distribution destination remains unanswered. PM additionally asked once
+whether the first release should use user-owned Apple/Windows signing credentials
+or documented OS warnings; updater signatures remain mandatory either way.
+No paid account/certificate purchase, source visibility change or public repository
+creation is inferred from silence. Independent private native-CI staging proceeds.
+
+PM logistics at 20:46 UTC: authenticated repository metadata confirms the source
+repository is private and PM has admin access. Both updater secrets were absent;
+PM provisioned them directly from the mode-600 files with no secret output, then
+verified their names/update times only (20:45:59Z and 20:46:00Z). No other secrets
+were set. Fetched master equals baseline `159737d6d6195ab33937609b994cf7baf77cdc02`
+with 0/0 divergence; the requested validation branch did not exist locally or
+remotely. PM created `release-validation/0.1.0` for candidate staging. Master is
+unchanged. Candidate/docs whitespace checks pass; raw evidence logs are preserved.
+
+### Public distribution destination: answer pending
+
+At the 19:39 UTC artifact-only checkpoint, new `docs/RELEASING.md` flags that the
+source repository is private and anonymous release/feed requests would fail.
+The user has authorized publishing verified releases, but has not authorized
+making private source public. PM asked asynchronously whether to use a public
+releases-only repository (recommended; keep source private), or make the existing
+source repository public. Do not infer a visibility choice from silence.
+Linux/Windows/macOS and publication after verification remain confirmed; this
+question concerns destination and source disclosure, not generic publish approval.
+Continue independent implementation and validation while that answer is pending;
+relay the answer once as product context to the same developer when received.
+
+### Reporter clarification
+
+The user said they started through **`bun run dev`**, and also "tried with the
+peak command" installed through Task and moved to bin. README confirms the browser
+command is the simulated demo; the CLI connects to a real Tauri desktop app.
+That explains the browser-only path, but the latter wording may also mean they
+tried launching a native app. Do not claim the entire exact report is conclusively
+browser-only. PM relayed this nuance as a steer to ordinal 8. The independently
+reproduced discovery defects remain valid, accepted fixes. Packaged release
+acceptance includes the installed GUI and separately invoked CLI working together.
+
+### Required outcomes and evidence
+
+- Real versioned standalone artifacts for **Linux, Windows and macOS** that users
+  can download/install without building source or needing Bun/Rust. GUI, normal
+  installed CLI and the applicable bundled collector work. State supported native
+  functionality/capabilities truthfully and validate the actual platform builds.
+  Default end-user instructions distinguish installed desktop, development and
+  browser demo, and explain the initial transition for source-built copies.
+- Repeatable automated builds/release workflow, concrete version/notes plan,
+  attributable artifact identities, checksums, signatures and correct updater
+  metadata. Build/verification remains separate from premature publication.
+- Installed releases discover, download, verify and apply genuine signed updates,
+  with clear progress/failure/restart behavior preserving history/settings and
+  active monitoring/workloads. Package formats state their actual updater support.
+- Prove the actual update path between two packaged versions in owned disposable
+  environments: check/download/signature verification/install/relaunch and data
+  persistence, plus meaningful no-update/offline/invalid-signature/failure cases.
+  A mock, update button or workflow YAML alone is not real release/update proof.
+  External/platform limitations must be explicit; no fabricated success claims.
+- Preserve existing frontend **100%** and backend **99%** gates, plus CLI/collector/
+  chart behavior. All coding, build/tests and technical CI decisions belong to
+  the single Claude developer. PM inspects outcomes/evidence and manages logistics.
+- Keep signing material outside git/logs/artifacts/chat with private permissions
+  and a persistent recovery plan. Do not delete a production signing key as temp
+  cleanup. PM receives only needed secret names/private paths/refs and concrete
+  provisioning steps; genuinely missing user-owned credentials use request_secret.
+- No user profiles/install/workloads or sportboekernl containers may be changed by
+  validation. Use owned disposable environments; no extra developers or subagents.
+
+### Saved next action and delivery boundary
+
+Finish the requested PM validation-branch push and private signing-secret
+provisioning, then continue implementation and native-CI validation on the SAME
+developer thread with unchanged configuration. Platform and publication choices
+are settled; public distribution destination and OS trust choices remain pending.
+Do not wait for those answers to perform independent private validation. Record
+returned continuation task/run IDs; active checkpoints then inspect artifacts only.
+An intermediate Linux milestone or a successful workflow build is not completion.
+PM handles commits/pushes, signing-secret logistics, release tags/assets/publishing
+and update-feed advancement after concrete evidence under the confirmed publishing
+choice. No further generic publish approval is required.
+Claude may not independently perform those external publishing mutations.
+No new review assignment or continuous goal loop is created.
 
 ## CLI-discovery acceptance: complete; delivered to master
 
@@ -532,6 +747,13 @@ CPU sampling semantics and unavailable metrics must remain honestly labeled.
 - At 14:56 UTC the CLI-discovery fix was pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`;
   its remote SHA was independently verified, then the same schedule was disabled.
   The user's exact launch/setup still needs their update/retry or diagnostic.
+- At 19:02 UTC PM recorded the user's browser/installed-command clarification and
+  new packaged-release/build/auto-update request. Configuration was read unchanged;
+  ordinal 8 was started on the same thread and the same five-minute schedule was
+  re-enabled. Product platform/publication choices remain pending. No new goal.
+- At 19:08 UTC PM recorded the user's explicit Linux/Windows/macOS and publish-
+  verified-release choices and successfully steered them into ordinal 8. The same
+  schedule now requires all-three-platform delivery. No additional developer or goal.
 
 If a new terminal usage failure arrives, set `quota_wait`, record its **new** exact
 reset facts (do not reuse the historical 03:20 reset), and resume the same developer
@@ -543,11 +765,12 @@ known terminal. Never infer quota availability from a send being accepted.
 
 - Schedule ID: `scheduled-task:command:mcp:5b5e17b5-d3da-458c-863e-dd3006d2ce12:schedule-task:28dc3ab8-d9aa-45d1-94fa-a5f2cf7e9bce`.
 - Bound PM thread: `56b6e6e0-c0a4-4731-8a5c-bb3021cf2717`.
-- Enabled: **false**, disabled at 14:56 UTC after the reproduced CLI discovery
-  defects passed acceptance and the fix was pushed to master. Tool confirms no
-  next run. Interval while enabled was 300000 ms (five minutes).
-- Historical acceptance did not prematurely close ordinal 7; current real-app
-  results and gates were inspected before acceptance/delivery.
+- Enabled: **true**, re-enabled at 19:02 UTC; updated at 19:08 UTC for the confirmed
+  Linux/Windows/macOS first release and publishing choice. Interval: 300000 ms.
+  Latest returned next run: `2026-11-06T19:12:29.756Z`.
+- Actual packaged update/build evidence and the verified published release are
+  required. Historical completion, Linux-only delivery or CI YAML alone cannot
+  prematurely close ordinal 8.
 - Read progress artifacts on active checks. Do not poll/interrupt the active
   developer or consume Claude quota for unchanged-status messages.
 - Completion events drive lifecycle changes and implementation continuations.
@@ -567,8 +790,11 @@ The accepted scope was pushed as `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`.
 Keep verified follow-up fixes delivered to master under the user's standing
 publishing instruction; PM handles git logistics after acceptance, without
 force-pushing.
-Production
-deployments, external communications and PR creation remain outside this request.
+The new release request and explicit publish choice authorize the verified first
+Linux/Windows/macOS release, tags/assets/update feed and required CI/signing-secret
+logistics. Verified master pushes remain authorized. Publish after concrete checks
+without another generic permission question. Unrelated production deployments,
+external messages and PR creation remain outside this request.
 Preserve unrelated work. The developer cleaned its disposable
 environments; shared Docker build cache was left alone. Product code and technical
 decisions belong to the developer. The PM maintains outcomes, evidence and handover.

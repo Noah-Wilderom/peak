@@ -130,15 +130,15 @@ pub struct Facts {
 /// Parse a signal name, including only those the protocol allows.
 pub fn signal_number(name: &str) -> Option<i32> {
     match name {
-        "INT" => Some(libc::SIGINT),
-        "TERM" => Some(libc::SIGTERM),
-        "KILL" => Some(libc::SIGKILL),
-        "HUP" => Some(libc::SIGHUP),
+        "INT" => Some(crate::runner::SIGINT),
+        "TERM" => Some(crate::runner::SIGTERM),
+        "KILL" => Some(crate::runner::SIGKILL),
+        "HUP" => Some(crate::runner::SIGHUP),
         _ => None,
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use serde_json::json;
@@ -186,10 +186,10 @@ mod tests {
 
     #[test]
     fn only_known_signals_are_accepted() {
-        assert_eq!(signal_number("TERM"), Some(libc::SIGTERM));
-        assert_eq!(signal_number("INT"), Some(libc::SIGINT));
-        assert_eq!(signal_number("KILL"), Some(libc::SIGKILL));
-        assert_eq!(signal_number("HUP"), Some(libc::SIGHUP));
+        assert_eq!(signal_number("TERM"), Some(crate::runner::SIGTERM));
+        assert_eq!(signal_number("INT"), Some(crate::runner::SIGINT));
+        assert_eq!(signal_number("KILL"), Some(crate::runner::SIGKILL));
+        assert_eq!(signal_number("HUP"), Some(crate::runner::SIGHUP));
         assert_eq!(signal_number("USR1"), None);
     }
 }

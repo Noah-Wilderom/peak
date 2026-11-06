@@ -1,0 +1,122 @@
+name: Release
+
+# Builds, signs and checks every platform's artifacts. A tag also makes a *draft* GitHub release.
+# Drafts aren't visible at releases/latest, which is the update channel, so nothing here can
+# reach users. Publishing the draft is a separate, deliberate act (docs/RELEASING.md).
+on:
+  push:
+    tags: ["v*.*.*"]
+    branches: ["release-validation/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The oldest supported runner: an AppImage only runs on glibc this new or newer.
+          - { os: ubuntu-22.04, platform: linux, target: x86_64-unknown-linux-gnu }
+          - { os: windows-latest, platform: windows, target: x86_64-pc-windows-msvc }
+          - { os: macos-latest, platform: darwin-aarch64, target: aarch64-apple-darwin }
+          - { os: macos-15-intel, platform: darwin-x86_64, target: x86_64-apple-darwin }
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      # Optional. Without them macOS is ad-hoc signed and Windows unsigned; see docs/RELEASING.md.
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}, x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.target }}
+      - name: Check the tag matches the version
+        shell: bash
+        run: node scripts/release/version.mjs check ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+      - name: Linux system libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev build-essential xvfb libfuse2
+      - name: Build Linux
+        if: matrix.platform == 'linux'
+        run: scripts/release/build-linux.sh artifacts
+      - name: Build
+        if: matrix.platform != 'linux'
+        shell: bash
+        env:
+          PEAK_REQUIRE_COLLECTOR: "1"
+        run: |
+          bun install --frozen-lockfile
+          bun run tauri build --target ${{ matrix.target }}
+          node scripts/release/collect.mjs src-tauri/target/${{ matrix.target }}/release/bundle artifacts ${{ matrix.platform }}
+      - name: Check the signatures, independently of Tauri
+        shell: bash
+        run: |
+          PUB=$(node -p "require('./src-tauri/tauri.conf.json').plugins.updater.pubkey")
+          for sig in artifacts/*.sig; do node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB"; done
+      - name: Smoke test the packaged app
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+          else node scripts/e2e/smoke/smoke.mjs artifacts smoke-output; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-${{ matrix.platform }}
+          path: smoke-output
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 30
+
+  draft:
+    name: Draft release
+    # Only a tag gets here. Never marks a release as published.
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: all
+          merge-multiple: true
+      - name: Write the feed and checksums
+        run: |
+          cp scripts/install-release.sh all/install.sh
+          node scripts/release/manifest.mjs all ${{ github.ref_name }} docs/release-notes/${{ github.ref_name }}.md
+      - name: Create the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${{ github.ref_name }} all/* --draft --verify-tag --title "Peak ${{ github.ref_name }}" --notes-file docs/release-notes/${{ github.ref_name }}.md

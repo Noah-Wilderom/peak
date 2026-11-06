@@ -9,12 +9,13 @@
 
 use std::fs;
 use std::io::{self, Write};
+#[cfg(unix)]
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::hub::data_dir;
+use crate::hub::data_dir_in_home;
 use crate::monitor::now_ms;
 use crate::procfs::ProcFs;
 
@@ -56,29 +57,61 @@ pub struct Here {
     pub net_ns: String,
 }
 
+#[cfg(target_os = "linux")]
 fn read_trim(path: &str) -> String {
     fs::read_to_string(path).map(|s| s.trim().to_string()).unwrap_or_default()
 }
 
+#[cfg(target_os = "linux")]
 fn read_link(path: &str) -> String {
     fs::read_link(path).map(|p| p.display().to_string()).unwrap_or_default()
 }
 
 impl Here {
+    #[cfg(target_os = "linux")]
     pub fn detect() -> Here {
-        let uid = unsafe { libc::geteuid() };
+        let (uid, user) = current_user();
         Here {
             uid,
-            user: account(uid).map_or_else(|| format!("uid {uid}"), |(name, _)| name),
+            user,
             host: read_trim("/proc/sys/kernel/hostname"),
             boot_id: read_trim("/proc/sys/kernel/random/boot_id"),
             pid_ns: read_link("/proc/self/ns/pid"),
             net_ns: read_link("/proc/self/ns/net"),
         }
     }
+
+    /// No namespaces to tell apart here, so those stay empty and always match.
+    #[cfg(not(target_os = "linux"))]
+    pub fn detect() -> Here {
+        let (uid, user) = current_user();
+        let fs = ProcFs::default();
+        Here {
+            uid,
+            user,
+            host: fs.hostname(),
+            boot_id: fs.boot_time().unwrap_or(0).to_string(),
+            pid_ns: String::new(),
+            net_ns: String::new(),
+        }
+    }
+}
+
+#[cfg(unix)]
+fn current_user() -> (u32, String) {
+    // SAFETY: geteuid has no preconditions.
+    let uid = unsafe { libc::geteuid() };
+    (uid, account(uid).map_or_else(|| format!("uid {uid}"), |(name, _)| name))
+}
+
+/// Windows keeps a user's application data private to that account already.
+#[cfg(windows)]
+fn current_user() -> (u32, String) {
+    (0, std::env::var("USERNAME").unwrap_or_else(|_| "this user".into()))
 }
 
 /// Name and home directory from the OS account database.
+#[cfg(unix)]
 fn account(uid: u32) -> Option<(String, PathBuf)> {
     use std::ffi::CStr;
     let mut buf = vec![0u8; 64 * 1024];
@@ -97,16 +130,16 @@ fn account(uid: u32) -> Option<(String, PathBuf)> {
     }
 }
 
-/// The start time of a process, if it exists.
+/// The start time of a process, if it's running. A zombie has exited, whatever its parent does.
 pub fn start_ticks(pid: u32) -> Option<u64> {
-    ProcFs::default().stat(pid).map(|s| s.starttime)
+    ProcFs::default().stat(pid).filter(|s| s.state != 'Z').map(|s| s.starttime)
 }
 
 /// Where to look and publish: the environment's data directory, then the account's.
 pub fn search_dirs(env_dir: PathBuf, account_home: Option<&Path>) -> Vec<PathBuf> {
     let mut dirs = vec![env_dir];
     if let Some(home) = account_home {
-        let dir = data_dir(None, home.to_str());
+        let dir = data_dir_in_home(home);
         if !dirs.contains(&dir) {
             dirs.push(dir);
         }
@@ -115,7 +148,10 @@ pub fn search_dirs(env_dir: PathBuf, account_home: Option<&Path>) -> Vec<PathBuf
 }
 
 pub fn default_dirs() -> Vec<PathBuf> {
+    #[cfg(unix)]
     let home = account(unsafe { libc::geteuid() }).map(|(_, home)| home);
+    #[cfg(windows)]
+    let home: Option<PathBuf> = None;
     search_dirs(crate::hub::default_data_dir(), home.as_deref())
 }
 
@@ -128,10 +164,19 @@ fn instance_name(record: &Record) -> String {
 /// Replace `path` whole, readable only by this user, so a reader never sees half a record.
 fn write_private(path: &Path, record: &Record) -> io::Result<()> {
     let dir = path.parent().expect("records live in a directory");
-    fs::DirBuilder::new().recursive(true).mode(0o700).create(dir)?;
+    let mut builder = fs::DirBuilder::new();
+    builder.recursive(true);
+    #[cfg(unix)]
+    builder.mode(0o700);
+    builder.create(dir)?;
     let tmp = dir.join(format!(".{}.tmp", std::process::id()));
-    let mut f = fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&tmp)?;
+    let mut options = fs::OpenOptions::new();
+    options.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    options.mode(0o600);
+    let mut f = options.open(&tmp)?;
     f.write_all(serde_json::to_string(record)?.as_bytes())?;
+    drop(f);
     fs::rename(&tmp, path)
 }
 
@@ -301,12 +346,15 @@ fn note_unreadable(found: &mut Discovery, path: &Path, e: &io::Error) {
 }
 
 /// `Ok(None)` means there's no such record.
+#[cfg_attr(windows, allow(unused_variables))]
 fn read_record(path: &Path, here: &Here) -> Result<Option<Record>, String> {
+    #[cfg_attr(windows, allow(unused_variables))]
     let meta = match fs::metadata(path) {
         Ok(meta) => meta,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
         Err(e) => return Err(format!("couldn't read {}: {e}", path.display())),
     };
+    #[cfg(unix)]
     if meta.uid() != here.uid {
         return Err(format!("{} belongs to another user, so it can't be used", path.display()));
     }
@@ -324,7 +372,7 @@ pub fn prune(dirs: &[PathBuf], here: &Here) {
     discover(dirs, here, &start_ticks);
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use std::os::unix::fs::PermissionsExt;

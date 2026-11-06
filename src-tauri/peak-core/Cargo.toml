@@ -11,3 +11,9 @@ libc = "0.2"
 
 [dev-dependencies]
 tempfile = "3"
+
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+sysinfo = { version = "0.37", default-features = false, features = ["system", "user"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Diagnostics_ToolHelp", "Win32_System_ProcessStatus", "Win32_System_Threading"] }

@@ -123,9 +123,11 @@ async function secondApp() {
   await sleep(4000)
   return a
 }
+/** The newest app, by its own record: an AppImage has a second process of the same name. */
 const appPid = async () => {
-  const { execSync } = await import("node:child_process")
-  return execSync("pgrep -x peak -n").toString().trim()
+  const dir = `${DATA}/instances`
+  const records = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(`${dir}/${f}`, "utf8")))
+  return String(records.sort((a, b) => b.startedAt - a.startedAt)[0].pid)
 }
 
 const driver = spawn("/opt/peak/tauri-driver", ["--native-driver", "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })

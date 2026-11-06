@@ -1,0 +1,17 @@
+# existing real-window steps against the production-key candidate AppImage: capture, markers, charts, agents. SSH, Docker, Kubernetes steps not run here. started 2026-11-06T20:41:06Z
+/opt/peak/tauri-driver: /lib/x86_64-linux-gnu/libc.so.6: weak version `GLIBC_2.39' not found (required by /opt/peak/tauri-driver)
+
+
+ok   starts with an empty real backend
+ok   captures a real command with output
+ok   timeline marks stderr and jumps to output
+ok   a real chart drag zooms; a real chart click opens the output
+ok   stop a local run: exits cleanly
+     1s axis 0:10.6 0:10.8 0:11.0 0:11.2 0:11.4; zoom 20:41:44.6 – 20:41:45.1 · 516ms 
+     10s axis 0:12 0:14 0:16 0:18 0:20; zoom 20:41:45.1 – 20:41:53.3 · 8.21s 
+ok   1s and 10s windows on real samples
+ok   python agent: lag and CPU profile from the real runtime
+ok   node agent: lag, and a CPU profile that says how it sampled
+
+ALL OK
+EXIT=0

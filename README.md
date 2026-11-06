@@ -3,6 +3,47 @@
 Process monitoring and heap profiling in a Tauri desktop app, locally and on other
 machines and containers over your own SSH, Docker and Kubernetes access.
 
+## Install
+
+Download from the [releases page](https://github.com/Noah-Wilderom/peak/releases). You don't need Bun or Rust.
+
+| Platform | Download | Then |
+|---|---|---|
+| Linux x86_64 | `install.sh` or the `.AppImage` | `curl -fsSL https://github.com/Noah-Wilderom/peak/releases/latest/download/install.sh \| sh` puts it at `~/.local/bin/peak` with a menu entry. AppImages need `libfuse2` (Ubuntu 24.04: `sudo apt install libfuse2t64`) |
+| Linux, Debian or Ubuntu | `.deb` | `sudo apt install ./peak_*_amd64.deb`. This one doesn't update itself |
+| Windows x64 | `*_x64-setup.exe` | Run it. No admin needed. It adds `peak-cli` to your PATH for new terminals |
+| macOS Apple Silicon or Intel | `*_aarch64.dmg` or `*_x64.dmg` | Drag Peak to Applications. For the command line: `ln -s /Applications/peak.app/Contents/MacOS/peak ~/.local/bin/peak` |
+
+Use it the same way everywhere: open the app, then run `peak run -- <command>` in a terminal (`peak-cli run -- <command>` on Windows). `peak version` says which version and format you have.
+
+**Updates.** Peak looks for a new release on start and every 6 hours, and offers it. It only downloads when you say so, checks the signature, and only restarts when you say so. A restart stops commands the app itself started, and it names them first. Commands from `peak run` and attached processes keep running, and your history and settings stay.
+
+| Format | Updates itself |
+|---|---|
+| Linux AppImage (`install.sh`) | Yes, in place |
+| Windows installer | Yes |
+| macOS app | Yes |
+| Linux `.deb` | No: install the next `.deb` |
+| Built from source | No |
+
+**Already built Peak from source?** That copy never updates. Install once as above and it replaces `~/.local/bin/peak`. If you moved your copy somewhere else on your PATH, delete it or `peak` may keep running the old one; the installer warns if it finds one first. Your history and settings are in the same place, so they carry over.
+
+### What works on each platform
+
+| | Linux x86_64 | Windows x64 | macOS |
+|---|---|---|---|
+| Capture a command, memory, CPU, disk rate, output, exit | Yes | Yes | Yes |
+| `peak run` to the open app | Yes | Yes, as `peak-cli` | Yes |
+| Node and Python runtime agents | Yes | Yes | Yes |
+| CPU split into user and system, threads, page faults | Yes | Yes | Yes |
+| Memory composition (anonymous, file, shared), swap per process | Yes | No | No |
+| File and socket handle counts, listening ports | Yes | No: shown as not tracked | No: shown as not tracked |
+| Memory pressure (PSI) | Yes | No | No |
+| Load average | Yes | No: left out | Yes |
+| Remote targets (SSH, Docker, Kubernetes on Linux machines) | Yes | Built in, not yet validated live | Built in, not yet validated live |
+
+The Windows and macOS columns say what's built. [`docs/RELEASING.md`](docs/RELEASING.md) says what each has actually been run on.
+
 ## Getting started
 
 You need [Bun](https://bun.sh), [Task](https://taskfile.dev), Rust through
@@ -13,6 +54,14 @@ task dev
 ```
 
 That installs dependencies, builds everything and opens the app for development. The first build takes a few minutes.
+
+**Which Peak is which:**
+
+| You ran | What you get |
+|---|---|
+| An installed release | The real app. It monitors real processes, works with `peak run`, and updates itself |
+| `task dev` | The real app, built from your checkout, for working on Peak. It doesn't update itself |
+| `bun run dev` | **A browser demo with simulated data.** It has no real processes, and `peak` commands can't connect to it |
 
 ### The `peak` command
 

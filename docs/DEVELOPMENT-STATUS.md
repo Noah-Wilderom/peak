@@ -3,14 +3,67 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 14:50 UTC
-- **State:** the reproduced CLI/app-discovery defects are accepted and pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`. Reporter-specific confirmation follows update/retry.
+- **Last update:** 2026-11-06 20:43 UTC
+- **State:** first packaged release for Linux, Windows and macOS **in progress, uncommitted**. Linux is proven locally. Windows and macOS are implemented and type-checked but have **never run**: they need the native CI below. See "Current scope".
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
+## Current scope: packaged releases and automatic updates on Linux, Windows and macOS
+
+**Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
+
+**Status: Linux done locally. Windows and macOS have not run. This isn't complete.**
+
+**Blockers, in order.**
+
+1. **The repository is private, so nothing can reach users.** Anonymous clients can't read a private repository's release assets, so the updater and `install.sh` would get 404s. **Decision needed: make `Noah-Wilderom/peak` public, or publish to a separate public releases repository.** The endpoint is compiled in, so this comes before the first tag. Details: `docs/RELEASING.md`.
+2. **Native CI hasn't run.** It needs this code pushed. See "Next action".
+3. **OS trust isn't set up.** Without Apple Developer ID and notarization, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Whether to buy these or ship with the warnings is the user's call; the release works either way, and `docs/RELEASING.md` says exactly how.
+
+**Done on Linux, verified locally.** Environment: Ubuntu 22.04 chroot (CI's base, on the data volume because the root disk is 98% full), real FUSE, Xvfb, real window. Logs in `docs/evidence/release/`.
+
+| Log | What ran | Result |
+|---|---|---|
+| `1-linux-update-proof.log` | Two real AppImages (9.0.0 to 9.0.1), throwaway key, localhost feed. Offline, no update, HTTP 500, malformed feed, missing artifact, truncated download, tampered bytes and a wrong-key signature each leave the install's hash unchanged and the app running. Then the real update: downloaded, verified, replaced, relaunched. History survived, and a `peak run` workload kept running through it and exited with its own code | PROOF OK, 17 checks |
+| `2-linux-update-ui.log` | Same, through the real window and buttons. Offline message in Settings with no popup; "latest version"; a tampered download refused with the reason; a release found by itself and **nothing downloaded until asked**; progress; "installed", with the old app still running and the file already replaced; a restart naming `sleep 300` and declinable; then the new version with settings and history | ALL OK, 10 steps |
+| `3-cli-discovery-installed-appimage.log` | The full CLI discovery suite on the installed candidate | 20/20 after one harness fix, recorded in the log |
+| `8-window-regression-appimage.log` | Capture, markers, chart drag and click, 1s/10s, Python and Node agents on the installed candidate | ALL OK, 8 steps |
+| `7-browser-mock.log` | Browser walkthrough (simulated data) | ALL OK, 15 steps |
+| `4-backend-gates.log` | fmt, clippy, collector, tests | All exit 0; 99 + 80 + 6 tests; **99.06% lines**, gate 99 |
+| `6-frontend-gates.log` | Typecheck, coverage, build | Exit 0; 292 tests; **100%** |
+| `5-cross-target-checks.log` | Rust type-checks for arm64 macOS, x64 macOS and Windows | Exit 0. C steps stubbed: **this isn't evidence that they work** |
+
+`peak-cli.rs` joins `main.rs` and `lib.rs` in the coverage exclusion, as a five-line entry point. The 99% gate itself is unchanged.
+
+**Bugs this found, which a successful build wouldn't have.**
+- **Commands ran in the wrong directory.** An AppImage's launcher moves into its own mount, so `peak run` ran every command inside the image. Fixed, and now a permanent smoke check.
+- **Commands inherited the image's libraries.** `LD_LIBRARY_PATH`, `PATH`, GTK settings and more pointed into the mount, for captured commands, the CLI, `ssh`, `docker` and `kubectl`. Fixed with `runner::host_command`, also a smoke check.
+- **A zombie counted as an open app.** Fixed.
+
+**First-release candidate, Linux only, production key.** Built by `scripts/release/build-linux.sh` from the uncommitted tree, version 0.1.0; a dry run, as the real one comes from CI. It carries a `-dirty` commit, so it isn't for publishing.
+- `peak_0.1.0_amd64.AppImage` sha256 `2fa4c38a0755a8c62c7e6a83635cf139317568f6a1455ca3f2bc0bf51b1eb312`
+- `peak_0.1.0_amd64.deb` sha256 `0a9265ce80a84a65f7accfd3e4c7466dd6fc5e4798b8f6800297eb44b8df8b2f`
+- At `/mnt/HC_Volume_107248377/.peak-sysroot/rel-root/home/tester/rc/`. The signature passes the independent check and a different file fails it. `smoke.mjs` passes on this AppImage.
+- The two-version proofs use a throwaway key. The production key has never signed anything above 0.1.0, so no valid update exists for anyone to replay.
+
+**Windows and macOS: implemented, not run.** What exists: a native sampling backend (`native.rs`), process stopping via `taskkill` on Windows, per-OS data directories, discovery without Linux namespaces, a console `peak-cli.exe`, a user PATH entry from the installer, Node and Python agent paths fixed for Windows, the login shell's PATH on macOS, and Linux collectors for both architectures embedded and linked with Rust's own linker (that link was proven on Linux for x86_64 and aarch64). The README's table says what each platform lacks: handle counts and listening ports, among others, are shown as not tracked rather than as zero. Expect first CI runs to find things.
+
+**Limits that will remain.**
+- No WebDriver exists for macOS webviews, so the macOS proof uses builds that press the update buttons on a timer (`VITE_PEAK_E2E_AUTOUPDATE`, absent from release builds). Same plugin and flow, but no eye on the UI beyond a screenshot.
+- Remote targets from Windows and macOS can't be proven on CI runners.
+- The `.deb` doesn't update itself, on purpose. The plugin's route needs a root prompt that I can't prove here. The app says so.
+- Builds are repeatable from a tag, and haven't been shown to be byte-reproducible.
+- Real GitHub feed behaviour, such as redirects from `releases/latest/download`, can't be checked until a release exists. Check it first thing after publishing.
+
+**Signing key.** Generated, password-protected, outside git, mode 600, in a mode 700 directory: `/mnt/HC_Volume_107248377/.peak-signing/` (`peak-updater.key`, `peak-updater.password`, `peak-updater.key.pub`). The public half is in `tauri.conf.json`. **Back it up: losing it strands every installed copy.**
+
+**Disposable environment still up, for the next round:** container `peak-release-env` and its chroot at `.peak-sysroot/rel-root`, about 8 GB on the data volume. Remove both when this scope closes; the signing key isn't in there.
+
 ## Accepted discovery fix: "the cli keeps saying the app isn't running while it is running"
 
-**Status: accepted and pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`. The user's own failure hasn't been seen directly.** The exact command and launch method are still pending from the user.
+**Status: accepted and pushed as `a1defaa786fc1d1a1e3da836540368a1ddc78eda`. The user's own failure hasn't been seen directly.**
+
+**The user's answer.** They started through `bun run dev` "but tried with the peak command", a `peak` installed through Task and moved to bin. `bun run dev` is the browser demo, with no real app behind it, so a CLI warning on that path is correct. The phrase could also mean they tried launching the native app with that command, so this isn't conclusively browser-only. The discovery bugs below were reproduced independently and are valid fixes, but they aren't established as this user's cause. The browser demo now says what it is on screen, and real installed GUI and CLI use is part of the release acceptance.
 
 **This host can't show the user's case.** It has no Peak process, `~/.local/share/peak` has no `control.json` or `peak.db`, and it has no system WebKit. So the user's app isn't running here under this account. I inspected read-only and touched nothing of theirs.
 
@@ -333,6 +386,13 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-The CLI discovery fix is accepted and pushed. Close old Peak instances when ready to restart, pull latest master, run `task peak:install`, reopen the updated app and retry the CLI on the same machine/user. If it still fails, report the new error line plus the CLI and app-launch commands. Reporter-specific confirmation remains pending; no continuous goal or scheduled checkpoint is active.
+**PM:**
+1. Get the user's decision on the private repository: public, or a separate public releases repository. If separate, tell me its name so I can change the compiled-in endpoint.
+2. Commit this tree and push it to a branch named `release-validation/0.1.0`. Don't tag. That runs **Update proof** (Windows, both Macs, Linux, needs no secrets) and **Release** (needs step 3), neither of which can reach users.
+3. Set the two required secrets privately, from files, without printing them:
+   `gh secret set TAURI_SIGNING_PRIVATE_KEY --repo Noah-Wilderom/peak < /mnt/HC_Volume_107248377/.peak-signing/peak-updater.key`
+   `gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --repo Noah-Wilderom/peak < /mnt/HC_Volume_107248377/.peak-signing/peak-updater.password`
+4. Ask the user whether to buy OS trust. If yes, use `request_secret` for: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, and for Windows `WINDOWS_CERTIFICATE`, `WINDOWS_CERTIFICATE_PASSWORD`. Windows needs wiring I'll add once a certificate exists.
+5. Send me back here with the branch pushed. I'll read the CI results and fix what they find, which will likely take several rounds.
 
-The broader open platform/live gaps remain in `docs/REMOTE-VALIDATION.md`.
+**Then, once all platforms pass:** set version and notes (`v0.1.0`, `docs/release-notes/v0.1.0.md`, both ready), tag, check the draft, and publish with `gh release edit v0.1.0 --draft=false --latest`. Publishing is what advances the update channel. Verify `releases/latest/download/latest.json` anonymously straight after.

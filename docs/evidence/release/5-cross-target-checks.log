@@ -1,0 +1,7 @@
+# cross-target type checks from Linux: every Rust line type-checked for that OS; C steps stubbed, nothing linked or run. recorded 2026-11-06T20:18:42Z
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 03s
+aarch64-apple-darwin exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 29.83s
+x86_64-apple-darwin exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 39.28s
+x86_64-pc-windows-gnu exit=0

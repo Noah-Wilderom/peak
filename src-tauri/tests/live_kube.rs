@@ -5,6 +5,8 @@
 //! PATH=<dir with kubectl>:$PATH cargo test --test live_kube -- --ignored --test-threads=1 --nocapture
 //! ```
 
+#![cfg(target_os = "linux")]
+
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::sync::Arc;

@@ -1,0 +1,83 @@
+name: Update proof
+
+# Proves a real update on each OS without touching the release channel or its signing key:
+# builds two versions with a throwaway key, serves them from localhost, and upgrades.
+on:
+  push:
+    branches: ["release-validation/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    name: Upgrade (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux, target: x86_64-unknown-linux-gnu }
+          - { os: windows-latest, platform: windows, target: x86_64-pc-windows-msvc }
+          - { os: macos-latest, platform: darwin-aarch64, target: aarch64-apple-darwin }
+          - { os: macos-15-intel, platform: darwin-x86_64, target: x86_64-apple-darwin }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}, x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: proof-${{ matrix.target }}
+      - name: Linux system libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev build-essential xvfb libfuse2
+      - run: bun install --frozen-lockfile
+      - name: Build, serve and upgrade
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_PROOF_TARGET: ${{ matrix.target }}
+        run: |
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+          else node scripts/e2e/smoke/update-proof.mjs proof-output; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: update-proof-${{ matrix.platform }}
+          path: proof-output
+          if-no-files-found: warn
+
+  platform-tests:
+    name: Core tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    defaults:
+      run:
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Build frontend
+        working-directory: .
+        run: bun install --frozen-lockfile && bun run build
+      - run: cargo test --workspace
+        env:
+          PEAK_REQUIRE_COLLECTOR: "1"

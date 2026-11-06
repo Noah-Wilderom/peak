@@ -19,6 +19,13 @@ function show(over: Partial<Proc>, onJump = vi.fn()) {
 }
 
 describe("ResourcesTab", () => {
+  it("says when this platform can't track ports and handles", () => {
+    show({ samples: full, unavailable: ["fds", "ports"] })
+    expect(screen.getByText("Listening ports aren't tracked on this platform yet.")).toBeInTheDocument()
+    expect(screen.getByText(/File and socket handles aren't tracked on this platform/)).toBeInTheDocument()
+    expect(screen.queryByText(/permissions/)).not.toBeInTheDocument()
+  })
+
   it("shows measured series, ports and children, with tooltips that format each", async () => {
     const { container } = show({
       samples: full,

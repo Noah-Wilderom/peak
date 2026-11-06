@@ -90,8 +90,29 @@ pub fn data_dir(xdg: Option<&str>, home: Option<&str>) -> PathBuf {
     }
 }
 
+/// `peak` in the per-user application data directory for a given home.
+pub fn data_dir_in_home(home: &Path) -> PathBuf {
+    if cfg!(target_os = "macos") {
+        home.join("Library/Application Support/peak")
+    } else {
+        home.join(".local/share/peak")
+    }
+}
+
+#[cfg(target_os = "linux")]
 pub fn default_data_dir() -> PathBuf {
     data_dir(std::env::var("XDG_DATA_HOME").ok().as_deref(), std::env::var("HOME").ok().as_deref())
+}
+
+#[cfg(target_os = "macos")]
+pub fn default_data_dir() -> PathBuf {
+    std::env::var_os("HOME").map_or_else(|| std::env::temp_dir().join("peak"), |h| data_dir_in_home(Path::new(&h)))
+}
+
+#[cfg(windows)]
+pub fn default_data_dir() -> PathBuf {
+    std::env::var_os("LOCALAPPDATA")
+        .map_or_else(|| std::env::temp_dir().join("peak"), |d| PathBuf::from(d).join("peak"))
 }
 
 pub fn random_hex(bytes: usize) -> String {
@@ -360,7 +381,7 @@ pub fn snapshot_from_agent(data: Value, t: u64) -> Result<HeapSnapshot, String> 
     })
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use crate::monitor::{AgentEnv, Monitor};

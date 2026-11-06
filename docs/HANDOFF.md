@@ -34,6 +34,7 @@ src-tauri/                    workspace root; package `peak` is the desktop app
   peak-core/src/              no desktop dependencies; also runs on targets
     model.rs                  serde types shared with src/lib/types.ts (camelCase)
     procfs.rs  sampler.rs     /proc parsers; rates, totals, composition, machine sample
+    native.rs                 the same `ProcFs` interface on macOS and Windows: sysinfo plus OS APIs
     runner.rs                 spawn (shell or direct argv), output pump, exit classification, signals
     monitor.rs                tracked runs, per-tick deltas, pending DB writes, agent hooks
     hub.rs                    localhost JSON-lines socket for agents and `peak run`; agent install
@@ -50,6 +51,8 @@ src-tauri/                    workspace root; package `peak` is the desktop app
     service.rs                monitor + hub + db + remote; Tauri commands call this
     cli.rs                    `peak run -- <cmd>`
     discovery.rs              how the CLI finds an open app: per-app records, identity checks
+    release.rs                version, commit, install kind; which kinds update themselves
+    bin/peak-cli.rs           the CLI as a console program, because `peak.exe` is windowed on Windows
     lib.rs                    Tauri commands/events (thin), app setup, tick thread
   tests/live_*.rs             live validation, #[ignore]d (see REMOTE-VALIDATION.md)
   agents/                     peak-agent.cjs, python/sitecustomize.py, tests/
@@ -58,7 +61,8 @@ src/lib/                      types, monitor-api (interface), monitor (picks bac
                               notify, format, ramp, theme
 src/hooks/                    use-monitor, use-smooth, use-theme
 src/components/               views, charts/ (timeline context + charts), ui/ (shadcn, excluded from coverage)
-scripts/e2e/                  real-browser and real-desktop walkthroughs
+scripts/e2e/                  real-browser and real-desktop walkthroughs; smoke/ is packaged, per OS
+scripts/release/              version, signature check, artifact collection, feed (docs/RELEASING.md)
 ```
 
 ## Contracts
@@ -93,6 +97,9 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **`Monitor` lock scope.** `tick` holds it while reading `/proc`. Remote I/O never goes near it.
 - **`now_ms()` is anchored once and advanced monotonically,** so clock changes don't break rates. `wall_ms()` reads the clock.
 - **Finding the app.** Each open app writes `instances/<pid>-<start ticks>.json` to the data directory named by the environment and to the one named by the OS account, and restores them every 10s if they vanish. `control.json` is only for an older `peak` on the PATH. A record's process is checked before its port gets the secret. An app started with a temporary `XDG_DATA_HOME` is therefore still visible to that user's other shells, though a CLI prefers the app sharing its data directory.
+- **An AppImage's launcher moves into its own mount.** The bundled WebKit needs that directory, so only the command line goes back to `OWD` (`release::restore_launch_dir`). Everything started for the user goes through `runner::host_command`, which removes what the image added to the environment. Skip it and the user's tools load the image's libraries.
+- **`createUpdaterArtifacts` makes `tauri build` need a signing key.** `--no-bundle` (`task peak:build`) doesn't bundle, so it doesn't.
+- **Don't add a pre-release feed by accident.** Apps read `releases/latest`, which skips drafts. Publishing is what reaches users.
 - **Hub tokens are run ids**, so the hub stays localhost-only, on whichever machine it runs.
 - **Serde and internally tagged enums:** integer map keys fail through them (`ServerFrame`), so `child_names` uses strings.
 - **`kubectl auth can-i` needs `--subresource`:** `pods/log` would ask about a pod named `log`.
@@ -135,6 +142,8 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 `tauri-driver`, Playwright and extra Node versions. Cargo commands need `. $PEAK_TOOLS/env.sh` first.
 
 ## What's next
+
+The first packaged release for Linux, Windows and macOS is in progress: see [`RELEASING.md`](RELEASING.md) and [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md).
 
 All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. The build/launch fix and the 1s
 and 10s chart windows are accepted and published as `5a1f57be524a0b7fcad2fb38838257a8f62e1419` (see

@@ -17,6 +17,8 @@ import { useMonitor, useMonitorEvents } from "@/hooks/use-monitor"
 import type { MonitorEvent } from "@/lib/monitor"
 import { formatBytes } from "@/lib/format"
 import { nativeNotify } from "@/lib/notify"
+import { UpdateNotice } from "@/components/update-panel"
+import { updates } from "@/lib/updates"
 
 /** Toast for every monitor event. */
 export function notify(e: MonitorEvent) {
@@ -50,6 +52,8 @@ export default function App() {
   useEffect(() => setPage((p) => (p === "capture" ? null : p)), [selectedId])
 
   useMonitorEvents(notify)
+
+  useEffect(() => updates.start(), [])
 
   useEffect(() => {
     if (error) toast.error("Backend error", { description: error })
@@ -86,6 +90,7 @@ export default function App() {
             close()
           }}
         />
+        <UpdateNotice />
         <main className="relative flex min-w-0 flex-1">
           <ErrorBoundary resetKey={pageKey}>
             <AnimatePresence mode="wait" initial={false}>

@@ -71,7 +71,7 @@ export function ResourcesTab() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card
           title="Threads and handles."
-          subtitle={proc.unavailable?.includes("fds") ? "Handle counts couldn't be read for part of this tree (permissions), so these lines understate them." : "Across the process tree. A steady climb in files or sockets is a leak of its own."}
+          subtitle={proc.unavailable?.includes("ports") ? "Thread counts across the process tree. File and socket handles aren't tracked on this platform yet." : proc.unavailable?.includes("fds") ? "Handle counts couldn't be read for part of this tree (permissions), so these lines understate them." : "Across the process tree. A steady climb in files or sockets is a leak of its own."}
         >
           {reported(data, "threads") ? (
             <ChartContainer config={handleConfig} className="aspect-auto h-[200px] w-full">
@@ -143,6 +143,8 @@ export function ResourcesTab() {
       <Card title="Listening ports." subtitle="TCP sockets the process tree is listening on.">
         {!running ? (
           <Unavailable>Ports are only known while the process runs.</Unavailable>
+        ) : proc.unavailable?.includes("ports") ? (
+          <Unavailable>Listening ports aren't tracked on this platform yet.</Unavailable>
         ) : ports.length === 0 ? (
           <Unavailable>Not listening on any TCP port.</Unavailable>
         ) : (

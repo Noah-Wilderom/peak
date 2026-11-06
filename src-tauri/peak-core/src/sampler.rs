@@ -211,11 +211,15 @@ impl TreeSampler {
             nice: root.map(|r| r.stat.nice).unwrap_or(0),
             ppid: root.map(|r| r.stat.ppid).unwrap_or(0),
             children,
-            unavailable: [("io", tree.iter().any(|p| p.io_denied)), ("fds", tree.iter().any(|p| p.fds_denied))]
-                .into_iter()
-                .filter(|(_, denied)| *denied)
-                .map(|(name, _)| name.to_string())
-                .collect(),
+            unavailable: [
+                ("io", tree.iter().any(|p| p.io_denied)),
+                ("fds", tree.iter().any(|p| p.fds_denied)),
+                ("ports", tree.iter().any(|p| p.ports_unknown)),
+            ]
+            .into_iter()
+            .filter(|(_, denied)| *denied)
+            .map(|(name, _)| name.to_string())
+            .collect(),
         }
     }
 }
@@ -250,7 +254,7 @@ impl SystemSampler {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use crate::procfs::{Io, Stat, Status};
@@ -287,6 +291,7 @@ mod tests {
             socket_inodes: vec![],
             io_denied: false,
             fds_denied: false,
+            ports_unknown: false,
         }
     }
 

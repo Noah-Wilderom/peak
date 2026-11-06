@@ -1,0 +1,20 @@
+# final code. real two-version update, Linux AppImage: Ubuntu 22.04 chroot (CI's base), real FUSE, Xvfb, throwaway key, localhost feed. Tree: uncommitted on 159737d.
+ok   the base version is installed peak 9.0.0 (AppImage, commit 159737d6d6195ab33937609b994cf7baf77cdc02)
+ok   a run recorded before the update history-1793996477150-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 2, artifact 0
+ok   malformed: nothing installed, app alive feed 2, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 7, artifact 6
+ok   truncated: nothing installed, app alive feed 6, artifact 5
+ok   tampered: nothing installed, app alive feed 5, artifact 5
+ok   wrong-key: nothing installed, app alive feed 6, artifact 5
+ok   downloaded from the feed feed 1, artifact 1
+ok   the old app exited and a new one started 48842 -> 48938
+ok   the installed copy is the new version peak 9.0.1 (AppImage, commit 159737d6d6195ab33937609b994cf7baf77cdc02)
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 7
+ok   the new app monitors the CLI post-1793996605771-err
+ok   that workload finished with its own exit code exit 9
+PROOF OK
+PROOF-EXIT=0

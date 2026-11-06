@@ -1,0 +1,58 @@
+# CLI discovery suite against the production-key candidate AppImage, installed; real window, independent CLI. Ubuntu 22.04 chroot, FUSE. started 2026-11-06T20:13:01Z
+/opt/peak/tauri-driver: /lib/x86_64-linux-gnu/libc.so.6: weak version `GLIBC_2.39' not found (required by /opt/peak/tauri-driver)
+
+ok   no app has ever run: says so, command unaffected 
+       exit 3, 284ms, said: peak: the app isn't running on 871febdbfe49 for tester — running without monitoring
+
+ok   app open, `peak` on PATH, cwd /tmp 
+       exit 7, 3281ms, running then failed in the open app, output in both
+ok   different working directory, relative binary path 
+       exit 7, 3265ms, running then failed in the open app, output in both
+ok   installed copy in ~/.local/bin (task peak:install's result) 
+       exit 7, 3286ms, running then failed in the open app, output in both
+ok   the other build's CLI against this app (dev <-> release) 
+       exit 7, 3281ms, running then failed in the open app, output in both
+ok   shell with a different XDG_DATA_HOME (snap, IDE and sudo terminals do this) 
+       exit 7, 3246ms, running then failed in the open app, output in both
+ok   shell with an empty XDG_DATA_HOME, and no USER 
+       exit 7, 3235ms, running then failed in the open app, output in both
+ok   shell with HOME unset 
+       exit 7, 3241ms, running then failed in the open app, output in both
+ok   record removed while the app stays open 
+       exit 7, 3269ms, running then failed in the open app, output in both
+ok   a second app opens, then closes: the first stays reachable 
+       exit 7, 3345ms, running then failed in the open app, output in both
+ok   two apps open: the run goes to exactly one, and peak says which 
+       shown in driven app: false; said: peak: 2 Peak apps are open; this run is in the one with PID 41860
+FAIL app frozen (SIGSTOP): reported as not answering, not as absent 
+       wrong reason: "" (wanted /open.*(isn't answering)/)
+ok   thawed: the same app takes commands again 
+       exit 7, 3283ms, running then failed in the open app, output in both
+ok   another user can't use this user's app 
+       own: peak: the app isn't running on 871febdbfe49 for other — running without monitoring | pointed at this user's dir: peak: couldn't read /home/tester/.local/share/peak/instances: Permission denied (os error 13) — running without monitoring
+ok   app closed normally: truly no app 
+       exit 3, 336ms, said: peak: the app isn't running on 871febdbfe49 for tester — running without monitoring
+
+ok   reopened: found again, in a different working directory 
+       exit 7, 3346ms, running then failed in the open app, output in both
+ok   app killed: stale record is recognised and never handed the secret 
+       exit 3, 316ms, said: peak: the app isn't running on 871febdbfe49 for tester — running without monitoring | port reused: exit 3, 257ms, said: peak: the app isn't running on 871febdbfe49 for tester — running without monitoring
+
+ok   restarted after the crash: found again 
+       exit 7, 3326ms, running then failed in the open app, output in both
+ok   corrupt record beside a healthy app 
+       exit 7, 3230ms, running then failed in the open app, output in both
+ok   only a corrupt record: reported as that, not as no app 
+       exit 3, 297ms, said: peak: couldn't read /home/tester/.local/share/peak/control.json: key must be a string at line 1 column 3 — running without monitoring
+PROBLEMS: 1
+app frozen (SIGSTOP): reported as not answering, not as absent: wrong reason: "" (wanted /open.*(isn't answering)/)
+EXIT=1
+# finished 2026-11-06T20:14:27Z
+
+# rerun of the frozen and thawed steps after fixing the harness (it had stopped the AppImage's mount process rather than the app), final code:
+ok   app frozen (SIGSTOP): reported as not answering, not as absent 
+       exit 3, 3452ms, said: peak: the app is open (PID 55232) but isn't answering — running without monitoring
+ok   thawed: the same app takes commands again 
+       exit 7, 3342ms, running then failed in the open app, output in both
+ALL OK
+

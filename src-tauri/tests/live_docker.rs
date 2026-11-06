@@ -6,6 +6,8 @@
 //! cargo test --test live_docker -- --ignored --test-threads=1 --nocapture
 //! ```
 
+#![cfg(target_os = "linux")]
+
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::sync::Arc;

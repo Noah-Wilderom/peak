@@ -3,23 +3,26 @@
 
 use std::fs;
 use std::io::{self, Write};
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
-#[cfg(peak_embedded_collector)]
-const EMBEDDED: Option<(&str, &[u8])> =
-    Some((env!("PEAK_EMBEDDED_COLLECTOR_ARCH"), include_bytes!(env!("PEAK_EMBEDDED_COLLECTOR"))));
-#[cfg(not(peak_embedded_collector))]
-const EMBEDDED: Option<(&str, &[u8])> = None;
+/// Collectors in this build, by the Linux architecture they run on.
+const EMBEDDED: &[(&str, &[u8])] = &[
+    #[cfg(peak_collector_x86_64)]
+    ("x86_64", include_bytes!(env!("PEAK_COLLECTOR_X86_64"))),
+    #[cfg(peak_collector_aarch64)]
+    ("aarch64", include_bytes!(env!("PEAK_COLLECTOR_AARCH64"))),
+];
 
 /// The architecture this build has a collector for, if any.
 pub fn embedded_arch() -> Option<&'static str> {
-    EMBEDDED.map(|(arch, _)| arch)
+    EMBEDDED.first().map(|(arch, _)| *arch)
 }
 
 /// The embedded collector as a file, if this build has one for `arch`.
 pub fn embedded_collector(arch: &str, data_dir: &Path) -> Option<io::Result<PathBuf>> {
-    EMBEDDED.filter(|(a, _)| *a == arch).map(|(a, bytes)| unpack(a, bytes, data_dir))
+    EMBEDDED.iter().find(|(a, _)| *a == arch).map(|(a, bytes)| unpack(a, bytes, data_dir))
 }
 
 fn fnv1a(bytes: &[u8]) -> u64 {
@@ -38,13 +41,14 @@ pub fn unpack(arch: &str, bytes: &[u8], data_dir: &Path) -> io::Result<PathBuf> 
     let partial = dir.join(format!("peak-collector.{}.tmp", std::process::id()));
     let mut file = fs::File::create(&partial)?;
     file.write_all(bytes)?;
+    #[cfg(unix)]
     file.set_permissions(fs::Permissions::from_mode(0o755))?;
     drop(file);
     fs::rename(&partial, &path)?;
     Ok(path)
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
 
@@ -84,7 +88,7 @@ mod tests {
 
     /// The regression this module exists for: an ordinary build carries a collector, and
     /// it's static, so it runs in containers regardless of their libc.
-    #[cfg(peak_embedded_collector)]
+    #[cfg(any(peak_collector_x86_64, peak_collector_aarch64))]
     #[test]
     fn the_embedded_collector_is_static_and_runs() {
         let d = tempfile::tempdir().unwrap();

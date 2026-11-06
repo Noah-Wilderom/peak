@@ -7,6 +7,8 @@
 //! cargo test --test live_ssh -- --ignored --test-threads=1 --nocapture
 //! ```
 
+#![cfg(target_os = "linux")]
+
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::Arc;

@@ -1,11 +1,10 @@
-//! Reading process statistics from Linux `/proc`.
+//! Process statistics. On Linux they're read from `/proc`; macOS and Windows have the
+//! same interface in [`crate::native`].
 //!
 //! Parsers are pure functions over file contents; [`ProcFs`] does the I/O and
 //! can be rooted anywhere so tests can use fixture directories.
 
 use std::collections::HashMap;
-use std::fs;
-use std::path::{Path, PathBuf};
 
 use crate::model::Fds;
 
@@ -282,138 +281,164 @@ pub struct RawProc {
     pub io_denied: bool,
     /// The fd table couldn't be read: `fds` and `socket_inodes` mean unknown.
     pub fds_denied: bool,
+    /// This platform can't say which ports a process listens on.
+    pub ports_unknown: bool,
 }
 
-#[derive(Debug, Clone)]
-pub struct ProcFs {
-    root: PathBuf,
-    passwd: PathBuf,
-}
+#[cfg(not(target_os = "linux"))]
+pub use crate::native::{ProcFs, clock_ticks, current_uid};
+#[cfg(target_os = "linux")]
+pub use linux::{ProcFs, clock_ticks, current_uid};
 
-impl Default for ProcFs {
-    fn default() -> Self {
-        ProcFs::new("/proc", "/etc/passwd")
-    }
-}
+#[cfg(target_os = "linux")]
+mod linux {
+    use super::*;
+    use std::fs;
+    use std::path::{Path, PathBuf};
 
-impl ProcFs {
-    pub fn new(root: impl Into<PathBuf>, passwd: impl Into<PathBuf>) -> Self {
-        ProcFs { root: root.into(), passwd: passwd.into() }
-    }
-
-    fn path(&self, pid: u32, file: &str) -> PathBuf {
-        self.root.join(pid.to_string()).join(file)
+    #[derive(Debug, Clone)]
+    pub struct ProcFs {
+        root: PathBuf,
+        passwd: PathBuf,
     }
 
-    pub fn pids(&self) -> Vec<u32> {
-        let Ok(dir) = fs::read_dir(&self.root) else { return vec![] };
-        let mut pids: Vec<u32> = dir.filter_map(|e| e.ok()?.file_name().to_str()?.parse().ok()).collect();
-        pids.sort_unstable();
-        pids
+    impl Default for ProcFs {
+        fn default() -> Self {
+            ProcFs::new("/proc", "/etc/passwd")
+        }
     }
 
-    pub fn stat(&self, pid: u32) -> Option<Stat> {
-        parse_stat(&fs::read_to_string(self.path(pid, "stat")).ok()?)
-    }
+    impl ProcFs {
+        pub fn new(root: impl Into<PathBuf>, passwd: impl Into<PathBuf>) -> Self {
+            ProcFs { root: root.into(), passwd: passwd.into() }
+        }
 
-    pub fn status(&self, pid: u32) -> Option<Status> {
-        Some(parse_status(&fs::read_to_string(self.path(pid, "status")).ok()?))
-    }
+        fn path(&self, pid: u32, file: &str) -> PathBuf {
+            self.root.join(pid.to_string()).join(file)
+        }
 
-    /// `/proc/<pid>/io` needs ptrace access; missing means zeros.
-    pub fn io(&self, pid: u32) -> Io {
-        fs::read_to_string(self.path(pid, "io")).map(|s| parse_io(&s)).unwrap_or_default()
-    }
+        pub fn pids(&self) -> Vec<u32> {
+            let Ok(dir) = fs::read_dir(&self.root) else { return vec![] };
+            let mut pids: Vec<u32> = dir.filter_map(|e| e.ok()?.file_name().to_str()?.parse().ok()).collect();
+            pids.sort_unstable();
+            pids
+        }
 
-    pub fn cmdline(&self, pid: u32) -> Vec<String> {
-        fs::read(self.path(pid, "cmdline")).map(|b| parse_cmdline(&b)).unwrap_or_default()
-    }
+        pub fn stat(&self, pid: u32) -> Option<Stat> {
+            parse_stat(&fs::read_to_string(self.path(pid, "stat")).ok()?)
+        }
 
-    fn link(&self, pid: u32, name: &str) -> Option<String> {
-        fs::read_link(self.path(pid, name)).ok().map(|p| p.to_string_lossy().into_owned())
-    }
+        pub fn status(&self, pid: u32) -> Option<Status> {
+            Some(parse_status(&fs::read_to_string(self.path(pid, "status")).ok()?))
+        }
 
-    pub fn exe(&self, pid: u32) -> Option<String> {
-        self.link(pid, "exe")
-    }
+        /// `/proc/<pid>/io` needs ptrace access; missing means zeros.
+        pub fn io(&self, pid: u32) -> Io {
+            fs::read_to_string(self.path(pid, "io")).map(|s| parse_io(&s)).unwrap_or_default()
+        }
 
-    pub fn cwd(&self, pid: u32) -> Option<String> {
-        self.link(pid, "cwd")
-    }
+        pub fn cmdline(&self, pid: u32) -> Vec<String> {
+            fs::read(self.path(pid, "cmdline")).map(|b| parse_cmdline(&b)).unwrap_or_default()
+        }
 
-    fn fd_targets(&self, pid: u32) -> Vec<String> {
-        let Ok(dir) = fs::read_dir(self.path(pid, "fd")) else { return vec![] };
-        dir.filter_map(|e| fs::read_link(e.ok()?.path()).ok()).map(|p| p.to_string_lossy().into_owned()).collect()
-    }
+        fn link(&self, pid: u32, name: &str) -> Option<String> {
+            fs::read_link(self.path(pid, name)).ok().map(|p| p.to_string_lossy().into_owned())
+        }
 
-    pub fn fds(&self, pid: u32) -> Fds {
-        classify_fds(self.fd_targets(pid).iter().map(String::as_str))
-    }
+        pub fn exe(&self, pid: u32) -> Option<String> {
+            self.link(pid, "exe")
+        }
 
-    pub fn read(&self, pid: u32) -> Option<RawProc> {
-        let targets = self.fd_targets(pid);
-        Some(RawProc {
-            io_denied: fs::read_to_string(self.path(pid, "io")).is_err(),
-            fds_denied: fs::read_dir(self.path(pid, "fd")).is_err(),
-            stat: self.stat(pid)?,
-            status: self.status(pid)?,
-            io: self.io(pid),
-            fds: classify_fds(targets.iter().map(String::as_str)),
-            socket_inodes: targets.iter().filter_map(|t| socket_inode(t)).collect(),
-        })
-    }
+        pub fn cwd(&self, pid: u32) -> Option<String> {
+            self.link(pid, "cwd")
+        }
 
-    /// Every listening TCP socket on the machine, keyed by inode.
-    pub fn listeners(&self) -> HashMap<u64, Listener> {
-        [("net/tcp", "tcp"), ("net/tcp6", "tcp6")]
-            .into_iter()
-            .flat_map(|(f, proto)| {
-                parse_net_listeners(&fs::read_to_string(self.root.join(f)).unwrap_or_default(), proto)
+        fn fd_targets(&self, pid: u32) -> Vec<String> {
+            let Ok(dir) = fs::read_dir(self.path(pid, "fd")) else { return vec![] };
+            dir.filter_map(|e| fs::read_link(e.ok()?.path()).ok()).map(|p| p.to_string_lossy().into_owned()).collect()
+        }
+
+        pub fn fds(&self, pid: u32) -> Fds {
+            classify_fds(self.fd_targets(pid).iter().map(String::as_str))
+        }
+
+        pub fn read(&self, pid: u32) -> Option<RawProc> {
+            let targets = self.fd_targets(pid);
+            Some(RawProc {
+                io_denied: fs::read_to_string(self.path(pid, "io")).is_err(),
+                fds_denied: fs::read_dir(self.path(pid, "fd")).is_err(),
+                stat: self.stat(pid)?,
+                status: self.status(pid)?,
+                io: self.io(pid),
+                fds: classify_fds(targets.iter().map(String::as_str)),
+                socket_inodes: targets.iter().filter_map(|t| socket_inode(t)).collect(),
+                ports_unknown: false,
             })
-            .map(|l| (l.inode, l))
-            .collect()
+        }
+
+        /// Every listening TCP socket on the machine, keyed by inode.
+        pub fn listeners(&self) -> HashMap<u64, Listener> {
+            [("net/tcp", "tcp"), ("net/tcp6", "tcp6")]
+                .into_iter()
+                .flat_map(|(f, proto)| {
+                    parse_net_listeners(&fs::read_to_string(self.root.join(f)).unwrap_or_default(), proto)
+                })
+                .map(|l| (l.inode, l))
+                .collect()
+        }
+
+        pub fn meminfo(&self) -> MemInfo {
+            parse_meminfo(&fs::read_to_string(self.root.join("meminfo")).unwrap_or_default())
+        }
+
+        /// `None` when the kernel has no pressure information (PSI disabled or absent).
+        pub fn psi_memory(&self) -> Option<(f64, f64)> {
+            fs::read_to_string(self.root.join("pressure/memory")).ok().map(|s| parse_psi(&s))
+        }
+
+        pub fn loadavg(&self) -> f64 {
+            parse_loadavg(&fs::read_to_string(self.root.join("loadavg")).unwrap_or_default())
+        }
+
+        pub fn cpu_totals(&self) -> Option<(u64, u64)> {
+            parse_cpu_totals(&fs::read_to_string(self.root.join("stat")).ok()?)
+        }
+
+        /// pid → ppid for every visible process.
+        pub fn parents(&self) -> HashMap<u32, u32> {
+            self.pids().into_iter().filter_map(|pid| Some((pid, self.stat(pid)?.ppid))).collect()
+        }
+
+        pub fn mem_total(&self) -> Option<f64> {
+            parse_meminfo_total(&fs::read_to_string(self.root.join("meminfo")).ok()?)
+        }
+
+        pub fn boot_time(&self) -> Option<u64> {
+            parse_btime(&fs::read_to_string(self.root.join("stat")).ok()?)
+        }
+
+        pub fn hostname(&self) -> String {
+            fs::read_to_string(self.root.join("sys/kernel/hostname")).map(|s| s.trim().to_string()).unwrap_or_default()
+        }
+
+        pub fn user(&self, uid: u32) -> String {
+            fs::read_to_string(&self.passwd).ok().and_then(|p| user_name(&p, uid)).unwrap_or_else(|| uid.to_string())
+        }
+
+        pub fn root(&self) -> &Path {
+            &self.root
+        }
     }
 
-    pub fn meminfo(&self) -> MemInfo {
-        parse_meminfo(&fs::read_to_string(self.root.join("meminfo")).unwrap_or_default())
+    pub fn clock_ticks() -> u64 {
+        // SAFETY: sysconf has no preconditions.
+        let v = unsafe { libc::sysconf(libc::_SC_CLK_TCK) };
+        if v > 0 { v as u64 } else { 100 }
     }
 
-    /// `None` when the kernel has no pressure information (PSI disabled or absent).
-    pub fn psi_memory(&self) -> Option<(f64, f64)> {
-        fs::read_to_string(self.root.join("pressure/memory")).ok().map(|s| parse_psi(&s))
-    }
-
-    pub fn loadavg(&self) -> f64 {
-        parse_loadavg(&fs::read_to_string(self.root.join("loadavg")).unwrap_or_default())
-    }
-
-    pub fn cpu_totals(&self) -> Option<(u64, u64)> {
-        parse_cpu_totals(&fs::read_to_string(self.root.join("stat")).ok()?)
-    }
-
-    /// pid → ppid for every visible process.
-    pub fn parents(&self) -> HashMap<u32, u32> {
-        self.pids().into_iter().filter_map(|pid| Some((pid, self.stat(pid)?.ppid))).collect()
-    }
-
-    pub fn mem_total(&self) -> Option<f64> {
-        parse_meminfo_total(&fs::read_to_string(self.root.join("meminfo")).ok()?)
-    }
-
-    pub fn boot_time(&self) -> Option<u64> {
-        parse_btime(&fs::read_to_string(self.root.join("stat")).ok()?)
-    }
-
-    pub fn hostname(&self) -> String {
-        fs::read_to_string(self.root.join("sys/kernel/hostname")).map(|s| s.trim().to_string()).unwrap_or_default()
-    }
-
-    pub fn user(&self, uid: u32) -> String {
-        fs::read_to_string(&self.passwd).ok().and_then(|p| user_name(&p, uid)).unwrap_or_else(|| uid.to_string())
-    }
-
-    pub fn root(&self) -> &Path {
-        &self.root
+    pub fn current_uid() -> u32 {
+        // SAFETY: getuid has no preconditions.
+        unsafe { libc::getuid() }
     }
 }
 
@@ -439,15 +464,10 @@ pub fn descendants(parents: &HashMap<u32, u32>, root: u32) -> Vec<u32> {
     out
 }
 
-pub fn clock_ticks() -> u64 {
-    // SAFETY: sysconf has no preconditions.
-    let v = unsafe { libc::sysconf(libc::_SC_CLK_TCK) };
-    if v > 0 { v as u64 } else { 100 }
-}
-
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
+    use std::fs;
     use std::os::unix::fs::symlink;
 
     const STAT: &str = "4242 (my (weird) proc) S 1 4242 4242 0 -1 4194304 1500 0 7 0 250 50 0 0 20 0 9 0 12345 1048576 300 18446744073709551615 0 0 0 0 0 0 0 0 0 0 0 0 17 3 0 0 0 0 0";

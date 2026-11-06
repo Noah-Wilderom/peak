@@ -7,6 +7,7 @@ version = "0.1.0"
 description = "Local process monitor and memory profiler"
 authors = ["Noah Wilderom"]
 edition = "2024"
+default-run = "peak"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -29,6 +30,8 @@ serde_json = "1"
 libc = "0.2"
 rusqlite = { version = "0.37", features = ["bundled"] }
 tauri-plugin-notification = "2"
+tauri-plugin-updater = "2.14.1"
+tauri-plugin-process = "2.4.0"
 
 [dev-dependencies]
 tempfile = "3"

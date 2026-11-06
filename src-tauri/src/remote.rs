@@ -1102,7 +1102,7 @@ impl Remote {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use peak_core::collector::{self, Options};

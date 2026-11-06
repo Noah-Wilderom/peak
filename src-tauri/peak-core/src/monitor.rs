@@ -54,7 +54,8 @@ impl AgentEnv {
         let mut env =
             vec![("PEAK_AGENT_ADDR".into(), self.addr.clone()), ("PEAK_AGENT_TOKEN".into(), token.to_string())];
         if let Some(p) = &self.node_agent {
-            let req = format!("--require \"{}\"", p.display());
+            // NODE_OPTIONS treats a backslash as an escape, even inside quotes.
+            let req = format!("--require \"{}\"", p.display().to_string().replace('\\', "/"));
             env.push((
                 "NODE_OPTIONS".into(),
                 match node_options {
@@ -68,7 +69,7 @@ impl AgentEnv {
             env.push((
                 "PYTHONPATH".into(),
                 match python_path {
-                    Some(o) if !o.is_empty() => format!("{dir}:{o}"),
+                    Some(o) if !o.is_empty() => format!("{dir}{}{o}", if cfg!(windows) { ';' } else { ':' }),
                     _ => dir,
                 },
             ));
@@ -236,10 +237,10 @@ impl Monitor {
             next_id: 1,
             next_log: 1,
             agent_env,
-            home: std::env::var("HOME").ok(),
+            home: std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).ok(),
             self_pid: std::process::id(),
             // SAFETY: getuid has no preconditions.
-            self_uid: unsafe { libc::getuid() },
+            self_uid: procfs::current_uid(),
             system: SystemSampler::default(),
             writes: vec![],
         }
@@ -451,8 +452,8 @@ impl Monitor {
         verify_identity(&fs, pid, tr.root_start)?;
         tr.stop_requested = true;
         let ok = match tr.origin {
-            Origin::Spawned => runner::signal_group(pid, libc::SIGINT),
-            Origin::Attached | Origin::External => runner::signal_pid(pid, libc::SIGTERM),
+            Origin::Spawned => runner::signal_group(pid, crate::runner::SIGINT),
+            Origin::Attached | Origin::External => runner::signal_pid(pid, crate::runner::SIGTERM),
         };
         if ok { Ok(pid) } else { Err(format!("could not signal pid {pid}")) }
     }
@@ -466,7 +467,7 @@ impl Monitor {
         }
         let pid = tr.proc.pid;
         verify_identity(&fs, pid, tr.root_start)?;
-        tr.stop_requested |= matches!(signal, libc::SIGINT | libc::SIGTERM | libc::SIGKILL);
+        tr.stop_requested |= matches!(signal, crate::runner::SIGINT | crate::runner::SIGTERM | crate::runner::SIGKILL);
         let ok = match tr.origin {
             Origin::Spawned => runner::signal_group(pid, signal),
             Origin::Attached | Origin::External => runner::signal_pid(pid, signal),
@@ -484,10 +485,19 @@ impl Monitor {
         self.fs.stat(pid).map(|s| s.starttime)
     }
 
+    /// The commands that would stop if this app closed: those it started itself.
+    pub fn running_spawned(&self) -> Vec<String> {
+        self.procs
+            .iter()
+            .filter(|t| t.origin == Origin::Spawned && t.proc.status == Status::Running)
+            .map(|t| t.proc.command.clone())
+            .collect()
+    }
+
     /// Terminate spawned processes that haven't exited after `shutdown`.
     pub fn kill_spawned(&mut self) {
         for tr in self.procs.iter().filter(|t| t.origin == Origin::Spawned && t.proc.status == Status::Running) {
-            runner::signal_group(tr.proc.pid, libc::SIGKILL);
+            runner::signal_group(tr.proc.pid, crate::runner::SIGKILL);
         }
     }
 
@@ -500,7 +510,7 @@ impl Monitor {
         let mut n = 0;
         for tr in self.procs.iter_mut().filter(|t| t.origin == Origin::Spawned && t.proc.status == Status::Running) {
             tr.stop_requested = true;
-            if runner::signal_group(tr.proc.pid, libc::SIGTERM) {
+            if runner::signal_group(tr.proc.pid, crate::runner::SIGTERM) {
                 n += 1;
             }
         }
@@ -790,16 +800,16 @@ pub fn stop(shared: &Shared, id: &str, grace: Duration) -> Result<(), String> {
         let still = s.lock().unwrap().get(&id).is_some_and(|p| p.status == Status::Running);
         if still {
             if origin == Origin::Spawned {
-                runner::signal_group(pid, libc::SIGKILL);
+                runner::signal_group(pid, crate::runner::SIGKILL);
             } else {
-                runner::signal_pid(pid, libc::SIGKILL);
+                runner::signal_pid(pid, crate::runner::SIGKILL);
             }
         }
     });
     Ok(())
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use std::process::{Command, Stdio};
@@ -847,7 +857,7 @@ mod tests {
         assert_eq!(g.live_start_ticks(child.id()), g.start_ticks("a"));
         // As if this PID had been reused since we started tracking.
         g.tracked("a").unwrap().root_start = Some(1);
-        assert!(g.signal("a", libc::SIGTERM).unwrap_err().contains("different process"));
+        assert!(g.signal("a", crate::runner::SIGTERM).unwrap_err().contains("different process"));
         assert!(g.request_stop("a").unwrap_err().contains("different process"));
         assert!(child.try_wait().unwrap().is_none(), "the innocent process wasn't touched");
         child.kill().unwrap();
@@ -856,12 +866,12 @@ mod tests {
         // Same process: the signal goes through; a vanished one reports failure.
         let mut other = Command::new("sleep").arg("30").stdout(Stdio::null()).spawn().unwrap();
         g.insert("b".into(), Origin::Attached, other.id(), "sleep", "/tmp", 1);
-        g.signal("b", libc::SIGTERM).unwrap();
+        g.signal("b", crate::runner::SIGTERM).unwrap();
         other.wait().unwrap();
-        assert!(g.signal("b", libc::SIGTERM).is_err());
-        assert!(g.signal("nope", libc::SIGTERM).is_err());
+        assert!(g.signal("b", crate::runner::SIGTERM).is_err());
+        assert!(g.signal("nope", crate::runner::SIGTERM).is_err());
         g.tick(now_ms());
-        assert!(g.signal("b", libc::SIGTERM).unwrap_err().contains("not running"));
+        assert!(g.signal("b", crate::runner::SIGTERM).unwrap_err().contains("not running"));
         assert!(g.forget("b"));
         assert!(!g.forget("b"));
     }
@@ -999,6 +1009,8 @@ mod tests {
 
     #[test]
     fn shutdown_terminates_spawned_processes() {
+        let idle = Monitor::new(ProcFs::default(), AgentEnv::default());
+        assert!(idle.running_spawned().is_empty());
         let m = monitor();
         let p = capture(&m, "sleep 30", "/tmp").unwrap();
         thread::sleep(Duration::from_millis(50));
@@ -1047,14 +1059,14 @@ mod tests {
         let p = attach(&m, child.id()).unwrap();
         stop(&m, &p.id, Duration::from_millis(150)).unwrap();
         use std::os::unix::process::ExitStatusExt;
-        assert_eq!(child.wait().unwrap().signal(), Some(libc::SIGKILL));
+        assert_eq!(child.wait().unwrap().signal(), Some(crate::runner::SIGKILL));
         wait_for(&m, &p.id, |p| p.status == Status::Exited);
     }
 
     #[test]
     fn attachable_skips_processes_without_cmdline() {
         let dir = tempfile::tempdir().unwrap();
-        let uid = unsafe { libc::getuid() };
+        let uid = procfs::current_uid();
         for (pid, cmdline) in [(10u32, &b""[..]), (11, &b"node\0app.js\0"[..])] {
             let p = dir.path().join(pid.to_string());
             std::fs::create_dir_all(&p).unwrap();

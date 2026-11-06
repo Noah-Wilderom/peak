@@ -389,6 +389,8 @@ export interface Settings {
   alertCpuPercent: number
   /** ... for this many seconds (0 = off). */
   alertCpuSeconds: number
+  /** Look for a new release on start and every few hours. Installing always asks. */
+  checkForUpdates: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -399,6 +401,7 @@ export const DEFAULT_SETTINGS: Settings = {
   alertMemoryMib: 0,
   alertCpuPercent: 90,
   alertCpuSeconds: 0,
+  checkForUpdates: true,
 }
 
 export interface SystemInfo {

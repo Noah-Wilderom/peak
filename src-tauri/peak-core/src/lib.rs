@@ -4,10 +4,13 @@
 //! and in the headless `peak-collector` on remote targets.
 
 pub mod cgroup;
+#[cfg(target_os = "linux")]
 pub mod collector;
 pub mod hub;
 pub mod model;
 pub mod monitor;
+#[cfg(not(target_os = "linux"))]
+pub mod native;
 pub mod procfs;
 pub mod protocol;
 pub mod runner;

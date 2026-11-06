@@ -1,12 +1,23 @@
 //! `peak-collector serve`: the protocol over stdin/stdout. Stdout carries only
 //! protocol frames; diagnostics go to stderr.
 
+#[cfg(target_os = "linux")]
 use std::io::{self, BufReader};
+#[cfg(target_os = "linux")]
 use std::path::PathBuf;
+#[cfg(target_os = "linux")]
 use std::time::Duration;
 
+#[cfg(target_os = "linux")]
 use peak_core::{collector, protocol};
 
+#[cfg(not(target_os = "linux"))]
+fn main() {
+    eprintln!("the collector runs on Linux targets");
+    std::process::exit(2);
+}
+
+#[cfg(target_os = "linux")]
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {

@@ -3,7 +3,6 @@
 
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::TcpStream;
-use std::os::unix::process::ExitStatusExt;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
@@ -14,16 +13,18 @@ use serde_json::{Value, json};
 
 use crate::discovery::{Candidate, Here, Record, Standing, discover, start_ticks};
 use crate::runner::pump_lines;
+#[cfg(unix)]
 use std::os::unix::process::CommandExt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Cli {
     Run(String),
     Collector,
+    Version,
     Help,
 }
 
-pub const USAGE: &str = "usage: peak run [--] <command> [args…]\n       peak collector\n\nrun: runs <command> and streams its memory, CPU and output to the peak app.\ncollector: shows the collector this build copies to remote targets.";
+pub const USAGE: &str = "usage: peak                      open the app\n       peak run [--] <command> [args…]\n       peak collector\n       peak version\n\nrun: runs <command> and streams its memory, CPU and output to the peak app.\ncollector: shows the collector this build copies to remote targets.\nversion: shows this build's version, commit and how it was installed.";
 
 /// `None` means "no CLI arguments — start the desktop app".
 pub fn parse_args(args: &[String]) -> Option<Cli> {
@@ -34,13 +35,30 @@ pub fn parse_args(args: &[String]) -> Option<Cli> {
             if rest.is_empty() { Some(Cli::Help) } else { Some(Cli::Run(shell_join(rest))) }
         }
         "collector" => Some(Cli::Collector),
+        "version" | "--version" | "-V" => Some(Cli::Version),
         "help" | "--help" | "-h" => Some(Cli::Help),
         // Tauri/WebKit may pass its own flags; anything unknown starts the app.
         _ => None,
     }
 }
 
+/// Quote arguments for `cmd /C` so `peak-cli run -- node "my file.js"` round-trips.
+#[cfg(windows)]
+pub fn shell_join(args: &[String]) -> String {
+    args.iter()
+        .map(|a| {
+            if !a.is_empty() && !a.chars().any(|c| c.is_whitespace() || "\"&|<>^%()".contains(c)) {
+                a.clone()
+            } else {
+                format!("\"{}\"", a.replace('"', "\\\""))
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// Quote arguments for `sh -c` so `peak run -- node "my file.js"` round-trips.
+#[cfg(unix)]
 pub fn shell_join(args: &[String]) -> String {
     args.iter()
         .map(|a| {
@@ -197,13 +215,16 @@ where
             None
         }
     };
-    let mut cmd = Command::new("/bin/sh");
-    cmd.arg("-c").arg(command).stdin(Stdio::inherit()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    let mut cmd = crate::runner::shell_command(command);
+    cmd.stdin(Stdio::inherit()).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some((_, env)) = &link {
         cmd.envs(env.iter().map(|(k, v)| (k.as_str(), v.as_str())));
     }
     // SAFETY: reset_signals only calls async-signal-safe functions.
-    unsafe { cmd.pre_exec(crate::runner::reset_signals) };
+    #[cfg(unix)]
+    unsafe {
+        cmd.pre_exec(crate::runner::reset_signals)
+    };
     let mut child = cmd.spawn()?;
     // Ctrl-C goes to the child; we stay alive to report how it ended.
     // SAFETY: setting a signal disposition has no preconditions.
@@ -226,22 +247,26 @@ where
     };
     let t1 = tee(Box::new(child.stdout.take().expect("stdout")), Box::new(out), "stdout");
     let t2 = tee(Box::new(child.stderr.take().expect("stderr")), Box::new(err), "stderr");
-    let status = child.wait()?;
+    let ended = crate::runner::ExitInfo::from(child.wait()?);
     let _ = t1.join();
     let _ = t2.join();
     // SAFETY: restoring the previous disposition.
     unsafe { libc::signal(libc::SIGINT, prev) };
 
     if let Some((l, _)) = &link {
-        l.send(json!({ "type": "exit", "code": status.code(), "signal": status.signal() }));
+        l.send(json!({ "type": "exit", "code": ended.code, "signal": ended.signal }));
     }
-    Ok(exit_code(status.code(), status.signal()))
+    Ok(exit_code(ended.code, ended.signal))
 }
 
 pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
     match cli {
         Cli::Help => {
             println!("{USAGE}");
+            0
+        }
+        Cli::Version => {
+            println!("{}", crate::release::InstallInfo::detect().line());
             0
         }
         Cli::Collector => {
@@ -269,7 +294,7 @@ pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;
     use crate::discovery::{Publication, default_dirs};
@@ -306,6 +331,9 @@ mod tests {
         assert_eq!(parse_args(&s(&["help"])), Some(Cli::Help));
         assert_eq!(parse_args(&s(&["-h"])), Some(Cli::Help));
         assert_eq!(parse_args(&s(&["collector"])), Some(Cli::Collector));
+        assert_eq!(parse_args(&s(&["version"])), Some(Cli::Version));
+        assert_eq!(parse_args(&s(&["--version"])), Some(Cli::Version));
+        assert_eq!(parse_args(&s(&["-V"])), Some(Cli::Version));
         assert_eq!(parse_args(&s(&["run", "--", "bun", "run", "build"])), Some(Cli::Run("bun run build".into())));
         assert_eq!(parse_args(&s(&["run", "node", "my file.js"])), Some(Cli::Run("node 'my file.js'".into())));
     }
@@ -544,7 +572,8 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let dirs = vec![dir.path().to_path_buf()];
         assert_eq!(main(Cli::Help, &dirs), 0);
-        #[cfg(peak_embedded_collector)]
+        assert_eq!(main(Cli::Version, &dirs), 0);
+        #[cfg(any(peak_collector_x86_64, peak_collector_aarch64))]
         assert_eq!(main(Cli::Collector, &dirs), 0, "this build can name its collector");
         assert_eq!(main(Cli::Run("exit 5".into()), &dirs), 5);
         // A NUL byte can't be passed to exec.
