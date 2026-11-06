@@ -6,6 +6,7 @@
 //! `db` (SQLite history), `remote` (targets and transports), `service` (wiring
 //! them together) and `cli` (`peak run`).
 
+pub mod bundled;
 pub mod cli;
 pub mod db;
 pub mod remote;

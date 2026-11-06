@@ -4,8 +4,7 @@
 //! Ignored by default because it needs `sshd` and a built collector:
 //!
 //! ```sh
-//! PEAK_COLLECTORS=<dir with x86_64/peak-collector> \
-//!   cargo test --test live_ssh -- --ignored --test-threads=1 --nocapture
+//! cargo test --test live_ssh -- --ignored --test-threads=1 --nocapture
 //! ```
 
 use std::path::{Path, PathBuf};
@@ -160,12 +159,13 @@ fn exists(pid: u32) -> bool {
     Path::new(&format!("/proc/{pid}")).exists()
 }
 
-fn collectors() -> PathBuf {
-    PathBuf::from(std::env::var_os("PEAK_COLLECTORS").expect("set PEAK_COLLECTORS"))
+/// Normally unset: the app's own embedded collector is what these should exercise.
+fn collectors() -> Option<PathBuf> {
+    std::env::var_os("PEAK_COLLECTORS").map(PathBuf::from)
 }
 
 fn setup(sshd: &Sshd, path: &Path) -> (Arc<Remote>, String) {
-    let tools = Tools { ssh_options: sshd.options(), collectors: Some(collectors()), ..Default::default() };
+    let tools = Tools { ssh_options: sshd.options(), collectors: collectors(), ..Default::default() };
     let timing = Timing { retry_max: Duration::from_secs(1), ..Default::default() };
     let r = Arc::new(Remote::with_timing(Arc::new(CliConnector { tools }), timing));
     let spec = TargetSpec {
@@ -187,7 +187,7 @@ fn state(r: &Remote, id: &str) -> ConnectionState {
 }
 
 #[test]
-#[ignore = "needs sshd and a built collector"]
+#[ignore = "needs sshd"]
 fn observes_and_controls_over_real_ssh() {
     let mut sshd = Sshd::start();
     let install = tempfile::tempdir().unwrap();
@@ -308,12 +308,12 @@ fn observes_and_controls_over_real_ssh() {
 }
 
 #[test]
-#[ignore = "needs sshd and a built collector"]
+#[ignore = "needs sshd"]
 fn a_black_holed_host_blocks_nothing() {
     // 192.0.2.0/24 is reserved for documentation, so packets go nowhere.
     let tools = Tools {
         ssh_options: vec!["-o".into(), "ConnectTimeout=20".into()],
-        collectors: Some(collectors()),
+        collectors: collectors(),
         ..Default::default()
     };
     let r = Remote::new(Arc::new(CliConnector { tools }));
@@ -342,7 +342,7 @@ fn a_black_holed_host_blocks_nothing() {
 }
 
 #[test]
-#[ignore = "needs sshd and a built collector"]
+#[ignore = "needs sshd"]
 fn failures_over_real_ssh_are_honest() {
     let mut sshd = Sshd::start();
     let install = tempfile::tempdir().unwrap();
@@ -353,7 +353,7 @@ fn failures_over_real_ssh_are_honest() {
     keygen(&other.path().join("key"));
     let mut opts = sshd.options();
     opts[1] = other.path().join("key").display().to_string();
-    let tools = Tools { ssh_options: opts, collectors: Some(collectors()), ..Default::default() };
+    let tools = Tools { ssh_options: opts, collectors: collectors(), ..Default::default() };
     let r = Remote::new(Arc::new(CliConnector { tools }));
     let spec = TargetSpec {
         id: "bad".into(),

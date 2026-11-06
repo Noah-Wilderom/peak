@@ -11,8 +11,14 @@ su tester -c '
 ssh-keygen -A >/dev/null
 /usr/sbin/sshd
 chmod 777 /out
-exec su tester -c '
-  export PATH=/opt/peak:/opt/peak/cli:$PATH PEAK_COLLECTORS=/opt/peak/collectors OUT=/out
+if [ -d /opt/peak/dist ]; then
+  # A debug binary loads its UI from the dev server's address.
+  (cd /opt/peak/dist && python3 -m http.server 1420 --bind 127.0.0.1 >/dev/null 2>&1 &)
+fi
+exec su --preserve-environment tester -c '
+  export HOME=/home/tester USER=tester
+  export PATH=/opt/peak:/opt/peak/cli:$PATH OUT=/out
+  if [ -n "${PEAK_E2E_COLLECTORS:-}" ]; then export PEAK_COLLECTORS=$PEAK_E2E_COLLECTORS; else unset PEAK_COLLECTORS; fi
   export DOCKER_HOST=tcp://peak-live-dind:2375 KUBECONFIG=/opt/peak/cli/kubeconfig
   export WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 XDG_DATA_HOME=$HOME/.local/share
   cd /opt/e2e

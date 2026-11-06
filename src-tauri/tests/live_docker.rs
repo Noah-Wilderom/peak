@@ -3,8 +3,7 @@
 //! containers it created.
 //!
 //! ```sh
-//! PEAK_COLLECTORS=<dir with x86_64/peak-collector> \
-//!   cargo test --test live_docker -- --ignored --test-threads=1 --nocapture
+//! cargo test --test live_docker -- --ignored --test-threads=1 --nocapture
 //! ```
 
 use std::path::PathBuf;
@@ -62,12 +61,13 @@ fn eventually(what: &str, secs: u64, mut f: impl FnMut() -> bool) {
     panic!("timed out: {what}");
 }
 
-fn collectors() -> PathBuf {
-    PathBuf::from(std::env::var_os("PEAK_COLLECTORS").expect("set PEAK_COLLECTORS"))
+/// Normally unset: the app's own embedded collector is what these should exercise.
+fn collectors() -> Option<PathBuf> {
+    std::env::var_os("PEAK_COLLECTORS").map(PathBuf::from)
 }
 
 fn tools() -> Tools {
-    Tools { collectors: Some(collectors()), ..Default::default() }
+    Tools { collectors: collectors(), ..Default::default() }
 }
 
 fn remote() -> Arc<Remote> {
@@ -92,8 +92,46 @@ fn state(r: &Remote, id: &str) -> ConnectionState {
     r.states().into_iter().find(|s| s.spec.id == id).unwrap().state
 }
 
+/// The reported bug: an ordinary build, with no override and no collector file anywhere,
+/// connects to a container it has never seen. `PEAK_LIVE_IMAGE` tries another image.
 #[test]
-#[ignore = "needs a Docker daemon and a built static collector"]
+#[ignore = "needs a Docker daemon"]
+fn an_ordinary_build_connects_with_nothing_prepared() {
+    let image = std::env::var("PEAK_LIVE_IMAGE").unwrap_or_else(|_| IMAGE.to_string());
+    let _ = docker(&["rm", "-f", "peak-live-clean"]);
+    let id = docker(&["run", "-d", "--name", "peak-live-clean", "--entrypoint", "sleep", &image, "300"])
+        .expect("docker run");
+    let c = Container { id: id.trim().to_string() };
+    assert!(docker(&["exec", &c.id, "ls", "/tmp/peak-collector"]).is_err(), "nothing is there yet");
+
+    // Exactly what the app's default tools do, apart from a throwaway unpack directory.
+    let data = tempfile::tempdir().unwrap();
+    let tools = Tools { collectors: None, data_dir: data.path().to_path_buf(), ..Default::default() };
+    let r = Remote::with_timing(Arc::new(CliConnector { tools }), Timing::default());
+    r.add(TargetSpec {
+        id: "clean".into(),
+        label: "clean".into(),
+        kind: Some(TargetKind::Docker),
+        container: c.id.clone(),
+        install: true,
+        ..Default::default()
+    });
+    r.connect("clean").unwrap();
+    eventually("connected", 60, || {
+        state(&r, "clean") != ConnectionState::Connecting && state(&r, "clean") != ConnectionState::Disconnected
+    });
+    let st = r.states().remove(0);
+    println!("  image {image}: {:?} {:?}", st.state, st.error);
+    assert_eq!(st.state, ConnectionState::Connected, "{:?}", st.error);
+    assert!(data.path().join("collectors").is_dir(), "unpacked from the app itself");
+    let p = r.attach("clean", 1).unwrap();
+    eventually("real samples", 20, || r.proc(&p.id).unwrap().samples.iter().any(|s| s.rss > 0.0));
+    r.shutdown();
+    println!("PASS");
+}
+
+#[test]
+#[ignore = "needs a Docker daemon"]
 fn observes_a_real_container() {
     docker(&["pull", "-q", IMAGE]).unwrap();
     let c = Container::run(
@@ -168,7 +206,7 @@ fn observes_a_real_container() {
 }
 
 #[test]
-#[ignore = "needs a Docker daemon and a built static collector"]
+#[ignore = "needs a Docker daemon"]
 fn minimal_and_locked_down_containers_fail_honestly() {
     docker(&["pull", "-q", IMAGE]).unwrap();
     println!("read-only filesystem: the collector can't be copied in");
@@ -215,7 +253,7 @@ fn minimal_and_locked_down_containers_fail_honestly() {
 /// Docker contexts and SSH configuration aren't read or changed. It's still this
 /// machine's daemon, so it proves the path, not a far-away engine.
 #[test]
-#[ignore = "needs a Docker daemon, sshd and a built static collector"]
+#[ignore = "needs a Docker daemon and sshd"]
 fn works_through_an_ssh_docker_context() {
     docker(&["pull", "-q", IMAGE]).unwrap();
     let home = tempfile::tempdir().unwrap();

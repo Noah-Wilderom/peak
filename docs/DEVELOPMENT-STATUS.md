@@ -3,11 +3,77 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 05:46 UTC
-- **State:** all eleven milestones implemented; final verification passed on this code. Awaiting PM acceptance.
-- **Commits:** none. All work is uncommitted in the shared checkout (94 changed paths; no commit was requested).
+- **Last update:** 2026-11-06 10:31 UTC
+- **State:** original delivery committed and pushed. **Collector-availability bug fixed and verified**, awaiting PM commit.
+- **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. This bug's fix is uncommitted in the checkout; commit and push are with the PM.
 
-## Final verification
+## Current bug: "no peak-collector build for x86_64 is available"
+
+Reported on Docker target `sportboekernl-laravel.test-1`, launched with `task dev`. **Status: fixed and verified. The fix is
+uncommitted; commit and push are with the PM.**
+
+**Cause.** `task dev` runs `bun run tauri dev`, which builds only the `peak` package. Nothing built `peak-collector`, so the
+lookup found nothing. The accepted validation always supplied one through `PEAK_COLLECTORS`, so it never hit this.
+
+**Fix.** `src-tauri/build.rs` builds the static musl collector, adding the rustup target if needed, and embeds it in the
+app. `src/bundled.rs` unpacks it to the data directory for transports to copy. Every way of building Peak now carries one,
+including installers. An override still comes first; a glibc sibling build is now the last resort. `peak collector` shows
+which one is in use. Release builds refuse to build without one, and CI's `PEAK_REQUIRE_COLLECTOR=1` extends that to debug.
+`task dev` also runs `bun install --frozen-lockfile`, so a clean checkout starts. `task collector:build` is removed.
+
+**Workaround for a build still at `dfa4dd3`:** run `task collector:build`, then press Connect again. No restart is needed.
+Verified in log 1. Once this fix is pulled, `task dev` alone is enough.
+
+**Evidence,** in `docs/evidence/collector-bug/`:
+
+| Log | Scenario | Result |
+|---|---|---|
+| `1-reproduction-at-dfa4dd3.log` | Fresh export of `dfa4dd3`, no override, real disposable Docker | No collector artifact after a build; **`Failed`, with the reported message**. Then `task collector:build`: `Connected` |
+| `2-clean-start-task-dev.log` | **Primary case, final code:** `task dev` from an export with no `node_modules`, no `target`, no `PEAK_COLLECTORS`, no collector file, musl target removed | Launched in 125s; target added by itself; `peak collector` exit 0 |
+| `5-real-window-exact-task-dev-binary.log` | **Final code:** that exact binary (sha256 `db26a7bc36b02b7e`) in a real window, real isolated Docker daemon, no collector supplied | Docker step passes: totals, logs, collector, attach, detach |
+| `3-live-docker-from-clean-start.log` | Clean-start copy, host daemon: `alpine:3.20`, and a disposable container from the reporter's image `sail-8.5/app` | `Connected`, real samples, on both. The reporter's container was not touched: same id and uptime before and after |
+| `4-real-window-task-dev-binary.log` | Full 24-step window suite, no collector supplied: local, SSH, Docker, Kubernetes | ALL OK. Binary relinked by `cargo test` from the same source, so not byte-identical to log 5's |
+| `6-deb-package.log` | `bun run tauri build --bundles deb`, unpacked (not installed); `peak collector`; real window against real Docker | Exit 0; one binary, no extra files; Docker step passes |
+| `7-no-collector-available.log` | Target absent, cache removed, `rustup target add` failing | Debug warns with the cause, and `peak collector` gives the actionable message, exit 1. Release refuses, exit 101. CI's guard refuses, exit 101. `PEAK_ALLOW_NO_COLLECTOR=1` builds |
+| `8-affected-gates.log` | Affected required gates, `PEAK_REQUIRE_COLLECTOR=1`, no override | Below |
+
+Logs 3, 4, 6 and 7 ran before the last `build.rs` edit, which only added `RUSTC_WRAPPER` to the list of cleared settings, plus
+wording and formatting. Logs 2, 5 and 8 ran on the final code. Only docs changed after them.
+
+**Gates (log 8, 10:24-10:26 UTC):**
+
+| Command | Result |
+|---|---|
+| `cargo fmt --all --check` | exit 0 |
+| `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
+| `cargo build -p peak-collector` without the desktop's libraries | exit 0 |
+| `cargo llvm-cov --workspace --ignore-filename-regex '(lib\|main\|live_\w+)\.rs$' --fail-under-lines 99` | exit 0; 155 tests; **99.10% lines**. `bundled.rs` 100% |
+| `cargo test --test live_ssh -- --ignored --test-threads=1` | 3/3, using the embedded collector |
+| `cargo test --test live_docker -- --ignored --test-threads=1` | 4/4, including new `an_ordinary_build_connects_with_nothing_prepared` |
+
+Not rerun, because nothing they cover changed: the frontend suite (no `src/`, `package.json` or `bun.lock` change) and the agent
+suites. `live_kube` wasn't rerun, but Kubernetes passed through the real window in log 4.
+
+The verification found one more bug before it could reach CI: `cargo-llvm-cov`'s `RUSTC_WRAPPER` broke the nested build. Without the
+new CI guard, coverage builds would have silently dropped the collector.
+
+**Limits.**
+- This machine has no system WebKit, so the plain `task dev` window can't open on it. The build and launch ran here with private
+  webkit dev libraries, and the same binary's window ran in a container against a static copy of the frontend, not the Vite server.
+- x86-64 only. An x86-64 app reports that it has no collector for other architectures. Building on arm64 should embed an arm64 one, but
+  that hasn't been run.
+- The `.deb` was unpacked, not installed. `.rpm` and AppImage weren't built. Nothing here has run on GitHub Actions.
+- The first `task dev` after a clean checkout adds about 20s for the collector, and needs network access if the rustup target is missing.
+- `task dev` on a machine without rustup gets a working local app, a build warning, and the "doesn't include one" message on remote targets.
+- Targets keep an existing copy of the collector while its version and protocol are unchanged.
+- The reporter's own container hasn't been connected to, to leave it unchanged. Its image has been.
+
+`*.log` is ignored by git, so new evidence logs wouldn't have been picked up by a normal `git add`. `.gitignore` now keeps
+`docs/evidence/**/*.log`, so this bug's logs appear in `git status`.
+
+**Next action:** PM commit and push. Then the reporter pulls and runs `task dev`, and presses Connect on the existing target.
+
+## Final verification (of delivery `dfa4dd3`)
 
 Run with `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot scripts/verify-all.sh`, 05:29:50-05:38:00 UTC, on the
 same code as this checkout apart from docs. Result: **ALL CHECKS PASSED**.
@@ -123,7 +189,8 @@ a metrics NotFound read as a missing pod; pruning closed the Settings page; a re
 ## Environment
 
 - webkit2gtk dev libraries are absent here. They're extracted rootlessly to `/mnt/HC_Volume_107248377/.peak-sysroot`,
-  along with `kubectl`, `tauri-driver`, Playwright and Node 20/22. Nothing was installed system-wide.
+  along with `kubectl`, `tauri-driver`, Playwright and Node 20/22. Nothing was installed system-wide. The rustup musl target
+  is installed in the user's toolchain.
 - The root disk holds Docker's data: 95% full (4.1 GB free) after cleanup. The disposable images I pulled are removed
   and no `peak-live` containers or networks remain. Docker's build cache was left alone because it's shared; it's
   2.2 GB in total and includes layers from this work, so `docker builder prune` is the owner's call.
@@ -136,4 +203,4 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-PM acceptance. After that, the open items are the live gaps above, packaging the collector, and an arm64 build.
+See "Current bug" above. After that, the open items are the live gaps in `docs/REMOTE-VALIDATION.md` and an arm64 build.

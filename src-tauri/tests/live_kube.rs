@@ -2,8 +2,7 @@
 //! cluster named `peak-live-k3s`, created and removed by this test.
 //!
 //! ```sh
-//! PATH=<dir with kubectl>:$PATH PEAK_COLLECTORS=<dir with x86_64/peak-collector> \
-//!   cargo test --test live_kube -- --ignored --test-threads=1 --nocapture
+//! PATH=<dir with kubectl>:$PATH cargo test --test live_kube -- --ignored --test-threads=1 --nocapture
 //! ```
 
 use std::path::PathBuf;
@@ -107,12 +106,13 @@ fn apply(yaml: &str) {
     let _ = std::fs::remove_file(path);
 }
 
-fn collectors() -> PathBuf {
-    PathBuf::from(std::env::var_os("PEAK_COLLECTORS").expect("set PEAK_COLLECTORS"))
+/// Normally unset: the app's own embedded collector is what these should exercise.
+fn collectors() -> Option<PathBuf> {
+    std::env::var_os("PEAK_COLLECTORS").map(PathBuf::from)
 }
 
 fn tools() -> Tools {
-    Tools { collectors: Some(collectors()), ..Default::default() }
+    Tools { collectors: collectors(), ..Default::default() }
 }
 
 fn remote() -> Arc<Remote> {
@@ -172,7 +172,7 @@ roleRef: { kind: Role, name: pod-reader, apiGroup: rbac.authorization.k8s.io }
 "#;
 
 #[test]
-#[ignore = "starts a disposable k3s cluster; needs Docker, kubectl and a built static collector"]
+#[ignore = "starts a disposable k3s cluster; needs Docker and kubectl"]
 fn observes_real_pods() {
     let _cluster = Cluster::start();
     let t = tools();

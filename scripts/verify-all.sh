@@ -6,7 +6,6 @@
 # Needs: bun, cargo + cargo-llvm-cov, rustup musl target, node 20/22 optional, python3,
 # docker, sshd, kubectl, tauri-driver, Playwright. Paths come from PEAK_TOOLS:
 #   $PEAK_TOOLS/env.sh                 optional environment (private webkit dev libraries)
-#   $PEAK_TOOLS/collectors/x86_64/     where the static collector is placed
 #   $PEAK_TOOLS/bin/kubectl, $PEAK_TOOLS/tauri-driver/bin/tauri-driver
 #   $PEAK_TOOLS/e2e/                   a directory with Playwright installed
 #   $PEAK_TOOLS/node/node-v*/bin/node  extra Node versions (optional)
@@ -20,7 +19,8 @@ mkdir -p "$OUT" "$SHOTS/browser" "$SHOTS/desktop"
 LOG=$OUT/verification.log
 exec > >(tee "$LOG") 2>&1
 [ -f "$TOOLS/env.sh" ] && . "$TOOLS/env.sh"
-export PATH=$TOOLS/bin:$PATH PEAK_COLLECTORS=$TOOLS/collectors
+export PATH=$TOOLS/bin:$PATH
+unset PEAK_COLLECTORS # the app's embedded collector is what's being tested
 FAILED=()
 # gate <name> <command...>: run, print the tail, record the outcome.
 gate() {
@@ -51,8 +51,6 @@ gate backend-clippy cargo clippy --workspace --all-targets -- -D warnings
 # Without the desktop's libraries: the collector must not need them.
 gate collector-builds-alone env -u RUSTFLAGS -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH cargo build -p peak-collector
 gate collector-static env -u RUSTFLAGS cargo build -p peak-collector --release --target x86_64-unknown-linux-musl
-mkdir -p "$TOOLS/collectors/x86_64"
-cp target/x86_64-unknown-linux-musl/release/peak-collector "$TOOLS/collectors/x86_64/"
 TAIL=60 gate backend-coverage cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|live_\w+)\.rs$' --fail-under-lines 99
 
 TAIL=5 gate live-ssh cargo test --test live_ssh -- --ignored --test-threads=1
@@ -69,7 +67,7 @@ PID=$(ss -ltnp 2>/dev/null | grep ':1420 ' | grep -oE 'pid=[0-9]+' | head -1 | c
 [ -n "$PID" ] && kill "$PID"
 
 gate desktop-binary bash -c "bun run build && cd src-tauri && cargo build --features tauri/custom-protocol"
-TAIL=60 gate desktop-real scripts/e2e/desktop/run.sh src-tauri/target/debug/peak "$TOOLS/tauri-driver/bin/tauri-driver" "$TOOLS/collectors" "$TOOLS/bin/kubectl" "$SHOTS/desktop"
+TAIL=60 gate desktop-real scripts/e2e/desktop/run.sh src-tauri/target/debug/peak "$TOOLS/tauri-driver/bin/tauri-driver" - "$TOOLS/bin/kubectl" "$SHOTS/desktop"
 [ -f "$SHOTS/desktop/notifications-received.log" ] && cp "$SHOTS/desktop/notifications-received.log" "$OUT/"
 
 echo; echo "leftover disposable containers: $(docker ps -a --filter name=peak-live --format '{{.Names}}' | wc -l)"

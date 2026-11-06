@@ -1,0 +1,30 @@
+started 2026-11-06T10:03:31Z
+binary: built by `cargo test` from the same clean-start copy after `task dev` (sha256 5b129d1d9ae9fceb), which relinked it with different features; NOT byte-identical to the `task dev` build (db26a7bc36b02b7e). See log 5 for that one. Collector argument: - (none supplied)
+ok   starts with an empty real backend
+ok   no notification service: peak says what it knows and keeps working
+ok   captures a real command with output
+ok   timeline marks stderr and jumps to output
+ok   a real chart drag zooms; a real chart click opens the output
+ok   stop a local run: exits cleanly
+ok   python agent: lag and CPU profile from the real runtime
+ok   a real notification daemon receives alerts, once per crossing
+ok   alerts from saved settings fire a toast and a marker
+ok   sustained CPU alert honours its duration; notifications can be turned off
+ok   machine strip shows real host data
+     clipboard: write accepted
+ok   stopping, then report and history
+ok   compare two real stored runs without adding them to the session
+ok   resources: real ports, children and lag
+ok   node agent: lag, and a CPU profile that says how it sampled
+ok   real SSH target: connect, attach, launch, detach
+ok   attach an existing remote process: only observed, no plain Stop
+ok   disconnect: attached stays running, launched ends with the session
+ok   reconnect: same run, verified, and the gap shows
+ok   real Docker daemon through the UI: totals, logs, collector, attach
+ok   real Kubernetes through the UI: pods, logs, RBAC answer, collector, attach
+ok   after a restart: history and settings survive
+ok   targets are remembered, and don't reconnect by themselves
+ok   storage maintenance removes history, leaves a running workload recording
+ALL OK
+exit=0
+ended 2026-11-06T10:05:46Z

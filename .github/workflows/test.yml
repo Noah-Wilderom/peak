@@ -30,6 +30,8 @@ jobs:
   backend:
     name: Backend (fmt, clippy, tests, coverage)
     runs-on: ubuntu-latest
+    env:
+      PEAK_REQUIRE_COLLECTOR: "1"
     defaults:
       run:
         working-directory: src-tauri
@@ -43,6 +45,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt, llvm-tools-preview
+          targets: x86_64-unknown-linux-musl
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri

@@ -1,0 +1,16 @@
+started 2026-11-06T10:01:40Z, in the clean-start copy, PEAK_COLLECTORS=<unset>
+=== alpine:3.20 (host daemon)
+  ok: connected
+  image alpine:3.20: Connected None
+  ok: real samples
+PASS
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.92s
+=== sail-8.5/app, the reporter's image, disposable container (--entrypoint sleep)
+  ok: connected
+  image sail-8.5/app: Connected None
+  ok: real samples
+PASS
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.94s
+reporter's container before: 4ada24deae7a Up 2 days
+reporter's container after:  4ada24deae7a Up 2 days
+ended 2026-11-06T10:02:15Z

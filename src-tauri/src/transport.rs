@@ -29,6 +29,8 @@ pub struct Tools {
     pub ssh_options: Vec<String>,
     /// Directory holding `<arch>/peak-collector` builds, tried before the app's own.
     pub collectors: Option<PathBuf>,
+    /// Where the embedded collector is unpacked.
+    pub data_dir: PathBuf,
 }
 
 impl Default for Tools {
@@ -39,6 +41,7 @@ impl Default for Tools {
             kubectl: "kubectl".into(),
             ssh_options: vec![],
             collectors: std::env::var_os("PEAK_COLLECTORS").map(PathBuf::from),
+            data_dir: crate::hub::default_data_dir(),
         }
     }
 }
@@ -94,20 +97,43 @@ fn shell_quote(s: &str) -> String {
     format!("'{}'", s.replace('\'', "'\\''"))
 }
 
-/// The collector built for this architecture, if we have one.
+/// The collector to copy to a target of this architecture. An explicit override comes first,
+/// then the static one built into this app. A plain sibling build is the last resort: it's
+/// linked against this machine's libc, so it won't run in every container.
 pub fn local_collector(tools: &Tools, arch: &str) -> Result<PathBuf, String> {
-    let mut places = vec![];
-    if let Some(dir) = &tools.collectors {
-        places.push(dir.join(arch).join("peak-collector"));
+    let override_path = tools.collectors.as_ref().map(|d| d.join(arch).join("peak-collector"));
+    if let Some(p) = override_path.filter(|p| p.is_file()) {
+        return Ok(p);
     }
-    let exe = std::env::current_exe().ok();
-    if let Some(dir) = exe.as_deref().and_then(Path::parent) {
-        places.push(dir.join("collectors").join(arch).join("peak-collector"));
+    let unpack_error = match crate::bundled::embedded_collector(arch, &tools.data_dir) {
+        Some(Ok(p)) => return Ok(p),
+        Some(Err(e)) => Some(format!("couldn't unpack this app's collector into {}: {e}", tools.data_dir.display())),
+        None => None,
+    };
+    let mut beside_app = vec![];
+    if let Some(dir) = std::env::current_exe().ok().as_deref().and_then(Path::parent) {
+        beside_app.push(dir.join("collectors").join(arch).join("peak-collector"));
         if arch == std::env::consts::ARCH {
-            places.push(dir.join("peak-collector"));
+            beside_app.push(dir.join("peak-collector"));
         }
     }
-    places.into_iter().find(|p| p.is_file()).ok_or_else(|| format!("no peak-collector build for {arch} is available"))
+    if let Some(p) = beside_app.into_iter().find(|p| p.is_file()) {
+        return Ok(p);
+    }
+    Err(unpack_error.unwrap_or_else(|| missing_collector(arch, crate::bundled::embedded_arch())))
+}
+
+/// Why there's no collector, and what can be done about it.
+fn missing_collector(arch: &str, included: Option<&str>) -> String {
+    let has = match included {
+        Some(other) => format!("This app only includes one for {other}."),
+        None => "This build of Peak doesn't include one; check its build output for why.".to_string(),
+    };
+    format!(
+        "no peak-collector build for {arch} is available. {has} Detailed monitoring on this target needs one: \
+         put a static build at $PEAK_COLLECTORS/{arch}/peak-collector, or prepare it on the target. \
+         Container totals and logs still work without it."
+    )
 }
 
 fn normalize_arch(machine: &str) -> String {
@@ -976,6 +1002,35 @@ mod tests {
         (link.close)();
     }
 
+    /// An override wins, for testing other builds. Without one, an ordinary build of the app
+    /// finds its own collector: no environment, no prebuilt file.
+    #[test]
+    fn collector_lookup_needs_nothing_beyond_the_app() {
+        let d = tempfile::tempdir().unwrap();
+        let store = d.path().join("store");
+        std::fs::create_dir_all(store.join("x86_64")).unwrap();
+        let chosen = store.join("x86_64/peak-collector");
+        std::fs::write(&chosen, "b").unwrap();
+        let data = d.path().join("data");
+        let with = Tools { collectors: Some(store), data_dir: data.clone(), ..Default::default() };
+        assert_eq!(local_collector(&with, "x86_64").unwrap(), chosen);
+
+        let without = Tools { collectors: None, data_dir: data.clone(), ..Default::default() };
+        assert!(local_collector(&without, "riscv64").unwrap_err().contains("riscv64"));
+        #[cfg(peak_embedded_collector)]
+        {
+            let arch = crate::bundled::embedded_arch().unwrap();
+            let found = local_collector(&without, arch).unwrap();
+            assert!(found.starts_with(&data), "unpacked from the app itself: {found:?}");
+
+            // An unusable data directory is reported as what it is, not as a missing build.
+            let file = d.path().join("a-file");
+            std::fs::write(&file, "").unwrap();
+            let blocked = Tools { collectors: None, data_dir: file, ..Default::default() };
+            assert!(local_collector(&blocked, arch).unwrap_err().contains("couldn't unpack"));
+        }
+    }
+
     #[test]
     fn custom_collector_paths_and_default_locations() {
         assert!(default_collector_path(&ssh_spec()).starts_with("~/.local/share/peak/collector/"));
@@ -1148,6 +1203,12 @@ esac"#,
         assert_eq!(normalize_arch("amd64\n"), "x86_64");
         assert_eq!(normalize_arch("arm64"), "aarch64");
         assert_eq!(normalize_arch("riscv64"), "riscv64");
+        let other = missing_collector("aarch64", Some("x86_64"));
+        assert!(
+            other.contains("no peak-collector build for aarch64") && other.contains("only includes one for x86_64"),
+            "{other}"
+        );
+        assert!(missing_collector("x86_64", None).contains("doesn't include one"));
         let Err(_) = local_collector(&Tools { collectors: Some(d.path().into()), ..Default::default() }, "nope") else {
             panic!()
         };

@@ -1,0 +1,24 @@
+started 2026-11-06T10:19:34Z
+=== when no collector can be built: musl target absent, cached collector removed, rustup target add failing
+info: removing component rust-std for target x86_64-unknown-linux-musl
+$ cargo build   (debug: must still build, and warn)
+warning: peak@0.1.0: no collector embedded, so this build can't connect to remote targets: the Rust target x86_64-unknown-linux-musl isn't installed, and `rustup target add x86_64-unknown-linux-musl` didn't work
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 19.15s
+$ target/debug/peak collector
+peak: no peak-collector build for x86_64 is available. This build of Peak doesn't include one; check its build output for why. Detailed monitoring on this target needs one: put a static build at $PEAK_COLLECTORS/x86_64/peak-collector, or prepare it on the target. Container totals and logs still work without it.
+exit=1
+$ cargo check --release   (release: must refuse)
+  cargo:rerun-if-env-changed=PEAK_ALLOW_NO_COLLECTOR
+  this release build couldn't embed a collector, so it couldn't connect to remote targets: the Rust target x86_64-unknown-linux-musl isn't installed, and `rustup target add x86_64-unknown-linux-musl` didn't work
+  Fix that, or set PEAK_ALLOW_NO_COLLECTOR=1 to build without remote support on purpose.
+exit=101
+$ PEAK_ALLOW_NO_COLLECTOR=1 cargo check --release   (a deliberate choice)
+warning: peak@0.1.0: no collector embedded, so this build can't connect to remote targets: the Rust target x86_64-unknown-linux-musl isn't installed, and `rustup target add x86_64-unknown-linux-musl` didn't work
+    Finished `release` profile [optimized] target(s) in 4.04s
+exit=0
+$ PEAK_REQUIRE_COLLECTOR=1 cargo check   (what CI sets)
+  this release build couldn't embed a collector, so it couldn't connect to remote targets: the Rust target x86_64-unknown-linux-musl isn't installed, and `rustup target add x86_64-unknown-linux-musl` didn't work
+exit=101
+info: downloading component rust-std
+installed again: 1
+ended 2026-11-06T10:20:12Z

@@ -19,11 +19,11 @@ use std::os::unix::process::CommandExt;
 #[derive(Debug, PartialEq, Eq)]
 pub enum Cli {
     Run(String),
+    Collector,
     Help,
 }
 
-pub const USAGE: &str =
-    "usage: peak run [--] <command> [args…]\n\nRuns <command> and streams its memory, CPU and output to the peak app.";
+pub const USAGE: &str = "usage: peak run [--] <command> [args…]\n       peak collector\n\nrun: runs <command> and streams its memory, CPU and output to the peak app.\ncollector: shows the collector this build copies to remote targets.";
 
 /// `None` means "no CLI arguments — start the desktop app".
 pub fn parse_args(args: &[String]) -> Option<Cli> {
@@ -33,6 +33,7 @@ pub fn parse_args(args: &[String]) -> Option<Cli> {
             let rest = if rest.first().map(String::as_str) == Some("--") { &rest[1..] } else { rest };
             if rest.is_empty() { Some(Cli::Help) } else { Some(Cli::Run(shell_join(rest))) }
         }
+        "collector" => Some(Cli::Collector),
         "help" | "--help" | "-h" => Some(Cli::Help),
         // Tauri/WebKit may pass its own flags; anything unknown starts the app.
         _ => None,
@@ -158,6 +159,21 @@ pub fn main(cli: Cli, data_dir: &Path) -> i32 {
             println!("{USAGE}");
             0
         }
+        Cli::Collector => {
+            let arch = std::env::consts::ARCH;
+            match crate::transport::local_collector(&crate::transport::Tools::default(), arch) {
+                Ok(path) => {
+                    let version = Command::new(&path).arg("version").output();
+                    let version = version.map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
+                    println!("{arch}: {} ({})", path.display(), version.unwrap_or_else(|e| e.to_string()));
+                    0
+                }
+                Err(e) => {
+                    eprintln!("peak: {e}");
+                    1
+                }
+            }
+        }
         Cli::Run(command) => match run(&command, data_dir, io::stdout(), io::stderr()) {
             Ok(code) => code,
             Err(e) => {
@@ -190,6 +206,7 @@ mod tests {
         assert_eq!(parse_args(&s(&["run", "--"])), Some(Cli::Help));
         assert_eq!(parse_args(&s(&["help"])), Some(Cli::Help));
         assert_eq!(parse_args(&s(&["-h"])), Some(Cli::Help));
+        assert_eq!(parse_args(&s(&["collector"])), Some(Cli::Collector));
         assert_eq!(parse_args(&s(&["run", "--", "bun", "run", "build"])), Some(Cli::Run("bun run build".into())));
         assert_eq!(parse_args(&s(&["run", "node", "my file.js"])), Some(Cli::Run("node 'my file.js'".into())));
     }
@@ -274,6 +291,8 @@ mod tests {
     fn help_and_spawn_errors() {
         let dir = tempfile::tempdir().unwrap();
         assert_eq!(main(Cli::Help, dir.path()), 0);
+        #[cfg(peak_embedded_collector)]
+        assert_eq!(main(Cli::Collector, dir.path()), 0, "this build can name its collector");
         assert_eq!(main(Cli::Run("exit 5".into()), dir.path()), 5);
         // A NUL byte can't be passed to exec.
         assert_eq!(main(Cli::Run("a\0b".into()), dir.path()), 127);

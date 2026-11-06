@@ -1,0 +1,22 @@
+started 2026-11-06T10:26:56Z
+=== preconditions
+PEAK_COLLECTORS=<unset>
+node_modules: absent
+target dir: absent
+collector files in the copy: 0
+info: removing component rust-std for target x86_64-unknown-linux-musl
+rustup musl target installed: 0
+
+=== $ task dev   (stopped once the app has been launched)
+build + launch took 125s
+task: [dev] bun install --frozen-lockfile
+task: [dev] bun run tauri dev
+    Building [=======================> ] 506/512: peak-core, peak(build), tau…    Building [=======================> ] 507/512: peak-core, peak(build), tau…    Building [=======================> ] 508/512: peak-core, peak(build)          Building [=======================> ] 509/512: peak(build)                     Building [=======================> ] 510/512: peak                            Building [=======================> ] 511/512: peak(bin)                   [K    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 54s
+     Running `target/debug/peak`
+
+=== results
+rustup musl target installed: 1
+$ src-tauri/target/debug/peak collector
+x86_64: /mnt/HC_Volume_107248377/.peak-sysroot/clean-start/.xdg/peak/collectors/x86_64-f619970e99887da8/peak-collector (0.1.0 protocol 1)
+exit=0
+ended 2026-11-06T10:29:07Z

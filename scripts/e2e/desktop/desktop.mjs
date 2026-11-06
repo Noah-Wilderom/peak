@@ -6,6 +6,7 @@ import { chmodSync, existsSync, openSync, readFileSync, unlinkSync, writeFileSyn
 
 const DRIVER = "http://127.0.0.1:4444"
 const OUT = process.env.OUT
+const ONLY = process.env.PEAK_E2E_ONLY ? new RegExp(process.env.PEAK_E2E_ONLY) : null
 const RECEIVED = `${OUT}/notifications-received.log`
 if (existsSync(RECEIVED)) unlinkSync(RECEIVED)
 let session = null
@@ -77,6 +78,7 @@ async function shot(name) {
 }
 
 async function step(name, fn) {
+  if (ONLY && !ONLY.test(name)) return
   try {
     await fn()
     console.log("ok  ", name)

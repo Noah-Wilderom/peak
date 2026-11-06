@@ -1,0 +1,51 @@
+started 2026-11-06T10:24:16Z; PEAK_COLLECTORS=<unset> PEAK_REQUIRE_COLLECTOR=1 (as CI sets)
+
+=== $ cargo fmt --all --check
+exit=0
+
+=== $ cargo clippy --workspace --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.02s
+exit=0
+
+=== $ env -u RUSTFLAGS -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH cargo build -p peak-collector
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+exit=0
+
+=== $ cargo llvm-cov --workspace --ignore-filename-regex (lib|main|live_\w+)\.rs$ --fail-under-lines 99
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 36.46s
+test result: ok. 77 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.55s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.99s
+peak-core/src/cgroup.rs 104 0 100.00%
+peak-core/src/collector.rs 613 15 97.55%
+peak-core/src/hub.rs 375 2 99.47%
+peak-core/src/model.rs 231 0 100.00%
+peak-core/src/monitor.rs 987 2 99.80%
+peak-core/src/procfs.rs 478 0 100.00%
+peak-core/src/protocol.rs 48 0 100.00%
+peak-core/src/runner.rs 224 0 100.00%
+peak-core/src/sampler.rs 289 0 100.00%
+src/bundled.rs 71 0 100.00%
+src/cli.rs 227 4 98.24%
+src/db.rs 412 4 99.03%
+src/remote.rs 1664 15 99.10%
+src/service.rs 441 13 97.05%
+src/transport.rs 962 9 99.06%
+TOTAL lines 7126 64 99.10%
+exit=0
+
+=== $ cargo test --test live_ssh -- --ignored --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.53s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.13s
+exit=0
+
+=== $ cargo test --test live_docker -- --ignored --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.63s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.79s
+exit=0
+
+ended 2026-11-06T10:26:15Z

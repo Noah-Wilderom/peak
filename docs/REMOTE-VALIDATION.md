@@ -22,7 +22,7 @@ PEAK_TOOLS=<tools dir> scripts/verify-all.sh       # everything, with a dated lo
 task test:live                                     # builds the static collector, runs the three live suites
 ```
 
-Or individually, with a static collector in `$PEAK_COLLECTORS/x86_64/`:
+Or individually. These use the collector embedded in the build; `PEAK_COLLECTORS` overrides it:
 
 ```sh
 cd src-tauri
@@ -114,15 +114,15 @@ Treat these as open until someone runs them for real.
 | SSH to another machine, over a real network | All live SSH was loopback. Latency, packet loss, NAT timeouts and `ServerAlive` behaviour are unproven |
 | Differing clocks, and a clock changed mid-run | Live offsets were always ~0. Remapping is fixture-tested only; the system clock wasn't changed |
 | A real reboot | Boot-id mismatch is fixture-tested only |
-| Arm64 targets | Only `x86_64-unknown-linux-musl` was built. Other architectures report "no peak-collector build" |
+| Arm64 | Only `x86_64-unknown-linux-musl` was built. An x86-64 app says it has no collector for other architectures. `build.rs` would embed `aarch64-unknown-linux-musl` when built on arm64, but that has not been run |
 | A Docker engine on another machine, Docker Desktop | The `ssh://` context reached this machine's daemon |
 | `hidepid` mounts | Unreadable metrics were shown via another user's process, not `hidepid` |
 | Images with no shell at all | Direct argv launch is tested, but in images that have a shell |
 | Managed Kubernetes, large clusters, cgroup v1 hosts | One k3s node with relaxed disk-eviction thresholds (this machine's disk is nearly full), cgroup v2. cgroup v1 parsing is fixture-tested |
 | Notification display on real desktops | Delivery to `dunst` is proven. GNOME, KDE, macOS and Windows weren't run, and whether a popup was actually seen isn't observable here |
 | Application pods getting measured metrics | Measured values were only seen for a system pod. New pods stayed unmeasured for over four minutes in one run, with the API answering NotFound. The cause wasn't established, and it may be this single-node, low-disk setup |
-| Packaged desktop builds | The window was validated on a debug build with the frontend embedded, under Xvfb with software rendering. No installer has been built or run |
-| Installers | The collector isn't bundled yet; the app finds it through `PEAK_COLLECTORS` or `collectors/<arch>/` beside its binary (`task collector:build`) |
+| Installing a package | The `.deb` was unpacked and run, not installed by a package manager. Only ran under Xvfb with software rendering |
+| Other package formats | A real `.deb` was built, unpacked and driven against real Docker, without installing it system-wide. `.rpm` and AppImage carry the same binary but weren't built |
 
 ## Deliberately not built
 

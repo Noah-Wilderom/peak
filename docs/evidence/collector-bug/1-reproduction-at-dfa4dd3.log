@@ -1,0 +1,18 @@
+✓ built in 1.36s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 33s
+after ordinary cargo build, collector artifacts:
+(end)
+  Executable tests/repro.rs (target/debug/deps/repro-a804ee6cd32bc58f)
+=== defect, from the app's directory, PEAK_COLLECTORS unset
+RESULT state=Failed error=Some("no peak-collector build for x86_64 is available")
+=== workaround: task collector:build
+task: [collector:build] mkdir -p target/debug/collectors/x86_64
+task: [collector:build] cp target/x86_64-unknown-linux-musl/release/peak-collector target/debug/collectors/x86_64/
+total 1172
+drwxrwxr-x 2 dev dev    4096 Nov  6 09:56 .
+drwxrwxr-x 3 dev dev    4096 Nov  6 09:56 ..
+-rwxrwxr-x 1 dev dev 1188736 Nov  6 09:56 peak-collector
+RESULT state=Connected error=None
+Fri Nov  6 09:56:32 AM UTC 2026
+
+[exited with code 0]

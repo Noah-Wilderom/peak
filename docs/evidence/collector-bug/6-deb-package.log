@@ -1,0 +1,27 @@
+started 2026-11-06T10:11:06Z
+$ bun run tauri build --bundles deb   (no override, in the clean-start copy)
+$ tauri build --bundles deb
+   Compiling thiserror v2.0.21
+   Compiling thiserror-impl v2.0.21
+   Compiling proc-macro-error-attr v1.0.4
+   Compiling proc-macro-error v1.0.4
+   Compiling thiserror v1.0.69
+   Compiling thiserror-impl v1.0.69
+    Finished `release` profile [optimized] target(s) in 3m 51s
+       Built application at: /mnt/HC_Volume_107248377/.peak-sysroot/clean-start/src-tauri/target/release/peak
+        Info Patching /mnt/HC_Volume_107248377/.peak-sysroot/clean-start/src-tauri/target/release/peak with bundle type information: deb
+    Bundling peak_0.1.0_amd64.deb (/mnt/HC_Volume_107248377/.peak-sysroot/clean-start/src-tauri/target/release/bundle/deb/peak_0.1.0_amd64.d
+    Finished 1 bundle at:
+exit=0
+5696754 src-tauri/target/release/bundle/deb/peak_0.1.0_amd64.deb
+12153720 usr/bin/peak
+$ <unpacked deb>/usr/bin/peak collector
+x86_64: /mnt/HC_Volume_107248377/.peak-sysroot/deb.HZIs/xdg/peak/collectors/x86_64-f619970e99887da8/peak-collector (0.1.0 protocol 1)
+exit=0
+ended 2026-11-06T10:16:23Z
+started 2026-11-06T10:16:41Z
+binary: usr/bin/peak from the unpacked .deb. Collector argument: - (none supplied). No k3s; Docker step only.
+ok   real Docker daemon through the UI: totals, logs, collector, attach
+ALL OK
+exit=0
+ended 2026-11-06T10:17:17Z

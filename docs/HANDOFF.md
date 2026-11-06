@@ -5,7 +5,7 @@ to a process, locally or on another machine or container, and watch memory, CPU,
 live. Tauri 2 + React 19 + shadcn/ui + recharts + motion, Rust backend, Linux first (`/proc`). The UI
 follows `DESIGN.md` (monochrome, pill controls), plus semantic colour for status and a dark mode.
 
-Work is uncommitted in the checkout unless `git log` says otherwise. Progress and evidence:
+The original delivery is `dfa4dd3` on `origin/master`; `git log` has the current state. Progress and evidence:
 [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md). Acceptance criteria: [`ACCEPTANCE.md`](ACCEPTANCE.md).
 Remote evidence and open gaps: [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md).
 
@@ -41,7 +41,9 @@ src-tauri/                    workspace root; package `peak` is the desktop app
     protocol.rs               collector protocol v1: requests, frames, facts
     collector.rs              one collector session over stdio; the disconnect contract
   peak-collector/             the headless binary: `serve`, `probe`, `version`
+  build.rs                    builds the static collector and embeds it in the app
   src/
+    bundled.rs                unpacks the embedded collector for transports to copy
     db.rs                     SQLite schema, history, retention, settings, targets
     remote.rs                 targets, sessions, reconnect, dedupe, gaps, routing
     transport.rs              ssh/docker/kubectl commands, collector install, discovery parsers
@@ -98,6 +100,8 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **WebKitGTK hard-codes helper paths,** so the desktop window can't run from a rootless extraction. Use the container in `scripts/e2e/desktop/`.
 - **k3s evicts below 5% free disk,** and this machine's Docker disk is near that. New pods then stay Pending. The disposable clusters relax the threshold.
 - **`import sitecustomize` isn't reliable in tests.** Python imports that name at startup, and Ubuntu's Python ships its own. The agent tests load it by path.
+- **The collector is built by a nested cargo in `build.rs`.** It clears the outer build's settings, because coverage works through `RUSTC_WRAPPER`, which would otherwise break it. It builds into `target/embedded-collector`. Without CI's `PEAK_REQUIRE_COLLECTOR=1`, a debug build that can't embed one only warns, and its embedded-collector tests are compiled out.
+- **Targets aren't re-copied within a version.** The readiness check compares collector version and protocol, so while changing the collector without bumping them, a target keeps its old copy until that file is removed.
 - **`rustfmt` reshapes code,** so scripted edits can silently miss. Check they applied.
 - **The notification plugin can't report delivery on Linux:** permission is always "granted" and errors are discarded.
 - **A drag across too little data is neither a zoom nor a click.** `useTimelineChart` checks how far the pointer moved.
@@ -108,7 +112,7 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 bun install
 bun run tauri dev            # desktop app (or: task dev)
 bun run dev                  # browser + mock monitor at http://localhost:1420
-task collector:build         # static collector where the debug app looks for it
+src-tauri/target/debug/peak collector   # which collector this build copies to targets
 
 bun run typecheck
 bun run test:coverage        # frontend (100% enforced)
@@ -129,5 +133,5 @@ All eleven planned steps are implemented and pass the checks in `scripts/verify-
 what this machine could validate:
 
 1. Close the live gaps in [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md), starting with SSH to a real second machine.
-2. Package the collector with installers, and build arm64.
+2. Build and validate arm64. The collector already travels inside the app binary, including in installers.
 3. Consider running `live_ssh` and `live_docker` in CI. They aren't in CI today.
