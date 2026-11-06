@@ -1,0 +1,7 @@
+# commit 676efdc Update proof / Upgrade through the real buttons (windows): failure. job 128186232413
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+PROBLEMS: 1
+Error: session not created: session not created: DevToolsActivePort file doesn't exist
+##[error]Process completed with exit code 1.

@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 22:12 UTC
-- **State:** first packaged release **in progress**. On `03f6ccf`, production packages for all four targets build, sign and pass native install, GUI, CLI and sampling smoke tests. Real signed upgrades pass on Linux and both Macs. **The Windows upgrade still fails, cause unknown.** Fixes and diagnostics are uncommitted, waiting on a push.
+- **Last update:** 2026-11-06 22:46 UTC
+- **State:** first packaged release **in progress**. On `676efdc`: production packages, independent signatures, native tests and the Tests gates all pass. **The Windows upgrade cause is found and fixed in the uncommitted tree, not yet proven.** Nothing is running in the background.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -20,6 +20,24 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 2. **Native CI needs another round.** See "Next action".
 3. **OS trust isn't set up.** Without Apple Developer ID and notarization, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Whether to buy these or ship with the warnings is the user's call; the release works either way, and `docs/RELEASING.md` says exactly how.
 
+**Third native CI, on `676efdc`** (Update proof 42303290111, Release 42303290122, Tests 42303290139; summaries in `docs/evidence/release/ci-676efdc/`):
+
+| Job | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Production package, independent signature, install, app, separate CLI, real samples | **Pass** | **Pass, signature truly checked** | **Pass** | **Pass** |
+| Real signed upgrade | **Pass** | **Fail, cause below** | **Pass** | **Pass** |
+| Failure cases in that proof | **Pass** | **Pass** | **Pass** | **Pass** |
+| Upgrade through real buttons | **Pass** | **Fail, driver below** | Not possible | Not possible |
+| Native core tests | Covered by **Tests** | **Pass** | **Pass** | **Pass** |
+
+**Tests** passes: backend gate at the unchanged 99%, frontend gate at 100%, and both agent versions. Note on the backend figure: the gate passed over the whole workspace, but the report step printed 98.98% because it only covered the root package, leaving out `peak-core`. CI's own coverage file works out at 99.47% across both, by a different line count than the gate's. The step now prints the gate's own figure.
+
+**Windows upgrade: cause established from the app's own error.** "The update was signed for version 9.0.0 but the update endpoint announced version 9.0.1." `scripts/release/collect.mjs` took the first installer in the bundle folder, which keeps earlier versions. On Windows that listed 9.0.0 first, so 9.0.0 was copied under the 9.0.1 name. **Peak's updater was right to refuse it**; the fault was the test build's packaging. It was also a release risk, had a bundle folder ever kept an old version. The script now only takes the file for this version, and fails unless the signature says that version. Tested locally on a fake folder holding both versions, with a stale-only folder and a mismatched signature: both refuse. The earlier `187f415` timeout probably had this cause, though that run's error wasn't captured. **The installer-lock theory remains unproven either way;** the next run exercises it, since a `peak-cli` workload is running during the upgrade.
+
+**Windows buttons:** `msedgedriver` couldn't attach ("DevToolsActivePort file doesn't exist"). `update-ui.mjs` now drives the real window on Windows through WebView2's debugging protocol, enabled only for that test by an environment variable. Same page, same button clicks, no driver. Unproven until it runs.
+
+Only the release scripts, the test harness, the workflows and docs changed after `676efdc`, so the app under test is unchanged, and the local gate logs stand.
+
 **Second native CI, on `03f6ccf`** (Update proof 42298320417, Release 42298320510, Tests 42298320480; summaries in `docs/evidence/release/ci-03f6ccf/`, screenshots in `screens/`):
 
 | Job | Linux | Windows | macOS arm64 | macOS x64 |
@@ -32,7 +50,7 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 I looked at the smoke screenshots: Windows and both Macs show the real UI with a real memory curve, thread count and exit status from a run started by a separate CLI process.
 
-**Windows upgrade: what's now known.** My installer-lock theory is **not supported**. In the timed-out run the app had made 98 feed requests and 97 downloads, was still running at 9.0.0, and no `peak-cli.old.*` file existed. So the installer never ran, and the failure comes after the download starts and before the installer launches. The renaming hook stays, because it's still right for a running `peak-cli`, but it's unproven. The signature is good: the same-format production artifact verifies here. The app's error wasn't visible, so proof builds now record it in their own history, and the harness prints it on timeout. The next run should name the cause.
+**Windows upgrade, as known at that point.** My installer-lock theory is **not supported**. In the timed-out run the app had made 98 feed requests and 97 downloads, was still running at 9.0.0, and no `peak-cli.old.*` file existed. So the installer never ran, and the failure comes after the download starts and before the installer launches. The renaming hook stays, because it's still right for a running `peak-cli`, but it's unproven. The signature is good: the same-format production artifact verifies here. The app's error wasn't visible, so proof builds now record it in their own history, and the harness prints it on timeout. The next run should name the cause.
 
 **Other failures and fixes, uncommitted, Linux-tested only:**
 - **Backend gate failed on CI** though it passed locally at 99.02%; the CI figure was hidden because the report step was skipped. Added tests, including that settings saved by an older version keep their values, so it's now **99.21%** locally, and the report always prints.
@@ -433,8 +451,8 @@ checkout; nothing was lost. No further limit since.
 ## Next action
 
 **PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-03f6ccf/`, `docs/evidence/release/screens/`, `public/peak.svg` and `src-tauri/icons/`.
-2. Send me back here. I'll read what the Windows run says went wrong and fix it.
+1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-676efdc/`.
+2. Send me back here. Nothing of mine is running or waiting until then.
 
 **Still needed from the user, without blocking CI:** where to publish (public source or a public releases-only repository; the update URL is compiled in, so before the first tag), and whether to buy OS trust.
 

@@ -84,7 +84,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev build-essential xvfb libfuse2 webkit2gtk-driver
       - run: bun install --frozen-lockfile
-      - run: cargo install tauri-driver --locked
+      - name: WebDriver bridge
+        if: matrix.platform == 'linux'
+        run: cargo install tauri-driver --locked
       - name: Drive the update
         shell: bash
         env:
@@ -95,12 +97,7 @@ jobs:
           if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
             WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/update-ui.mjs ui-output
           else
-            # The driver has to match the runner's WebView2 exactly, and the image doesn't ship it.
-            WV=$(powershell -NoProfile -Command "(Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}').pv" | tr -d '\r')
-            echo "WebView2 $WV"
-            curl -fsSL -o edgedriver.zip "https://msedgedriver.microsoft.com/$WV/edgedriver_win64.zip"
-            powershell -NoProfile -Command "Expand-Archive edgedriver.zip -DestinationPath edgedriver -Force"
-            PEAK_NATIVE_DRIVER="$(cygpath -w "$PWD/edgedriver/msedgedriver.exe")" node scripts/e2e/desktop/update-ui.mjs ui-output
+            node scripts/e2e/desktop/update-ui.mjs ui-output
           fi
       - uses: actions/upload-artifact@v4
         if: always()

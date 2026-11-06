@@ -5,7 +5,7 @@
 import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { createServer } from "node:http"
-import { IS_WINDOWS, PLATFORM, closeApps, dataDir, install, join, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
+import { IS_WINDOWS, PLATFORM, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, paths, pidAlive, readFileSync, sleep, tmpdir, waitFor, writeFileSync } from "../smoke/lib.mjs"
 import { buildPair } from "../smoke/build-pair.mjs"
 import { DatabaseSync } from "node:sqlite"
 
@@ -18,7 +18,10 @@ const work = mkdtempSync(join(tmpdir(), "peak-ui-"))
 const { baseDir, artifactName, artifactBytes, goodSig, key } = buildPair({ work, BASE, NEXT, PORT, autoUpdate: false })
 const problems = []
 const DRIVER = "http://127.0.0.1:4444"
+const CDP_PORT = 9223
 let session = null
+let cdp = null
+let cdpId = 0
 
 async function wd(method, path, body) {
   const url = path.startsWith("/session") || path === "/status" ? `${DRIVER}${path}` : `${DRIVER}/session/${session}${path}`
@@ -27,7 +30,29 @@ async function wd(method, path, body) {
   if (json.value?.error) throw new Error(`${json.value.error}: ${json.value.message}`)
   return json.value
 }
-const js = (script, args = []) => wd("POST", "/execute/sync", { script, args })
+
+/** On Windows the window is driven through WebView2's own debugging protocol. */
+function cdpCall(method, params = {}) {
+  return new Promise((resolve, reject) => {
+    const id = ++cdpId
+    const onMessage = (e) => {
+      const m = JSON.parse(e.data)
+      if (m.id !== id) return
+      cdp.removeEventListener("message", onMessage)
+      if (m.error) reject(new Error(m.error.message))
+      else resolve(m.result)
+    }
+    cdp.addEventListener("message", onMessage)
+    cdp.send(JSON.stringify({ id, method, params }))
+    setTimeout(() => reject(new Error(`${method} got no answer`)), 20_000)
+  })
+}
+async function evaluate(script, args) {
+  const r = await cdpCall("Runtime.evaluate", { expression: `(function () { ${script} }).apply(null, ${JSON.stringify(args)})`, returnByValue: true })
+  if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? r.exceptionDetails.text)
+  return r.result.value
+}
+const js = (script, args = []) => (IS_WINDOWS ? evaluate(script, args) : wd("POST", "/execute/sync", { script, args }))
 const text = () => js("return document.body.innerText")
 async function see(pattern, ms = 15000) {
   const end = Date.now() + ms
@@ -46,11 +71,36 @@ async function click(pattern, ms = 10000) {
   }
   throw new Error(`nothing to click for /${pattern}/`)
 }
-const shot = async (name) => writeFileSync(join(out, `${name}.png`), Buffer.from(await wd("GET", "/screenshot"), "base64"))
+const shot = async (name) => {
+  const b64 = IS_WINDOWS ? (await cdpCall("Page.captureScreenshot")).data : await wd("GET", "/screenshot")
+  writeFileSync(join(out, `${name}.png`), Buffer.from(b64, "base64"))
+}
 async function open() {
-  const v = await wd("POST", "/session", { capabilities: { alwaysMatch: { browserName: "wry", "tauri:options": { application: paths().gui } } } })
-  session = v.sessionId
+  if (IS_WINDOWS) {
+    launch({ WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${CDP_PORT}` })
+    const target = await waitFor("the window's debugging port", async () => {
+      const pages = await fetch(`http://127.0.0.1:${CDP_PORT}/json`).then((r) => r.json()).catch(() => [])
+      return pages.find((p) => p.type === "page")
+    }, 60_000)
+    cdp = new WebSocket(target.webSocketDebuggerUrl)
+    await new Promise((res, rej) => {
+      cdp.addEventListener("open", res, { once: true })
+      cdp.addEventListener("error", rej, { once: true })
+    })
+  } else {
+    const v = await wd("POST", "/session", { capabilities: { alwaysMatch: { browserName: "wry", "tauri:options": { application: paths().gui } } } })
+    session = v.sessionId
+  }
   await see(/peak\./, 30000)
+}
+/** Stop driving, and close whichever app is open. */
+async function endSession() {
+  if (IS_WINDOWS) cdp?.close()
+  else await wd("DELETE", "").catch(() => {})
+  session = null
+  cdp = null
+  closeApps()
+  await sleep(2500)
 }
 async function step(name, fn) {
   try {
@@ -90,8 +140,8 @@ const server = createServer((req, res) => {
 const serve = () => new Promise((r) => server.listen(PORT, "127.0.0.1", r))
 const hash = () => createHash("sha256").update(readFileSync(paths().gui)).digest("hex")
 
-const driver = spawn(process.env.PEAK_TAURI_DRIVER, ["--native-driver", IS_WINDOWS ? process.env.PEAK_NATIVE_DRIVER : "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })
-for (let i = 0; i < 100; i++) {
+const driver = IS_WINDOWS ? null : spawn(process.env.PEAK_TAURI_DRIVER, ["--native-driver", "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })
+for (let i = 0; driver && i < 100; i++) {
   try {
     await wd("GET", "/status")
     break
@@ -135,9 +185,7 @@ try {
     if (hash() !== before) throw new Error("the install changed")
     if (!liveApps().length) throw new Error("the app went away")
   })
-  await wd("DELETE", "").catch(() => {})
-  session = null
-  await sleep(1500)
+  await endSession()
 
   await step("a new release is found by itself and nothing downloads until asked", async () => {
     mode = "good"
@@ -201,10 +249,7 @@ try {
     const fresh = await waitFor("the new app", () => liveApps().find((i) => i.pid !== oldPid), 60_000)
     await waitFor("the old app to go", () => !pidAlive(oldPid), 20_000)
     await sleep(3000)
-    await wd("DELETE", "").catch(() => {})
-    session = null
-    closeApps()
-    await sleep(2000)
+    await endSession()
     return `${oldPid} -> ${fresh.pid}`
   })
   await step("reopened: new version, with history and settings", async () => {
@@ -228,9 +273,8 @@ try {
 } catch (e) {
   problems.push(String(e))
 } finally {
-  await wd("DELETE", "").catch(() => {})
-  driver.kill()
-  closeApps()
+  await endSession()
+  driver?.kill()
   server.closeAllConnections?.()
   server.close()
 }

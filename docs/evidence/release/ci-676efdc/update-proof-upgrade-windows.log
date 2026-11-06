@@ -1,0 +1,29 @@
+# commit 676efdc Update proof / Upgrade (windows): failure. job 128186232237
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+ok   the base version is installed peak 9.0.0 (Windows installer, commit 676efdc8ba6798bb751641b5bc77d117bc1a6551)
+ok   a run recorded before the update history-1794004581668-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 3, artifact 0
+ok   malformed: nothing installed, app alive feed 3, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 7, artifact 6
+ok   truncated: nothing installed, app alive feed 6, artifact 5
+ok   tampered: nothing installed, app alive feed 7, artifact 6
+ok   wrong-key: nothing installed, app alive feed 7, artifact 6
+feed 99, artifact 98; old app alive: true; records: [6816]
+peak 9.0.0 (Windows installer, commit 676efdc8ba6798bb751641b5bc77d117bc1a6551)
+what the app said went wrong:
+{"during":"check","message":"error sending request for url (http://127.0.0.1:18765/latest.json)"}
+{"during":"check","message":"Could not fetch a valid release JSON from the remote"}
+{"during":"check","message":"error decoding response body for url (http://127.0.0.1:18765/latest.json)"}
+{"during":"install","message":"`Download request failed with status: 404 Not Found`"}
+{"during":"install","message":"error decoding response body"}
+{"during":"install","message":"The download failed its signature check, so nothing was installed. (The signature verification failed)"}
+{"during":"install","message":"The download failed its signature check, so nothing was installed. (The signature was created with a different key than the one provided)"}
+{"during":"install","message":"The update was signed for version 9.0.0 but the update endpoint announced version 9.0.1. The endpoint response may have been tampered with to force installing a different release."}
+  throw new Error(`timed out waiting for ${what}`)
+Error: timed out waiting for the updated app to relaunch
+##[error]Process completed with exit code 1.

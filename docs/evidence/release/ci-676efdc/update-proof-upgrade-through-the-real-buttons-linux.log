@@ -1,0 +1,15 @@
+# commit 676efdc Update proof / Upgrade through the real buttons (linux): success. job 128186231727
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  PEAK_SMOKE_PLATFORM: linux
+  PEAK_PROOF_TARGET: x86_64-unknown-linux-gnu
+ok   offline, a check says so in Settings and nothing interrupts 
+ok   no newer release: says it's the latest 
+ok   a tampered download is refused, with the reason, and the app carries on 
+ok   a new release is found by itself and nothing downloads until asked 
+ok   settings saved before the update 
+ok   a command captured in the app, to see a restart treat it fairly 
+ok   download shows progress, verifies, installs, and then waits 
+ok   a restart names what it would stop, and can be declined 
+ok   restart: the old app exits and the new version comes up 10905 -> 10984
+ok   reopened: new version, with history and settings 
+ALL OK (linux)

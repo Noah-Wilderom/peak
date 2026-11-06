@@ -65,7 +65,7 @@ jobs:
       - run: cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
       # Even when the gate fails, say by how much.
       - if: always()
-        run: cargo llvm-cov report --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --summary-only
+        run: cargo llvm-cov --workspace --no-run --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --summary-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:

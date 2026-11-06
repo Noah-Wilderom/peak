@@ -33,17 +33,17 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 |---|---|---|---|---|
 | Package builds and signs | CI | CI | CI | CI |
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
-| Updater signature checked independently | CI | By hand on the artifact; the CI step was skipping itself | CI | CI |
-| Two-version signed update (`update-proof.mjs`) | CI | **Fails** | CI | CI |
+| Updater signature checked independently | CI | CI | CI | CI |
+| Two-version signed update (`update-proof.mjs`) | CI | **Not yet: fix awaiting a run** | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | CI | **Not yet** | Not possible: no WebDriver for macOS webviews | Not possible |
-| Native tests (`tests/platform.rs`, `native.rs`) | Local, without `native.rs` | **One failure** | CI | **One failure** |
+| Update through real buttons (`update-ui.mjs`) | CI | **Not yet: fix awaiting a run** | Not possible: no WebDriver for macOS webviews | Not possible |
+| Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
 | Remote targets from this OS | Yes, earlier live suites | **Not run** | **Not run** | **Not run** |
 | OS code signing and notarization | Not applicable | **None configured** | **Ad-hoc only** | **Ad-hoc only** |
 
-"CI" means a native GitHub runner on `03f6ccf`. Every later commit needs them again.
+"CI" means a native GitHub runner on `676efdc`. Every later commit needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/` and `ci-03f6ccf/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/` and `ci-676efdc/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux Docker daemon for a collector to reach. They need a real machine.
 
 ## Secrets
 

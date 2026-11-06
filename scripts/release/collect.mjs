@@ -10,16 +10,25 @@ const [bundle, out, platform] = process.argv.slice(2)
 const version = JSON.parse(readFileSync(new URL("../../src-tauri/tauri.conf.json", import.meta.url))).version
 mkdirSync(out, { recursive: true })
 
+// A bundle folder keeps earlier versions, and which comes first depends on the filesystem. So a
+// file naming a version must name this one. Only the macOS update archive names none.
 const find = (dir, re) => {
   const d = join(bundle, dir)
-  const hit = existsSync(d) && readdirSync(d).find((f) => re.test(f) && !f.endsWith(".sig"))
-  if (!hit) throw new Error(`no ${re} in ${d}`)
+  const hits = existsSync(d) ? readdirSync(d).filter((f) => re.test(f) && !f.endsWith(".sig")) : []
+  const hit = hits.find((f) => f.includes(`_${version}_`)) ?? hits.find((f) => !/_\d+\.\d+\.\d+_/.test(f))
+  if (!hit) throw new Error(`no ${re} for ${version} in ${d}: ${hits.join(", ") || "nothing"}`)
   return join(d, hit)
+}
+/** What's signed says which version it is, and that has to be this one. */
+const checkSignedVersion = (sigFile) => {
+  const text = Buffer.from(readFileSync(sigFile, "utf8").trim(), "base64").toString("utf8")
+  if (!text.includes(`version:${version}`)) throw new Error(`${sigFile} isn't signed for ${version}: ${text.split("\n")[2]}`)
 }
 const copy = (from, name, signed) => {
   copyFileSync(from, join(out, name))
   if (signed) {
     if (!existsSync(`${from}.sig`)) throw new Error(`no signature for ${from}`)
+    checkSignedVersion(`${from}.sig`)
     copyFileSync(`${from}.sig`, join(out, `${name}.sig`))
   }
 }
