@@ -4,13 +4,30 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `b72de3f`: smoke and signatures pass on all four targets. Linux and Windows press `v0.1.0`'s real buttons. macOS can't be driven yet, in either proof, and Linux's window proof has 5 harness failures. Fixes are in the working tree, awaiting a native run.** Not ready to tag. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
+- **State:** **`v0.1.1` candidate `6c5166c`: all four targets press the real `v0.1.0`'s buttons, and signatures and smoke pass on production packages. The window proof passes only on Windows. Linux and macOS have harness fixes awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Fourth native run: `6c5166c`
+
+**Update proof 42349363906 and Tests 42349363900 passed.** Release 42349363901 failed. Raw results: `docs/evidence/release/ci-candidate-6c5166c/`.
+
+| Check | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| The unmodified published `v0.1.0`: Settings, Check for updates, its answer | **Pass** | **Pass** | **Pass** | **Pass** |
+| Signatures and smoke, on production packages | Pass | Pass | Pass | Pass |
+| Window proof | Stopped by a harness error | **Pass, 132 checks, 0 unobserved** | 105 of 152 fail, 4 unobserved | 94 of 152 fail, 3 unobserved |
+
+- **The buttons of the real `v0.1.0` can be pressed on all four targets**, on Linux by WebDriver, on Windows by UI Automation, on macOS by reading the screen and clicking, since its accessibility tree stays empty.
+- **Windows** shows the corrected PHP report, no `pecl`, the Go allocation wording, and the non-selected-run behaviour.
+- **macOS's failures are in the harness, as far as this run shows.** Reading now works, and scrolling does natively: a capture shows the page moved. But pressing required a control to report itself enabled, which reading a screen can't do, so nothing was pressed. Scrolling also stayed down, which hid the identity card from later checks. **Unobserved so far:** every macOS button action, CPU and heap results in its window, Capture, History search and reopening.
+- **Linux** stopped on an uncaught "element click intercepted", most likely a notification over the control. It now waits that out.
+
+Local check, the real `drive.mjs` on this run's macOS captures with stand-ins for the OS tools: it finds and clicks the grey disabled "Record 5s" at the right place, and reads "No CPU profiles." and PHP's reason.
 
 ### Third native run: `b72de3f`
 
@@ -112,7 +129,7 @@ Update proof 42333866409, Release 42333866414, Tests 42333866424, **all failed**
 | Live heap | `process.memoryUsage` | `memory_get_usage` | No | `MemStats` |
 | Collections | **No:** Bun publishes none, and none are invented | Pause from `gc_status` on 8.3+. Freed bytes marked not reported, never zero | Counts, once, at exit | Pause. Freed is estimated, and says so |
 | Delay | Timer drift | **No:** no loop | No | `/sched/latencies` |
-| CPU | JavaScriptCore, by inspector | Excimer: on-CPU on Linux, elapsed elsewhere | **No**, with `pecl install excimer` shown | `runtime/pprof` |
+| CPU | JavaScriptCore, by inspector, Bun 1.3.7+ | Excimer: on-CPU on Linux, elapsed on macOS | **No.** Linux and macOS show `pecl install excimer`. Windows says it has no build, and to use Linux or macOS | `runtime/pprof` |
 | Snapshot | By type. No allocation stacks | **No:** nothing can list PHP's memory | No | Allocation sites by function, scaled |
 
 Shared by all of them:
@@ -157,7 +174,7 @@ That's a project of its own. Nothing in this release claims it, and the README s
 
 ### `v0.1.0` to `v0.1.1`
 
-`public-delivery.yml` gets a new job, `upgrade`, and `scripts/e2e/smoke/release-upgrade.mjs`: the real `v0.1.0` from its public URLs, unmodified, with its own feed check and its own buttons, on all four targets. Then history, settings, the running workload and all the new agents are checked. A release has no debug port, so `drive.mjs` presses buttons with UI Automation on Windows, the accessibility API on macOS and by reading the screen on Linux. **Whether the macOS runner allows that isn't known.** `upgrade-rehearsal` in `update-proof.yml` finds out before publishing, by pressing Settings and Check for updates in `v0.1.0`.
+`public-delivery.yml` gets a new job, `upgrade`, and `scripts/e2e/smoke/release-upgrade.mjs`: the real `v0.1.0` from its public URLs, unmodified, with its own feed check and its own buttons, on all four targets. Then history, settings, the running workload and all the new agents are checked. A release has no debug port, so `drive.mjs` presses buttons with WebDriver on Linux, UI Automation on Windows, and on macOS by reading the screen and clicking, since the runner's accessibility tree comes back empty. `upgrade-rehearsal` in `update-proof.yml` finds out before publishing, by pressing Settings and Check for updates in `v0.1.0`.
 
 The existing 0.0.9 proof stays, for the candidate. It doesn't count for the release-to-release claim.
 

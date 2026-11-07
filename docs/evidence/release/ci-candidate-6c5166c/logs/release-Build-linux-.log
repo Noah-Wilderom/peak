@@ -1,0 +1,353 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go,php-excimer
+  DEBIAN_FRONTEND: noninteractive
+Installed: peak 0.1.1 (AppImage, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)
+History and settings are untouched. Run 'peak' to open the app.
+(node:8033) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (AppImage, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)
+collector: x86_64: /home/runner/.local/share/peak/collectors/x86_64-2e8f665fb64e3930/peak-collector (0.1.1 protocol 1) 
+ok   names its bundled collector x86_64: /home/runner/.local/share/peak/collectors/x86_64-2e8f665fb64e3930/peak-collector (0.1.1 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmlby3q for runner — running without monitoring
+app pid 8177
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place azLOxA
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794035094694-err
+ok   the app recorded real samples and the exit samples 9, max rss 131522560, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2015 ms sampled in 2015 ms, top: busyWork 1523, (idle) 409, (garbage collector) 37, post 14, listOnTimeout 10, processTimers 5: 
+ok   node: says how it sampled v8
+ok   node: sampled time fits within the recording 2015 ms sampled in 2015 ms
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 34 of 36
+ok   node: live heap reached the samples 
+ok   node: collections are stored 1239
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.16, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2000 ms sampled in 2000 ms, top: busy_work 1527, <module> 473, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: sampled time fits within the recording 2000 ms sampled in 2000 ms
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 35 of 38
+ok   python: collections are stored 27
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2002 ms sampled in 2006 ms, top: busyWork 2000, repeat 1, (anonymous) 0, (root) 0, processTicksAndRejections 0, (program) 0: 
+ok   bun: says how it sampled jsc
+ok   bun: sampled time fits within the recording 2002 ms sampled in 2006 ms
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (string): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":82525,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2348489,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 34 of 36
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-cpu, 2000 ms sampled in 2000 ms, top: busy_work 2000, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-cpu
+ok   php: sampled time fits within the recording 2000 ms sampled in 2000 ms
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":609816,"unit":"bytes"},{"name":"Peak memory","value":1203216,"unit":"bytes"},{"name":"Collector runs","value":1713,"unit":"count"},{"name":"Values collected","value":17119956,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1713
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: its advice is possible on this OS Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":598904,"unit":"bytes"},{"name":"Peak memory","value":1175440,"unit":"bytes"},{"name":"Collector runs","value":768,"unit":"count"},{"name":"Values collected","value":7680000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1760 ms sampled in 2003 ms, top: time.runtimeNow 1520, time.Now 50, time.now 40, time.now 20, time.runtimeNow 10, time.runtimeNow 10: 
+ok   go: says how it sampled pprof
+ok   go: sampled time is plausible for this many threads 1760 ms sampled in 2003 ms on 4 CPUs
+ok   go: heap snapshot holds what the program allocated 6 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.04100866895244207,"unit":"percent"},{"name":"Live objects","value":793451,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 35 of 37
+ok   go: live heap reached the samples 
+ok   go: collections are stored 9
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+sudo apt-get install -y --no-install-recommends webkit2gtk-driver
+cargo install tauri-driver --locked
+shell: /usr/bin/bash -e {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /home/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following NEW packages will be installed:
+  webkit2gtk-driver
+0 upgraded, 1 newly installed, 0 to remove and 34 not upgraded.
+Need to get 468 kB of archives.
+After this operation, 1565 kB of additional disk space will be used.
+Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Get:2 http://azure.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 webkit2gtk-driver amd64 2.50.4-0ubuntu0.22.04.1 [468 kB]
+Fetched 468 kB in 0s (1240 kB/s)
+Selecting previously unselected package webkit2gtk-driver.
+(Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 267159 files and directories currently installed.)
+Preparing to unpack .../webkit2gtk-driver_2.50.4-0ubuntu0.22.04.1_amd64.deb ...
+Unpacking webkit2gtk-driver (2.50.4-0ubuntu0.22.04.1) ...
+Setting up webkit2gtk-driver (2.50.4-0ubuntu0.22.04.1) ...
+
+Running kernel seems to be up-to-date.
+
+Services to be restarted:
+ systemctl restart irqbalance.service
+ systemctl restart multipathd.service
+ systemctl restart packagekit.service
+ systemctl restart php8.1-fpm.service
+ systemctl restart polkit.service
+ systemctl restart rsyslog.service
+ systemctl restart ssh.service
+ systemctl restart systemd-journald.service
+ /etc/needrestart/restart.d/systemd-manager
+ systemctl restart systemd-networkd.service
+ systemctl restart systemd-resolved.service
+ systemctl restart systemd-udevd.service
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart docker.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart systemd-logind.service
+ systemctl restart user@1001.service
+ systemctl restart walinuxagent.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded tauri-driver v2.1.0
+     Ignored package `tauri-driver v2.1.0` is already installed, use --force to override
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /home/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+  PEAK_SMOKE_PLATFORM: linux
+Replacing /home/runner/.local/bin/peak: peak 0.1.1 (AppImage, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)
+Installed: peak 0.1.1 (AppImage, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)
+History and settings are untouched. Run 'peak' to open the app.
+(node:10680) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+(peak:10782): dbind-WARNING **: 07:07:17.237: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+ok   node: connected 
+ok   node: the window names the runtime and its version 
+ok   node: and the agent's version 
+ok   node: and that it's connected 
+ok   node: Record 5s can be pressed 
+ok   node: shows it's recording 
+ok   node: the profile appears, with its length 
+ok   node: explained by how it was measured /Sampled by V8/
+ok   node: Take snapshot can be pressed 
+ok   node: the snapshot appears 
+ok   node: and shows what the program holds /SmokeThing/
+ok   node: Collect garbage can be pressed 
+ok   node: a profile from the terminal appears in the window  3572
+ok   node: the program's exit code is its own exit 0: 
+ok   node: after it ends, the window says the agent has gone 
+ok   node: the buttons' results are in history cpu 2, snapshots 1
+ok   python: connected 
+ok   python: the window names the runtime and its version 
+ok   python: and the agent's version 
+ok   python: and that it's connected 
+ok   python: says why there's no live heap /no cheap total/
+ok   python: Record 5s can be pressed 
+ok   python: shows it's recording 
+ok   python: the profile appears, with its length 
+ok   python: explained by how it was measured /Python stack sampled/
+ok   python: Take snapshot can be pressed 
+ok   python: the snapshot appears 
+ok   python: and shows what the program holds /SmokeThing/
+ok   python: Collect garbage can be pressed 
+ok   python: a profile from the terminal appears in the window  3753
+file:///home/runner/work/peak/peak/scripts/e2e/smoke/drive.mjs:194
+  if (json.value?.error) throw new Error(`${json.value.error}: ${json.value.message}`)
+                               ^
+
+Error: element click intercepted: 
+    at wd (file:///home/runner/work/peak/peak/scripts/e2e/smoke/drive.mjs:194:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async linuxPress (file:///home/runner/work/peak/peak/scripts/e2e/smoke/drive.mjs:209:3)
+    at async pressMatching (file:///home/runner/work/peak/peak/scripts/e2e/desktop/agents-ui.mjs:50:17)
+    at async runtimeInWindow (file:///home/runner/work/peak/peak/scripts/e2e/desktop/agents-ui.mjs:151:5)
+    at async file:///home/runner/work/peak/peak/scripts/e2e/desktop/agents-ui.mjs:172:1
+
+Node.js v22.23.4
+with:
+  name: smoke-linux
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /home/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+(node:11353) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 17 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:11353) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 1801852
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is c19e2454d2a161524234e13c9ffac78980dfef0db4e87c6cd1eebc0070f90115
+Finalizing artifact upload
+Artifact smoke-linux.zip successfully finalized. Artifact ID 13565580604
+Artifact smoke-linux has been successfully uploaded! Final size is 1801852 bytes. Artifact ID is 13565580604
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42349363901/artifacts/13565580604
+Post job cleanup.
+Post job cleanup.
+[command]/usr/bin/git version
+git version 2.56.0
+Temporarily overriding HOME='/home/runner/work/_temp/b5db3dd7-098b-4f08-8f47-f90a8e38135e' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/runner/work/peak/peak
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes
+Terminate orphan process: pid (10778) (tauri-driver)
+Terminate orphan process: pid (10779) (WebKitWebDriver)
+Terminate orphan process: pid (11226) (peak)
+Terminate orphan process: pid (11233) (peak)
+Terminate orphan process: pid (11262) (sh)
+Terminate orphan process: pid (11263) (python3)

@@ -1,0 +1,569 @@
+{
+  "the installed copy says what it is": {
+    "ok": true,
+    "detail": "peak 0.1.1 (Windows installer, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)"
+  },
+  "names its bundled collector": {
+    "ok": true,
+    "detail": "x86_64: C:\\Users\\runneradmin\\AppData\\Local\\peak\\collectors\\x86_64-dfb0e5856d9b9a52\\peak-collector (for Linux targets)"
+  },
+  "with no app open, the command still runs and says why": {
+    "ok": true,
+    "detail": "peak: the app isn't running on runnervmm7ud1 for runneradmin — running without monitoring"
+  },
+  "the app stays open": {
+    "ok": true
+  },
+  "commands don't inherit the app's own environment": {
+    "ok": true,
+    "detail": "clean"
+  },
+  "commands run where the CLI was started": {
+    "ok": true,
+    "detail": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\peak place yaaPSu"
+  },
+  "output and exit code in the terminal": {
+    "ok": true,
+    "detail": "exit 7"
+  },
+  "monitored by the open app": {
+    "ok": true,
+    "detail": "smoke-1794035122785-err"
+  },
+  "the app recorded real samples and the exit": {
+    "ok": true,
+    "detail": "samples 9, max rss 121507840, exit 7"
+  },
+  "the Node agent reported from inside the program": {
+    "ok": true,
+    "detail": "lag samples 7"
+  },
+  "node: identity": {
+    "ok": true,
+    "detail": {
+      "agentVersion": "0.1.1",
+      "capabilities": [
+        "heap",
+        "gc",
+        "lag",
+        "cpu",
+        "snapshot",
+        "forcegc"
+      ],
+      "gauges": [],
+      "notes": {
+        "cpu": "V8's sampling profiler. Time waiting on the event loop shows as (idle).",
+        "freed": "Change in used heap across the collection.",
+        "lag": "Event-loop delay, p99"
+      },
+      "runtimeVersion": "22.23.4",
+      "unavailable": {}
+    }
+  },
+  "node: identifies its runtime and agent": {
+    "ok": true,
+    "detail": "node 22.23.4, agent 0.1.1"
+  },
+  "node: offers heap": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: offers gc": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: offers lag": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: offers cpu": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: offers snapshot": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: offers forcegc": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "node: CPU profile holds the program's own function, in milliseconds": {
+    "ok": true,
+    "detail": "v8, 2092 ms sampled in 2093 ms, top: busyWork 1545, (idle) 389, post 82, (garbage collector) 27, (program) 22, writeUtf8String 7: "
+  },
+  "node: says how it sampled": {
+    "ok": true,
+    "detail": "v8"
+  },
+  "node: sampled time fits within the recording": {
+    "ok": true,
+    "detail": "2092 ms sampled in 2093 ms"
+  },
+  "node: heap snapshot holds what the program allocated": {
+    "ok": true,
+    "detail": "60 entries, top (compiled code): "
+  },
+  "node: forces a collection": {
+    "ok": true,
+    "detail": ""
+  },
+  "node: the app opens its profiler": {
+    "ok": true,
+    "detail": ""
+  },
+  "node: the program's exit code is its own": {
+    "ok": true,
+    "detail": "exit 0: "
+  },
+  "node: history keeps what the agent reported": {
+    "ok": true,
+    "detail": "[]"
+  },
+  "node: history keeps the CPU profile": {
+    "ok": true,
+    "detail": "1"
+  },
+  "node: history keeps the snapshot": {
+    "ok": true,
+    "detail": "1"
+  },
+  "node: delay reached the samples": {
+    "ok": true,
+    "detail": "33 of 37"
+  },
+  "node: live heap reached the samples": {
+    "ok": true
+  },
+  "node: collections are stored": {
+    "ok": true,
+    "detail": "816"
+  },
+  "node: a user's own NODE_OPTIONS still apply": {
+    "ok": true,
+    "detail": "own=true agent=true"
+  },
+  "python: identity": {
+    "ok": true,
+    "detail": {
+      "agentVersion": "0.1.1",
+      "capabilities": [
+        "gc",
+        "lag",
+        "cpu",
+        "snapshot",
+        "forcegc"
+      ],
+      "gauges": [],
+      "notes": {
+        "cpu": "Samples the main thread's stack whether it's on-CPU or not, so blocking calls count.",
+        "freed": "Estimated at 64 bytes per object collected.",
+        "lag": "How late a 10 ms sleep woke up, p99: time waiting for the GIL and a CPU",
+        "snapshot": "Live objects by type. Allocation stacks start with the first snapshot."
+      },
+      "runtimeVersion": "3.12.10",
+      "unavailable": {
+        "heap": "CPython has no cheap total for its heap, so memory here is the process's."
+      }
+    }
+  },
+  "python: identifies its runtime and agent": {
+    "ok": true,
+    "detail": "python 3.12.10, agent 0.1.1"
+  },
+  "python: offers gc": {
+    "ok": true,
+    "detail": "gc,lag,cpu,snapshot,forcegc"
+  },
+  "python: offers lag": {
+    "ok": true,
+    "detail": "gc,lag,cpu,snapshot,forcegc"
+  },
+  "python: offers cpu": {
+    "ok": true,
+    "detail": "gc,lag,cpu,snapshot,forcegc"
+  },
+  "python: offers snapshot": {
+    "ok": true,
+    "detail": "gc,lag,cpu,snapshot,forcegc"
+  },
+  "python: offers forcegc": {
+    "ok": true,
+    "detail": "gc,lag,cpu,snapshot,forcegc"
+  },
+  "python: says why there's no heap": {
+    "ok": true,
+    "detail": "CPython has no cheap total for its heap, so memory here is the process's."
+  },
+  "python: CPU profile holds the program's own function, in milliseconds": {
+    "ok": true,
+    "detail": "stack, 2009 ms sampled in 2009 ms, top: busy_work 1541, <module> 444, <genexpr> 24, (root) 0: "
+  },
+  "python: says how it sampled": {
+    "ok": true,
+    "detail": "stack"
+  },
+  "python: sampled time fits within the recording": {
+    "ok": true,
+    "detail": "2009 ms sampled in 2009 ms"
+  },
+  "python: heap snapshot holds what the program allocated": {
+    "ok": true,
+    "detail": "60 entries, top type: "
+  },
+  "python: forces a collection": {
+    "ok": true,
+    "detail": ""
+  },
+  "python: the app opens its profiler": {
+    "ok": true,
+    "detail": ""
+  },
+  "python: the program's exit code is its own": {
+    "ok": true,
+    "detail": "exit 0: "
+  },
+  "python: history keeps what the agent reported": {
+    "ok": true,
+    "detail": "[]"
+  },
+  "python: history keeps the CPU profile": {
+    "ok": true,
+    "detail": "1"
+  },
+  "python: history keeps the snapshot": {
+    "ok": true,
+    "detail": "1"
+  },
+  "python: delay reached the samples": {
+    "ok": true,
+    "detail": "34 of 37"
+  },
+  "python: collections are stored": {
+    "ok": true,
+    "detail": "26"
+  },
+  "python: a user's own PYTHONPATH still applies": {
+    "ok": true,
+    "detail": "own=found agent=True "
+  },
+  "bun: a user's own BUN_OPTIONS don't lose the agent": {
+    "ok": true,
+    "detail": "smol=4 agent=true "
+  },
+  "bun: identity": {
+    "ok": true,
+    "detail": {
+      "agentVersion": "0.1.1",
+      "capabilities": [
+        "heap",
+        "lag",
+        "snapshot",
+        "forcegc",
+        "cpu"
+      ],
+      "gauges": [
+        {
+          "name": "Live objects",
+          "unit": "count",
+          "value": 10343
+        },
+        {
+          "name": "Protected objects",
+          "unit": "count",
+          "value": 11
+        },
+        {
+          "name": "Extra memory",
+          "unit": "bytes",
+          "value": 411903
+        }
+      ],
+      "notes": {
+        "cpu": "JavaScriptCore's sampling profiler. Time waiting on the event loop shows as (idle) or (program).",
+        "lag": "How late a 20 ms timer fired, p99",
+        "snapshot": "Objects by type, from JavaScriptCore's heap. Bun has no allocation stacks here, and retained size equals own size."
+      },
+      "runtimeVersion": "1.4.4",
+      "unavailable": {
+        "gc": "Bun doesn't publish individual garbage collections, so none are listed."
+      }
+    }
+  },
+  "bun: identifies its runtime and agent": {
+    "ok": true,
+    "detail": "bun 1.4.4, agent 0.1.1"
+  },
+  "bun: offers heap": {
+    "ok": true,
+    "detail": "heap,lag,snapshot,forcegc,cpu"
+  },
+  "bun: offers lag": {
+    "ok": true,
+    "detail": "heap,lag,snapshot,forcegc,cpu"
+  },
+  "bun: offers cpu": {
+    "ok": true,
+    "detail": "heap,lag,snapshot,forcegc,cpu"
+  },
+  "bun: offers snapshot": {
+    "ok": true,
+    "detail": "heap,lag,snapshot,forcegc,cpu"
+  },
+  "bun: offers forcegc": {
+    "ok": true,
+    "detail": "heap,lag,snapshot,forcegc,cpu"
+  },
+  "bun: says why there's no gc": {
+    "ok": true,
+    "detail": "Bun doesn't publish individual garbage collections, so none are listed."
+  },
+  "bun: CPU profile holds the program's own function, in milliseconds": {
+    "ok": true,
+    "detail": "jsc, 2024 ms sampled in 2030 ms, top: busyWork 2001, repeat 12, SmokeThing 9, (anonymous) 1, push 1, (anonymous) 0: "
+  },
+  "bun: says how it sampled": {
+    "ok": true,
+    "detail": "jsc"
+  },
+  "bun: sampled time fits within the recording": {
+    "ok": true,
+    "detail": "2024 ms sampled in 2030 ms"
+  },
+  "bun: heap snapshot holds what the program allocated": {
+    "ok": true,
+    "detail": "60 entries, top (compiled code): "
+  },
+  "bun: forces a collection": {
+    "ok": true,
+    "detail": ""
+  },
+  "bun: the app opens its profiler": {
+    "ok": true,
+    "detail": ""
+  },
+  "bun: the program's exit code is its own": {
+    "ok": true,
+    "detail": "exit 0: "
+  },
+  "bun: history keeps what the agent reported": {
+    "ok": true,
+    "detail": "[{\"name\":\"Live objects\",\"value\":89189,\"unit\":\"count\"},{\"name\":\"Protected objects\",\"value\":11,\"unit\":\"count\"},{\"name\":\"Extra memory\",\"value\":2338125,\"unit\":\"bytes\"}]"
+  },
+  "bun: history keeps the CPU profile": {
+    "ok": true,
+    "detail": "1"
+  },
+  "bun: history keeps the snapshot": {
+    "ok": true,
+    "detail": "1"
+  },
+  "bun: delay reached the samples": {
+    "ok": true,
+    "detail": "34 of 36"
+  },
+  "bun: live heap reached the samples": {
+    "ok": true
+  },
+  "bun: no collections are invented": {
+    "ok": true,
+    "detail": "0"
+  },
+  "php-alone: identity": {
+    "ok": true,
+    "detail": {
+      "agentVersion": "0.1.1",
+      "capabilities": [],
+      "gauges": [],
+      "notes": {
+        "gauges": "Figures from when the program ended."
+      },
+      "runtimeVersion": "8.3.36",
+      "unavailable": {
+        "cpu": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS.",
+        "forcegc": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS.",
+        "gc": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS.",
+        "heap": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS.",
+        "lag": "PHP runs one request from start to end, with no event loop to delay.",
+        "snapshot": "PHP has no built-in way to list what is in memory."
+      }
+    }
+  },
+  "php-alone: identifies its runtime and agent": {
+    "ok": true,
+    "detail": "php 8.3.36, agent 0.1.1"
+  },
+  "php-alone: says why there's no heap": {
+    "ok": true,
+    "detail": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: says why there's no gc": {
+    "ok": true,
+    "detail": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: says why there's no cpu": {
+    "ok": true,
+    "detail": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: says why there's no forcegc": {
+    "ok": true,
+    "detail": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: says why there's no lag": {
+    "ok": true,
+    "detail": "PHP runs one request from start to end, with no event loop to delay."
+  },
+  "php-alone: says why there's no snapshot": {
+    "ok": true,
+    "detail": "PHP has no built-in way to list what is in memory."
+  },
+  "php-alone: its advice is possible on this OS": {
+    "ok": true,
+    "detail": "Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: a CPU profile is refused, with how to get one": {
+    "ok": true,
+    "detail": "peak: Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS."
+  },
+  "php-alone: a snapshot is refused, with the reason": {
+    "ok": true,
+    "detail": "peak: PHP has no built-in way to list what is in memory."
+  },
+  "php-alone: the app opens its profiler": {
+    "ok": true,
+    "detail": ""
+  },
+  "php-alone: the program's exit code is its own": {
+    "ok": true,
+    "detail": "exit 0: "
+  },
+  "php-alone: history keeps what the agent reported": {
+    "ok": true,
+    "detail": "[{\"name\":\"Memory now\",\"value\":605472,\"unit\":\"bytes\"},{\"name\":\"Peak memory\",\"value\":1181960,\"unit\":\"bytes\"},{\"name\":\"Collector runs\",\"value\":764,\"unit\":\"count\"},{\"name\":\"Values collected\",\"value\":7640000,\"unit\":\"count\"}]"
+  },
+  "php-alone: no delay is claimed": {
+    "ok": true
+  },
+  "php-alone: no collections are invented": {
+    "ok": true,
+    "detail": "0"
+  },
+  "php: a user's own auto_prepend_file still runs, and the exit code is the program's": {
+    "ok": true,
+    "detail": "exit 4: own=yes agent=yes "
+  },
+  "go: a program builds against the installed SDK": {
+    "ok": true,
+    "detail": ""
+  },
+  "go: identity": {
+    "ok": true,
+    "detail": {
+      "agentVersion": "0.1.1",
+      "capabilities": [
+        "heap",
+        "gc",
+        "lag",
+        "cpu",
+        "snapshot",
+        "forcegc"
+      ],
+      "gauges": [],
+      "notes": {
+        "cpu": "On-CPU time from runtime/pprof, across all goroutines. Sleeping and blocked goroutines don't appear.",
+        "freed": "Estimated from allocation counters between samples.",
+        "lag": "p99 time goroutines waited to be scheduled",
+        "snapshot": "Sampled allocation sites from the runtime's heap profile. Go has no type names or retained sizes here, so entries are grouped by allocating function, and sizes are estimates scaled from samples."
+      },
+      "runtimeVersion": "1.27.3",
+      "unavailable": {}
+    }
+  },
+  "go: identifies its runtime and agent": {
+    "ok": true,
+    "detail": "go 1.27.3, agent 0.1.1"
+  },
+  "go: offers heap": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: offers gc": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: offers lag": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: offers cpu": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: offers snapshot": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: offers forcegc": {
+    "ok": true,
+    "detail": "heap,gc,lag,cpu,snapshot,forcegc"
+  },
+  "go: CPU profile holds the program's own function, in milliseconds": {
+    "ok": true,
+    "detail": "pprof, 1770 ms sampled in 2001 ms, top: time.now 190, time.Time.Before 170, time.now 130, time.runtimeNow 120, time.now 110, time.now 100: "
+  },
+  "go: says how it sampled": {
+    "ok": true,
+    "detail": "pprof"
+  },
+  "go: sampled time is plausible for this many threads": {
+    "ok": true,
+    "detail": "1770 ms sampled in 2001 ms on 4 CPUs"
+  },
+  "go: heap snapshot holds what the program allocated": {
+    "ok": true,
+    "detail": "13 entries, top main.smokeAlloc: "
+  },
+  "go: forces a collection": {
+    "ok": true,
+    "detail": ""
+  },
+  "go: the app opens its profiler": {
+    "ok": true,
+    "detail": ""
+  },
+  "go: the program's exit code is its own": {
+    "ok": true,
+    "detail": "exit 0: "
+  },
+  "go: history keeps what the agent reported": {
+    "ok": true,
+    "detail": "[{\"name\":\"Goroutines\",\"value\":3,\"unit\":\"count\"},{\"name\":\"Time in GC\",\"value\":0.013917569455166768,\"unit\":\"percent\"},{\"name\":\"Live objects\",\"value\":785230,\"unit\":\"count\"}]"
+  },
+  "go: history keeps the CPU profile": {
+    "ok": true,
+    "detail": "1"
+  },
+  "go: history keeps the snapshot": {
+    "ok": true,
+    "detail": "1"
+  },
+  "go: delay reached the samples": {
+    "ok": true,
+    "detail": "34 of 36"
+  },
+  "go: live heap reached the samples": {
+    "ok": true
+  },
+  "go: collections are stored": {
+    "ok": true,
+    "detail": "10"
+  },
+  "go: a program without the import has no agent, and that's what's reported": {
+    "ok": true,
+    "detail": "peak: no profiling agent is attached to this process"
+  },
+  "explains how to profile each runtime": {
+    "ok": true,
+    "detail": "Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots."
+  }
+}

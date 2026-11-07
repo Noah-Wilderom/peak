@@ -5,8 +5,8 @@
 // did something. On Linux the window takes WebDriver, on Windows UI Automation, on macOS the
 // accessibility API, as a release has no debug port.
 //   PEAK_SMOKE_PLATFORM=... [PEAK_TAURI_DRIVER=...] agents-ui.mjs <artifacts dir> <output dir>
-import { IS_WINDOWS, PLATFORM, cli, install, join, liveApps, log, mkdirSync, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
-import { closeApp, contents, openApp, press, readsState, scrollDown, stopDriving, typeInto } from "../smoke/drive.mjs"
+import { IS_MAC, IS_WINDOWS, PLATFORM, cli, install, join, liveApps, log, mkdirSync, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
+import { closeApp, contents, openApp, press, readsState, scrollDown, scrollToTop, stopDriving, typeInto } from "../smoke/drive.mjs"
 import { phpHasExcimer, programs } from "../smoke/probes.mjs"
 
 const [artifacts, out] = process.argv.slice(2)
@@ -24,19 +24,25 @@ async function look() {
   return { text: items.map((i) => i.name).join("\n"), items }
 }
 async function see(pattern, ms = 30_000) {
-  const end = Date.now() + ms
+  // Reading a screen takes seconds a go, and what's wanted may be further down the page.
+  const sight = !readsState()
+  const end = Date.now() + (sight ? Math.max(ms, 45_000) : ms)
   let text = ""
   let scrolled = 0
+  if (sight) scrollToTop()
   while (Date.now() < end) {
-    // Reading a screen wraps lines where the window does, and curls apostrophes.
+    // It wraps lines where the window does, and curls apostrophes.
     text = (await look()).text.replace(/\s+/g, " ").replaceAll("\u2019", "'")
     if (pattern.test(text)) return true
     await sleep(500)
-    // Reading the screen, what's further down the page takes scrolling to. A few times, and only
-    // once it isn't simply taking a moment.
-    if (!readsState() && scrolled < 4 && Date.now() > end - ms * 0.5) {
-      scrollDown()
-      scrolled++
+    if (sight) {
+      if (scrolled < 4) {
+        scrollDown()
+        scrolled++
+      } else {
+        scrollToTop()
+        scrolled = 0
+      }
     }
   }
   log(`never saw ${pattern} in:\n${text.slice(0, 1500)}`)
@@ -44,11 +50,19 @@ async function see(pattern, ms = 30_000) {
 }
 /** Press a control by its name's pattern, such as a tab whose name holds a count. */
 async function pressMatching(pattern, ms = 30_000) {
-  const end = Date.now() + ms
+  const sight = !readsState()
+  const end = Date.now() + (sight ? Math.max(ms, 45_000) : ms)
+  let scrolled = 0
+  if (sight) scrollToTop()
   while (Date.now() < end) {
-    const hit = (await look()).items.find((i) => pattern.test(i.name) && i.enabled)
+    // Reading the screen says what's there, not whether it's enabled. Elsewhere it has to be.
+    const hit = (await look()).items.find((i) => pattern.test(i.name) && (i.enabled === true || (i.enabled === undefined && !readsState())))
     if (hit && (await press(hit.name))) return true
     await sleep(500)
+    if (sight && scrolled < 4) {
+      scrollDown()
+      scrolled++
+    }
   }
   return false
 }
@@ -61,7 +75,11 @@ async function checkDisabled(label, name, run) {
     return check(label, (await look()).items.find((i) => i.name === name && i.enabled !== undefined)?.enabled === false)
   }
   const before = storedRunById(run)
-  const pressed = await press(name)
+  let pressed = await press(name)
+  for (let i = 0; !pressed && i < 3; i++) {
+    scrollDown()
+    pressed = await press(name)
+  }
   await sleep(2500)
   const after = storedRunById(run)
   const quiet = before?.cpuProfiles === after?.cpuProfiles && before?.snapshots === after?.snapshots && !/Recording|Capturing/.test((await look()).text)
@@ -96,7 +114,8 @@ await openWindow()
 await shot("window")
 
 // ─── each runtime, while it runs ────────────────────────────────────────────
-const SECONDS = 70
+// Reading the screen takes far longer than asking WebDriver or UI Automation.
+const SECONDS = IS_MAC ? 150 : 70
 const kept = []
 
 async function runtimeInWindow({ name, label, versionShape, program, cpu, snapshot, gc, missing }) {
@@ -181,7 +200,7 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
 
 // Started from the window's own Capture page, rather than a terminal.
 {
-  const program = programs.bun(20)
+  const program = programs.bun(IS_MAC ? 90 : 20)
   const marker = program.command.at(-1)
   const command = `bun "${join(program.cwd, marker).replaceAll("\\", "/")}"`
   check("capture: the page opens", await pressMatching(/^Capture$/))
@@ -205,8 +224,8 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
 
 // A result from the terminal, on a run that isn't the one on screen, leaves the window where it is.
 {
-  const shown = programs.node(30)
-  const other = programs.python(30)
+  const shown = programs.node(IS_MAC ? 90 : 30)
+  const other = programs.python(IS_MAC ? 90 : 30)
   const running = [cli(["run", "--", ...shown.command], { cwd: shown.cwd }), cli(["run", "--", ...other.command], { cwd: other.cwd })]
   const find = (program) => waitFor("a run's agent", async () => (asJson((await cli(["ps", "--json"]).done).out) ?? []).find((r) => r.command.includes(program.command.find((p) => p.includes("work-"))) && r.profiling) ?? null, 60_000).catch(() => null)
   const [a, b] = [await find(shown), await find(other)]

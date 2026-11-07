@@ -1,0 +1,610 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go,php-excimer
+  DEBIAN_FRONTEND: noninteractive
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $EE592F21
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $950D2DFF
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $4B2DBFDA
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_HFS : 4)…
+          disk image (Apple_HFS : 4): verified   CRC32 $15DB8CE5
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $4B2DBFDA
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $11CF6D18
+verified   CRC32 $47AEE8B9
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-6331P3
+"disk31" ejected.
+(node:53256) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (macOS app, commit 6c5166c0a5f350f4fc1324a5589336929487f15f)
+collector: aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-ad181d14820be954/peak-collector (for Linux targets) 
+ok   names its bundled collector aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-ad181d14820be954/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sat12-dp147-0a4563cd-ec8f-4188-af40-427505ed79b2-5E2A963FFC03.local for runner — running without monitoring
+app pid 53841
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak place kjdBao
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794036135640-err
+ok   the app recorded real samples and the exit samples 8, max rss 123092992, exit 7
+ok   the Node agent reported from inside the program lag samples 6
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2038 ms sampled in 2043 ms, top: busyWork 1292, (idle) 420, (garbage collector) 203, post 39, (program) 38, observerCallback 10: 
+ok   node: says how it sampled v8
+ok   node: sampled time fits within the recording 2038 ms sampled in 2043 ms
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 29 of 31
+ok   node: live heap reached the samples 
+ok   node: collections are stored 650
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2003 ms sampled in 2003 ms, top: <module> 1605, busy_work 397, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: sampled time fits within the recording 2003 ms sampled in 2003 ms
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 28 of 30
+ok   python: collections are stored 15
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2038 ms sampled in 2041 ms, top: busyWork 2037, (anonymous) 2, (root) 0, processTicksAndRejections 0, (program) 0, (anonymous) 0: 
+ok   bun: says how it sampled jsc
+ok   bun: sampled time fits within the recording 2038 ms sampled in 2041 ms
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":86380,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2272437,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 28 of 30
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-wall, 2140 ms sampled in 2149 ms, top: busy_work 2140, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-wall
+ok   php: sampled time fits within the recording 2140 ms sampled in 2149 ms
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":947992,"unit":"bytes"},{"name":"Peak memory","value":1197312,"unit":"bytes"},{"name":"Collector runs","value":1680,"unit":"count"},{"name":"Values collected","value":16793910,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1660
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: its advice is possible on this OS Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":598872,"unit":"bytes"},{"name":"Peak memory","value":1179568,"unit":"bytes"},{"name":"Collector runs","value":760,"unit":"count"},{"name":"Values collected","value":7600000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1340 ms sampled in 2094 ms, top: runtime.walltime 690, runtime.nanotime1 430, runtime.madvise 70, time.Now 50, time.now 10, time.now 10: 
+ok   go: says how it sampled pprof
+ok   go: sampled time is plausible for this many threads 1340 ms sampled in 2094 ms on 3 CPUs
+ok   go: heap snapshot holds what the program allocated 7 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.04082316075156573,"unit":"percent"},{"name":"Live objects","value":758991,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 28 of 30
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+brew install tesseract cliclick imagemagick
+shell: /bin/bash -e {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+==> Downloading bottle manifests
+✔︎ Bottle Manifest tesseract (5.5.4)
+✔︎ Bottle Manifest cliclick (5.1)
+✔︎ Bottle Manifest imagemagick (7.1.2-35)
+==> Would install 3 formulae:
+tesseract    5.5.4
+cliclick     5.1
+imagemagick  7.1.2-35
+==> Would install 8 dependencies for tesseract:
+openjpeg    2.5.4_1
+leptonica   1.87.0
+libb2       0.98.1
+libarchive  3.8.11
+fribidi     1.0.18
+libdatrie   0.2.14
+libthai     0.1.30
+pango       1.58.2
+==> Would install 3 dependencies for imagemagick:
+libde265  1.1.3
+x265      4.3
+libheif   1.23.7
+==> Would upgrade 1 dependency for imagemagick:
+aom 3.15.1 -> 3.15.3
+==> Fetching downloads for: tesseract, cliclick and imagemagick
+✔︎ Bottle Manifest openjpeg (2.5.4_1)
+✔︎ Bottle Manifest leptonica (1.87.0)
+✔︎ Bottle Manifest libb2 (0.98.1)
+✔︎ Bottle cliclick (5.1)
+✔︎ Bottle Manifest libarchive (3.8.11)
+✔︎ Bottle tesseract (5.5.4)
+✔︎ Bottle Manifest fribidi (1.0.18)
+✔︎ Bottle leptonica (1.87.0)
+✔︎ Bottle Manifest libdatrie (0.2.14)
+✔︎ Bottle openjpeg (2.5.4_1)
+✔︎ Bottle imagemagick (7.1.2-35)
+✔︎ Bottle libb2 (0.98.1)
+✔︎ Bottle Manifest libthai (0.1.30)
+✔︎ Bottle Manifest pango (1.58.2)
+✔︎ Bottle Manifest aom (3.15.3)
+✔︎ Bottle Manifest libde265 (1.1.3)
+✔︎ Bottle Manifest x265 (4.3)
+✔︎ Bottle libarchive (3.8.11)
+✔︎ Bottle Manifest libheif (1.23.7)
+✔︎ Bottle fribidi (1.0.18)
+✔︎ Bottle libdatrie (0.2.14)
+✔︎ Bottle pango (1.58.2)
+✔︎ Bottle libthai (0.1.30)
+✔︎ Bottle libde265 (1.1.3)
+✔︎ Bottle x265 (4.3)
+✔︎ Bottle aom (3.15.3)
+✔︎ Bottle libheif (1.23.7)
+==> Installing dependencies for tesseract: openjpeg, leptonica, libb2, libarchive, fribidi, libdatrie, libthai and pango
+==> Installing tesseract dependency: openjpeg (2.5.4_1)
+==> Pouring openjpeg--2.5.4_1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/openjpeg/2.5.4_1: 518 files, 14.9MB
+==> Installing tesseract dependency: leptonica (1.87.0)
+==> Pouring leptonica--1.87.0.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/leptonica/1.87.0: 55 files, 7.1MB
+==> Installing tesseract dependency: libb2 (0.98.1)
+==> Pouring libb2--0.98.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libb2/0.98.1: 9 files, 112.7KB
+==> Installing tesseract dependency: libarchive (3.8.11)
+==> Pouring libarchive--3.8.11.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libarchive/3.8.11: 65 files, 4.1MB
+==> Installing tesseract dependency: fribidi (1.0.18)
+==> Pouring fribidi--1.0.18.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/fribidi/1.0.18: 69 files, 763.1KB
+==> Installing tesseract dependency: libdatrie (0.2.14)
+==> Pouring libdatrie--0.2.14.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libdatrie/0.2.14: 20 files, 276.1KB
+==> Installing tesseract dependency: libthai (0.1.30)
+==> Pouring libthai--0.1.30.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libthai/0.1.30: 30 files, 955KB
+==> Installing tesseract dependency: pango (1.58.2)
+==> Pouring pango--1.58.2.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/pango/1.58.2: 69 files, 3.7MB
+==> Installing tesseract
+==> Pouring tesseract--5.5.4.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/tesseract/5.5.4: 74 files, 26.1MB
+==> Pouring cliclick--5.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/cliclick/5.1: 6 files, 161.3KB
+==> Installing dependencies for imagemagick: aom, libde265, x265 and libheif
+==> Upgrading imagemagick dependency: aom (3.15.1 -> 3.15.3)
+==> Pouring aom--3.15.3.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/aom/3.15.3: 30 files, 11.3MB
+==> Installing imagemagick dependency: libde265 (1.1.3)
+==> Pouring libde265--1.1.3.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libde265/1.1.3: 18 files, 435.2KB
+==> Installing imagemagick dependency: x265 (4.3)
+==> Pouring x265--4.3.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/x265/4.3: 12 files, 17.3MB
+==> Installing imagemagick dependency: libheif (1.23.7)
+==> Pouring libheif--1.23.7.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libheif/1.23.7: 53 files, 9MB
+==> Installing imagemagick
+==> Pouring imagemagick--7.1.2-35.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/imagemagick/7.1.2-35: 681 files, 28.7MB
+==> Caveats
+==> tesseract
+This formula contains only the "eng" and "osd" language data files.
+If you need any other supported languages, run `brew install tesseract-lang`.
+==> imagemagick
+imagemagick-full includes additional tools and libraries that are not included in the regular imagemagick formula.
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PEAK_SMOKE_PLATFORM: darwin-aarch64
+expected   CRC32 $47AEE8B9
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-hgYBg5
+"disk31" ejected.
+(node:60932) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   node: connected 
+accessibility tree on macOS: not usable, 0 items: 
+ok   node: the window names the runtime and its version 
+ok   node: and the agent's version 
+ok   node: and that it's connected 
+FAIL node: Record 5s can be pressed 
+never saw /Recording/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:26AM @ 5 @ peak peak. node --no-use.. ® Running 00 Freeze © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 @ node —no-use-osr work-node-17.. 99.8 MiB 5, é Node.js 22.23.4 Peak agent 0.1.1 Connected a Live heap Garbage collections Runtime delay CPU profi
+FAIL node: shows it's recording 
+never saw /Profile\s+1/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:26AM @ 5 @ peak peak. node --no-use-osr work-.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 WW th EEE Ue Live heap Garbage collections Runtime delay CPU profiles Heap snapshots Ended 1 Clear Force collection node --no-
+FAIL node: the profile appears, with its length 
+never saw /Sampled by V8/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:26AM @ 5 @ peak peak. node --no-use-osr work-.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 WW th EEE Ue Live heap Garbage collections Runtime delay CPU profiles Heap snapshots Ended 1 Clear Force collection node --no
+FAIL node: explained by how it was measured /Sampled by V8/
+FAIL node: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:28AM @ 5 @ peak peak. node --no-use-osr work-.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 WW th EEE Ue Live heap Garbage collections Runtime delay CPU profiles Heap snapshots Ended 1 Clear Force collection node --no-
+FAIL node: the snapshot appears 
+never saw /SmokeThing/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:28AM @ 5 @ peak peak. node --no-use-osr work-.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 WW th EEE Ue Live heap Garbage collections Runtime delay CPU profiles Heap snapshots Ended 1 Clear Force collection node --no
+FAIL node: and shows what the program holds /SmokeThing/
+FAIL node: Collect garbage can be pressed 
+FAIL node: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1397
+ok   node: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:29AM @ 5 @ peak peak. node --no-use-osr work-.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 WW th EEE Ue Live heap Garbage collections Runtime delay CPU profiles Heap snapshots Ended 1 Clear Force collection node --no-
+FAIL node: after it ends, the window says the agent has gone 
+FAIL node: the buttons' results are in history cpu 0, snapshots 0
+ok   python: connected 
+ok   python: the window names the runtime and its version 
+ok   python: and the agent's version 
+ok   python: and that it's connected 
+ok   python: says why there's no live heap /no cheap total/
+FAIL python: Record 5s can be pressed 
+never saw /Recording/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:30AM @ 5 @ peak peak. ED pythons work... e Running 00 Freeze © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 @ python3 work-py-1794936601568... Python 3.12.10 Peak agent 0.1.1 Connected 19.6 MiB: 43 -— Garbage collections Runtime delay CPU profiles 
+FAIL python: shows it's recording 
+never saw /Profile\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:31AM @ 5 @ peak peak. pythons work-py-1794036.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Python 3.12.10 Peak agent 0.1.1 Agent has disconnected. This is what it reported. Ended 2 Clear Garbage col
+FAIL python: the profile appears, with its length 
+never saw /Python stack sampled/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:31AM @ 5 @ peak peak. pythons work-py-1794036.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Python 3.12.10 Peak agent 0.1.1 Agent has disconnected. This is what it reported. Ended 2 Clear Garbage col
+FAIL python: explained by how it was measured /Python stack sampled/
+FAIL python: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:33AM @ 5 @ peak peak. pythons work-py-1794036.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Garbage collections Runtime delay CPU profiles Heap snapshots Force collection Ended 2 Clear Live heap CPyt
+FAIL python: the snapshot appears 
+never saw /SmokeThing/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:33AM @ 5 @ peak peak. pythons work-py-1794036.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Garbage collections Runtime delay CPU profiles Heap snapshots Force collection Ended 2 Clear Live heap CPyth
+FAIL python: and shows what the program holds /SmokeThing/
+FAIL python: Collect garbage can be pressed 
+FAIL python: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1644
+ok   python: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:34AM @ 5 @ peak peak. pythons work-py-1794036.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Garbage collections Runtime delay CPU profiles Heap snapshots Force collection Ended 2 Clear Live heap CPyt
+FAIL python: after it ends, the window says the agent has gone 
+FAIL python: the buttons' results are in history cpu 0, snapshots 0
+ok   bun: connected 
+ok   bun: the window names the runtime and its version 
+ok   bun: and the agent's version 
+ok   bun: and that it's connected 
+ok   bun: says why there's no collections /doesn't publish individual garbage collections/
+FAIL bun: Record 5s can be pressed 
+never saw /Recording/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:36AM @ 5 @ peak peak. ED bun work-bun-.. e Running 00 Freeze © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 @ bun work-bun-1794836895287.js 5, Bun 1.4.4 Peak agent 0.1.1 Connected 45.1 MiB é — Live heap Runtime delay CPU profiles Heap snapshots F
+FAIL bun: shows it's recording 
+never saw /Profile\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:36AM @ 5 @ peak peak. bun work-bun-1794036895.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Bun 1.4.4 Peak agent 0.1.1 Agent has disconnected. This is what it reported. Ended 3 Clear Live heap Runtim
+FAIL bun: the profile appears, with its length 
+never saw /Sampled by JavaScriptCore/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:36AM @ 5 @ peak peak. bun work-bun-1794036895.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Bun 1.4.4 Peak agent 0.1.1 Agent has disconnected. This is what it reported. Ended 3 Clear Live heap Runtim
+FAIL bun: explained by how it was measured /Sampled by JavaScriptCore/
+FAIL bun: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:38AM @ 5 @ peak peak. bun work-bun-1794036895.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 eee See ee eee . Heath EEE Ue “op 369.9k 11 7.5 MiB Ended 3 Clear Garbage collections Bun doesn't publish individual g
+FAIL bun: the snapshot appears 
+never saw /SmokeThing/ in:
+6 peak File Edit View Window Help Q S$ SatNov7 7:38AM @ 5 @ peak peak. bun work-bun-1794036895.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 eee See ee eee . Heath EEE Ue “op 369.9k 11 7.5 MiB Ended 3 Clear Garbage collections Bun doesn't publish individual g
+FAIL bun: and shows what the program holds /SmokeThing/
+FAIL bun: Collect garbage can be pressed 
+FAIL bun: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1691
+ok   bun: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:39AM @ 5 @ peak peak. bun work-bun-1794036895.. + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 eee See ee eee . Heath EEE Ue “op 369.9k 11 7.5 MiB Ended 3 Clear Garbage collections Bun doesn't publish individual ga
+FAIL bun: after it ends, the window says the agent has gone 
+FAIL bun: the buttons' results are in history cpu 0, snapshots 0
+ok   php: connected 
+ok   php: the window names the runtime and its version 
+ok   php: and the agent's version 
+ok   php: and that it's connected 
+ok   php: says why there's no delay /no event loop to delay/
+ok   php: says why there's no snapshots /no built-in way to list/
+FAIL php: Record 5s can be pressed 
+never saw /Recording/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:40AM @ 5 @ peak peak. ED php work-php.-.. ® Running 00 Freeze Ph © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 @ php work-php-1794837192783. php Connected 24.1 MiB -— PHP 8.3.36 Peak agent 0.1.1 Live heap Garbage collections CPU profiles Force collec
+FAIL php: shows it's recording 
+never saw /Profile\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:41AM @ 5 @ peak peak. php work-php-1794037192.. + Exited - 0 CG Run again cy Ph /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 ee = a = - ~ Heath EEE Ue werrn Runtime delay PHP runs one request from start to end, with no event loop to delay. Ended 4
+FAIL php: the profile appears, with its length 
+never saw /sampled by Excimer/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:41AM @ 5 @ peak peak. php work-php-1794037192.. + Exited - 0 CG Run again cy Ph /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 ee = a = - ~ Heath EEE Ue werrn Runtime delay PHP runs one request from start to end, with no event loop to delay. Ended 4
+FAIL php: explained by how it was measured /sampled by Excimer/
+NOT OBSERVED php: taking a snapshot is disabled
+ok   php: the heap view doesn't invite a snapshot 
+FAIL php: Collect garbage can be pressed 
+FAIL php: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 2026
+ok   php: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:43AM @ 5 @ peak peak. php work-php-1794037192.. + Exited - 0 CG Run again cy Ph /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 ee = a = - ~ Heath EEE Ue werrn Runtime delay PHP runs one request from start to end, with no event loop to delay. Ended 4 
+FAIL php: after it ends, the window says the agent has gone 
+FAIL php: the buttons' results are in history cpu 0, snapshots 0
+ok   php-alone: connected 
+ok   php-alone: the window names the runtime and its version 
+ok   php-alone: and the agent's version 
+ok   php-alone: and that it's connected 
+ok   php-alone: says why there's no live figures /pecl install excimer/
+ok   php-alone: says why there's no delay /no event loop to delay/
+ok   php-alone: says why there's no snapshots /no built-in way to list/
+NOT OBSERVED php-alone: recording is disabled
+ok   php-alone: the CPU view doesn't invite recording 
+NOT OBSERVED php-alone: taking a snapshot is disabled
+never saw /can't take them/ in:
+6 peak File Edit View Window Help Q SB sCSsat Nov 7 7:44AM @ 5 @ peak peak. ED Ph php work-php.-.. e Running 00 Freeze © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 @ php work-php-alone-17946373.. Connected 21.7 MiB- lies PHP 8.3.36 Peak agent 0.1.1 Ended 4 Clear Live heap Install the Excimer extensio
+FAIL php-alone: the heap view doesn't invite a snapshot 
+NOT OBSERVED php-alone: collecting garbage is disabled
+ok   php-alone: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q ® Sat Nov 7 7:45AM @ 5 @ peak peak. ED + Exited - 0 Ph php work-php-alone-1794.. CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter processes Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 - - aeeeee Heath EEE Ue tgeeee mpeg Live heap Install the Excimer extension far this: pecl install excimer Ended 5 Cl
+FAIL php-alone: after it ends, the window says the agent has gone 
+ok   php-alone: the buttons' results are in history cpu 0, snapshots 0
+ok   go: builds against the installed SDK 
+ok   go: connected 
+ok   go: the window names the runtime and its version 
+ok   go: and the agent's version 
+ok   go: and that it's connected 
+FAIL go: Record 5s can be pressed 
+never saw /Recording/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:46AM @ 5 @ peak peak. ED '/var/folders.. @ Running 00 Freeze © Restart /private/var/folders/h5/t85nd63d71%*27_8... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 1 e@ '/var/folders/h5/t85nd63d71.. Go 1.27.3 Peak agent 0.1.1 Connected 553 MiB 465 —_— Live heap Garbage collections Runtime delay CPU prof
+FAIL go: shows it's recording 
+never saw /Profile\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:46AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 85
+FAIL go: the profile appears, with its length 
+never saw /all goroutines/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:46AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 85
+FAIL go: explained by how it was measured /all goroutines/
+FAIL go: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:48AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 85
+FAIL go: the snapshot appears 
+never saw /smokeAlloc/ in:
+6 peak File Edit View Window Help Q S$ SatNov7 7:48AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 85
+FAIL go: and shows what the program holds /smokeAlloc/
+never saw /allocating\s+functions/ in:
+6 peak File Edit View Window Help Q Be SatNov7 7:48AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 85
+FAIL go: Go's objects are estimates from allocating functions, not types 
+FAIL go: Collect garbage can be pressed 
+FAIL go: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1683
+ok   go: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+6 peak File Edit View Window Help Q 8 SatNov7 7:60AM @ 5 @ peak peak. ED '/var/folders/h5/t85ndé... + Exited - 0 CG Run again cy /private/var/folders/h5/t85nd63d71%*27_8gl5gw3l_w0000gn/... QQ Filter proces Sas ses Overview Memory Profiler Stats Report Output 1 Resources 1 Running 0 Heath EEE Ue Goroutines Time in GC Live objects 3 0.04% 3M Ended 6 Clear '/var/folders/h5/t85nd63d71... CPU peak 854
+FAIL go: after it ends, the window says the agent has gone 
+FAIL go: the buttons' results are in history cpu 0, snapshots 0
+FAIL capture: the page opens 
+ok   capture: takes a command 
+FAIL capture: starts it 
+FAIL capture: the agent connected 
+ok   selection: both runs connected 
+never saw /Node\.js\s+\d/ in:
+© History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s © History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s
+FAIL selection: the first run is on screen 
+FAIL selection: the other run was profiled from the terminal peak: no profiling agent is attached to this process
+FAIL selection: the window stayed on the first run 
+never saw /Python\s+\d/ in:
+© History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s © History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s
+never saw /Profile\s+1/ in:
+© History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s © History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s
+FAIL selection: and the other run has the result 
+never saw /profiling aren't available/ in:
+© History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s © History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s
+FAIL no agent: the window says profiling isn't available 
+never saw /Attaching to a running process only gives OS-level monitoring|Peak has profiling agents for/ in:
+© History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s © History ® Settings 8 Od & Q Search Woe 8k eS ~ 0 euVeeve BEeowe VeEsVEe O©Oe@eoeegeaAIROR>»s
+FAIL no agent: and that attaching only gives OS-level monitoring, or how to opt in 
+FAIL node, reopened: History opens 
+FAIL node, reopened: searching finds the run 
+FAIL node, reopened: the run is listed and opens 
+FAIL node, reopened: the Profiler tab opens 
+never saw /Node\.js\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q S$ SatNov7 7:66AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL node, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q S$ SatNov7 7:66AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL node, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+6 Finder File Edit View Go Window Help Q S$ SatNov7 7:66AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL node, reopened: the CPU profile is there 
+FAIL python, reopened: History opens 
+FAIL python, reopened: searching finds the run 
+FAIL python, reopened: the run is listed and opens 
+FAIL python, reopened: the Profiler tab opens 
+never saw /Python\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q 8 SatNov7 7:69AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go program
+FAIL python, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 7:69AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL python, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 7:69AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL python, reopened: the CPU profile is there 
+FAIL bun, reopened: History opens 
+FAIL bun, reopened: searching finds the run 
+FAIL bun, reopened: the run is listed and opens 
+FAIL bun, reopened: the Profiler tab opens 
+never saw /Bun\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q S$ SatNov7 8:01AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL bun, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 8:01AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL bun, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+6 Finder File Edit View Go Window Help Q Se SatNov7 8:02AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL bun, reopened: the CPU profile is there 
+FAIL php, reopened: History opens 
+FAIL php, reopened: searching finds the run 
+FAIL php, reopened: the run is listed and opens 
+FAIL php, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q S$ SatNov7 8:04AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL php, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 8:04AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL php, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+6 Finder File Edit View Go Window Help Q 8 SatNov7 8:05AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go program
+FAIL php, reopened: the CPU profile is there 
+FAIL php-alone, reopened: History opens 
+FAIL php-alone, reopened: searching finds the run 
+FAIL php-alone, reopened: the run is listed and opens 
+FAIL php-alone, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q Se SatNov7 8:07AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL php-alone, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q 8 SatNov7 8:07AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go program
+FAIL php-alone, reopened: as what it reported, not as live 
+FAIL go, reopened: History opens 
+FAIL go, reopened: searching finds the run 
+FAIL go, reopened: the run is listed and opens 
+FAIL go, reopened: the Profiler tab opens 
+never saw /Go\s+\d+\.\d+/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 8:09AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL go, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 8:09AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL go, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+6 Finder File Edit View Go Window Help Q Be SatNov7 8:10AM peak + Capture peak. QQ Filter processes Capture a process. Run a script through peak, or attach to something already Running 0 running, and watch its memory, CPU and I/O as it happens. WW th EEE Ue Run a command. Attach to a process. Node.js, Bun, Python and PHP get a Your processes, largest first. profiling agent automatically. Go progra
+FAIL go, reopened: the CPU profile is there 
+AGENTS UI FAILED
+with:
+  name: smoke-darwin-aarch64
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+(node:33914) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 44 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:33914) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 6896476
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is 67582d58a8f3c8a350b6af6a74c16516ed87fd51b279bbd3bfbf350139ef516c
+Finalizing artifact upload
+Artifact smoke-darwin-aarch64.zip successfully finalized. Artifact ID 13566568517
+Artifact smoke-darwin-aarch64 has been successfully uploaded! Final size is 6896476 bytes. Artifact ID is 13566568517
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42349363901/artifacts/13566568517
+Post job cleanup.
+Post job cleanup.
+[command]/opt/homebrew/bin/git version
+git version 2.56.0
+Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/46004e01-4f5a-47eb-8ecd-04682f79626b/.gitconfig'
+Temporarily overriding HOME='/Users/runner/work/_temp/46004e01-4f5a-47eb-8ecd-04682f79626b' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/peak/peak
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes

@@ -100,7 +100,7 @@ function readScreen() {
     w: (Number(c[8]) / ENLARGE) * toPoints,
     h: (Number(c[9]) / ENLARGE) * toPoints,
   }))
-  const shapes = run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-negate", "-threshold", "75%", "-define", "connected-components:verbose=true", "-define", "connected-components:area-threshold=400", "-connected-components", "8", "null:"])
+  const shapes = run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-negate", "-threshold", "35%", "-define", "connected-components:verbose=true", "-define", "connected-components:area-threshold=400", "-connected-components", "8", "null:"])
   const found = `${shapes.stdout}${shapes.stderr}`.matchAll(/(\d+)x(\d+)\+(\d+)\+(\d+) [\d.,]+ \d+ \w+\((?:255|100%)/g)
   let n = 0
   for (const [, width, height, left, top] of found) {
@@ -164,6 +164,14 @@ export function scrollDown() {
   run("cliclick", ["kp:page-down"])
 }
 
+/** Back to the top of the main pane. */
+export function scrollToTop() {
+  if (!IS_MAC || macTree()) return
+  const [area] = locateAll("Profiler")
+  if (area) clickAt({ x: area.x + 400, y: area.y + 90 })
+  for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
+}
+
 /**
  * A WKWebView can expose nothing to the accessibility API on a runner, with no error to say so. If
  * nothing at all comes through from the window, macOS is read by sight, as X is.
@@ -206,8 +214,14 @@ async function linuxContents() {
 async function linuxPress(name) {
   const el = await script(`const name = arguments[0]; return ${CONTROLS}.find((e) => ${LABEL} === name)`, name)
   if (!el) return false
-  await wd("POST", `/element/${Object.values(el)[0]}/click`, {})
-  return true
+  try {
+    await wd("POST", `/element/${Object.values(el)[0]}/click`, {})
+    return true
+  } catch (e) {
+    // A notification can be over it for a few seconds, and that's for the caller to wait out.
+    if (/intercepted|not interactable|stale/.test(e.message)) return false
+    throw e
+  }
 }
 
 const LINUX = !IS_WINDOWS && !IS_MAC
