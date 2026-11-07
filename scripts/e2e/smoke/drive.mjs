@@ -91,6 +91,7 @@ const magick = () => (run("magick", ["-version"]).status === 0 ? "magick" : "con
  * Light text on a dark button doesn't read at all that way, so each dark button is found as a shape
  * and read by itself.
  */
+let screenPoints = null
 function readScreen({ whole = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "peak-ocr-"))
   const shot = join(dir, "screen.png")
@@ -101,45 +102,50 @@ function readScreen({ whole = false } = {}) {
   const frame = whole ? null : windowFrame()
   run("screencapture", frame ? ["-x", "-R", frame.join(","), shot] : ["-x", shot])
   const pixels = Number(run("sips", ["-g", "pixelWidth", shot]).stdout.match(/pixelWidth: (\d+)/)?.[1])
-  const points = Number(run("osascript", ["-e", 'tell application "Finder" to get item 3 of (bounds of window of desktop)']).stdout.trim())
-  const toPoints = (points || pixels) / pixels
+  screenPoints ??= Number(run("osascript", ["-e", 'tell application "Finder" to get item 3 of (bounds of window of desktop)']).stdout.trim()) || null
+  // Points per pixel: the window's width over the capture's, or the screen's.
+  const toPoints = frame ? frame[2] / pixels : (screenPoints || pixels) / pixels
+  const scale = 1 / toPoints
   const tool = magick()
   const clean = (w) => w.toLowerCase().replace(/[.,:]/g, "")
   const ENLARGE = 2
-  // A capture has an alpha channel, which ImageMagick 7 keeps through all this, leaving tesseract nothing.
-  run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-resize", `${ENLARGE * 100}%`, "-threshold", "75%", page])
-  const words = run("tesseract", [page, "stdout", "--psm", "11", "tsv"]).stdout.split("\n").slice(1).map((l) => l.split("\t")).filter((c) => c[11]?.trim()).map((c) => ({
-    word: c[11].trim(),
-    plain: clean(c[11].trim()),
-    line: `${c[2]}/${c[3]}/${c[4]}`,
-    x: (Number(c[6]) / ENLARGE) * toPoints + (frame?.[0] ?? 0),
-    y: (Number(c[7]) / ENLARGE) * toPoints + (frame?.[1] ?? 0),
-    w: (Number(c[8]) / ENLARGE) * toPoints,
-    h: (Number(c[9]) / ENLARGE) * toPoints,
-  }))
+  // Light text on a dark or grey button doesn't survive the threshold that small grey text needs.
+  // Each such button is found as a shape, and turned the other way round within the page, so that
+  // one reading covers everything. Reading each button separately took too long on a big screen.
   const shapes = run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-negate", "-threshold", "35%", "-define", "connected-components:verbose=true", "-define", "connected-components:area-threshold=400", "-connected-components", "8", "null:"])
-  const found = `${shapes.stdout}${shapes.stderr}`.matchAll(/(\d+)x(\d+)\+(\d+)\+(\d+) [\d.,]+ \d+ \w+\((?:255|100%)/g)
-  let n = 0
-  for (const [, width, height, left, top] of found) {
+  const regions = []
+  for (const [, width, height, left, top] of `${shapes.stdout}${shapes.stderr}`.matchAll(/(\d+)x(\d+)\+(\d+)\+(\d+) [\d.,]+ \d+ \w+\((?:255|100%)/g)) {
     const [w, h, x, y] = [width, height, left, top].map(Number)
-    // Button-shaped, in either a 1x or a 2x capture.
-    // Button-shaped, in either a 1x or a 2x capture, and not the menu bar or the Dock.
-    const scale = pixels / (points || pixels)
+    // Button-shaped, in either a 1x or a 2x capture, and not the menu bar, title bar or Dock.
     if (w < 40 * scale || w > 500 * scale || h < 18 || h > 90 || y < 30 * scale) continue
-    const crop = join(dir, `shape-${n++}.png`)
-    run(tool, [shot, "-alpha", "off", "-crop", `${w}x${h}+${x}+${y}`, "+repage", "-colorspace", "Gray", "-negate", "-resize", "300%", crop])
-    const text = run("tesseract", [crop, "stdout", "--psm", "7"]).stdout.trim().replace(/^\W+\s*/, "")
-    // An icon inside a button reads as stray symbols.
-    for (const word of text.split(/\s+/).map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}.]+$/gu, "")).filter(Boolean)) {
-      words.push({ word, plain: clean(word), line: `shape-${n}`, x: x * toPoints + (frame?.[0] ?? 0), y: y * toPoints + (frame?.[1] ?? 0), w: w * toPoints, h: h * toPoints })
-    }
+    regions.push("-region", `${w}x${h}+${x}+${y}`, "-negate", "-threshold", "40%", "+region")
   }
-  return words
+  // A capture has an alpha channel, which ImageMagick 7 keeps through all this, leaving tesseract nothing.
+  run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", ...regions, "-resize", `${ENLARGE * 100}%`, "-threshold", "75%", page])
+  return run("tesseract", [page, "stdout", "--psm", "11", "tsv"]).stdout.split("\n").slice(1).map((l) => l.split("\t")).filter((c) => c[11]?.trim()).map((c) => {
+    // An icon inside a button reads as stray symbols around its words.
+    const word = c[11].trim().replace(/^[^\p{L}\p{N}(]+|[^\p{L}\p{N}.)]+$/gu, "") || c[11].trim()
+    return {
+      word,
+      plain: clean(word),
+      line: `${c[2]}/${c[3]}/${c[4]}`,
+      x: (Number(c[6]) / ENLARGE) * toPoints + (frame?.[0] ?? 0),
+      y: (Number(c[7]) / ENLARGE) * toPoints + (frame?.[1] ?? 0),
+      w: (Number(c[8]) / ENLARGE) * toPoints,
+      h: (Number(c[9]) / ENLARGE) * toPoints,
+    }
+  })
 }
 
 /** Every place the words of `name` are on screen, top to bottom. */
 /** One character off, as reading a screen often is: "Coltect garbage", "Record Ss". */
+// Letters and digits a screen reading mixes up: "Record Sa" for "Record 5s".
+const LOOKALIKE = { 5: "s", 0: "o", 1: "l", i: "l", 8: "b" }
+const canon = (w) => [...w].map((c) => LOOKALIKE[c] ?? c).join("")
+
 function nearly(a, b) {
+  a = canon(a)
+  b = canon(b)
   if (a === b) return true
   if (Math.min(a.length, b.length) < 2 || Math.abs(a.length - b.length) > 1) return false
   let [i, j] = [0, 0]
@@ -216,7 +222,8 @@ function wheelTool() {
 let pane = null
 function paneCentre() {
   if (!pane) {
-    const [tab] = locateAll("Overview")
+    // A tab shares its line with the others, so it's looked for in the line.
+    const [tab] = locateAll("Overview", { inLine: true })
     if (!tab) return null
     pane = { x: tab.x + 300, y: tab.y + 320 }
   }
@@ -329,7 +336,11 @@ export async function typeInto(field, text) {
   }
   if (IS_MAC) {
     // Where the field has a placeholder to find by, otherwise it's focused on arrival.
-    if (field === "Search" && !bySight("Search", true)) return false
+    // The placeholder is "Search by command", so "Search" is part of a line.
+    if (field === "Search" && !bySight("Search", true, { inLine: true })) {
+      log("paste: no search box on screen")
+      return false
+    }
     // Pasted, not typed: typed keys can land in macOS's own shortcuts, which once opened the
     // character viewer over the window and took the rest of the text.
     // And by the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.

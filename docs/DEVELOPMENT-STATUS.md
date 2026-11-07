@@ -4,13 +4,33 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `f3c6a0e`: everything passes except macOS's window proof, at 36 and 39 failing checks, from scrolling and pasting regressions in the harness. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `54f66b0`: everything passes except macOS's window proof, at 38 and 57 failing checks, from harness defects and slow screen reading. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Tenth native run: `54f66b0`
+
+**Update proof 42397228385, including the `v0.1.0` rehearsal on all four, and Tests 42397228332 passed**, with the backend at 99.14% on CI. Release 42397228258 failed on macOS's window proof only. Its macOS x64 job took over two and a half hours. Raw results: `docs/evidence/release/ci-candidate-54f66b0/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `54f66b0` | **153 / 0 / 0** | **132 / 0 / 0** | 122 / 38 / 0 of 160 | 103 / 57 / 0 of 160 |
+
+All 160 checks are recorded on macOS now, including Capture's.
+
+**Newly observed on macOS:** pasting through the Edit menu, and with it the Capture page. A command entered there started a Bun run that connected with agent 0.1.1 and ended with its own exit code.
+
+**Still failing, and why:**
+
+- **arm64, the snapshot table, Go's caption and every History search:** last round's rule that a one-word control stands alone on its line also applied to two things the harness looks for inside a line, the "Overview" tab, which places the scroll, and the search box's "Search by command". So there was no scrolling at all (no "mouse wheel" line in the log), and no search. Both are now looked for inside their line.
+- **x64, everything after recording:** from naming the runtime to pressing Record took three and a half minutes, so the program ended mid-checks. A capture shows Node "Exited · 0" at 7 minutes with no snapshot. The time went to reading the screen: one pass for the page, then one more per dark button. **It's now one pass:** each dark or grey button is found as a shape and inverted in place, then the whole window is read at once. Scrolling up first happens only once a read has missed, not before every read.
+- **"Record 5s" reads as "Record Sa":** look-alike characters such as 5 and s now count as the same.
+
+Locally, against this run's real captures with stand-ins for the OS tools: Record 5s and Record 10s, dark or greyed out, Take snapshot, Collect garbage, CPU, Heap, History and Capture are all clicked at the right places, on both screen sizes. Paste and the Swift wheel still can't run here.
 
 ### Ninth native run: `f3c6a0e`
 

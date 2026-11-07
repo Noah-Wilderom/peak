@@ -26,20 +26,16 @@ async function see(pattern, ms = 30_000) {
   const end = Date.now() + (sight ? Math.max(ms, 90_000) : ms)
   let text = ""
   let scrolled = 0
-  if (sight) scrollToTop()
   while (Date.now() < end) {
     // It wraps lines where the window does, and curls apostrophes.
     text = (await look()).text.replace(/\s+/g, " ").replaceAll("\u2019", "'")
     if (pattern.test(text)) return true
     await sleep(500)
+    // From the top, then down a screen at a time: only once what's on screen hasn't got it.
     if (sight) {
-      if (scrolled < 4) {
-        scrollDown()
-        scrolled++
-      } else {
-        scrollToTop()
-        scrolled = 0
-      }
+      if (scrolled === 0) scrollToTop()
+      else if (scrolled < 5) scrollDown()
+      scrolled = scrolled < 5 ? scrolled + 1 : 0
     }
   }
   log(`never saw ${pattern} in:\n${text.slice(0, 1500)}`)
@@ -50,7 +46,6 @@ async function pressMatching(pattern, ms = 30_000) {
   const sight = !readsState()
   const end = Date.now() + (sight ? Math.max(ms, 45_000) : ms)
   let scrolled = 0
-  if (sight) scrollToTop()
   // Reading the screen, a control's words can share a line with its icon, so the pattern's own
   // words are what's looked for.
   const words = pattern.source.replace(/^\^|\$$/g, "").replace(/\\(.)/g, "$1")
@@ -62,8 +57,9 @@ async function pressMatching(pattern, ms = 30_000) {
     const hit = (await look()).items.find((i) => pattern.test(i.name) && (i.enabled === true || (i.enabled === undefined && !readsState())))
     if (hit && (await press(hit.name))) return true
     await sleep(500)
-    if (sight && scrolled < 4) {
-      scrollDown()
+    if (sight && scrolled < 5) {
+      if (scrolled === 0) scrollToTop()
+      else scrollDown()
       scrolled++
     }
   }
