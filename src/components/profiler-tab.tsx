@@ -296,7 +296,7 @@ function HeapProfiler({ proc }: { proc: Proc }) {
         <motion.div key={snap.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="flex min-w-0 flex-col gap-4">
           <div className="grid grid-cols-3 gap-4">
             <Metric label="Heap used" value={<Bytes value={snap.heapUsed} />} hint={base ? `${snap.heapUsed >= base.heapUsed ? "+" : "−"}${formatBytes(Math.abs(snap.heapUsed - base.heapUsed))} vs snapshot ${index}` : "First snapshot"} />
-            <Metric label="Objects" value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={`${rows.length} types`} />
+            <Metric label="Objects" value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={`${rows.length} ${go ? "functions" : "types"}`} />
             {grower ? (
               <div className="rounded-card bg-danger/10 p-5 ring-1 ring-danger/25 ring-inset">
                 <p className="flex items-center gap-1.5 text-xs font-semibold text-danger">
@@ -356,8 +356,10 @@ function HeapProfiler({ proc }: { proc: Proc }) {
         </motion.div>
       ) : (
         <div className="flex min-h-[320px] flex-col items-center justify-center rounded-card bg-secondary text-center">
-          <h2 className="text-title">No snapshot selected.</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Take a heap snapshot to see what is holding memory.</p>
+          <h2 className="text-title">{canSnapshot ? "No snapshot selected." : "No heap snapshots here."}</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            {canSnapshot ? "Take a heap snapshot to see what is holding memory." : "This runtime's agent can't take them. The reason is on the left."}
+          </p>
         </div>
       )}
     </div>

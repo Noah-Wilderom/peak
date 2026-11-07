@@ -1,0 +1,6062 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go,php-excimer
+  DEBIAN_FRONTEND: noninteractive
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $EE592F21
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $D33130ED
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $71224886
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_HFS : 4)…
+          disk image (Apple_HFS : 4): verified   CRC32 $C328B0FB
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $71224886
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $57F3700A
+verified   CRC32 $F89C9BC2
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-e3tm68
+(node:47777) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+"disk31" ejected.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (macOS app, commit 131e76a632e059633eb1a8cbf16e03a60fc7c5a5)
+collector: aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-21a336ccab4bee4a/peak-collector (for Linux targets) 
+ok   names its bundled collector aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-21a336ccab4bee4a/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sjc22-be106-25dc435f-6a14-4c3d-b6f4-7a79d356220e-C69A9A8CA398.local for runner — running without monitoring
+app pid 47891
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak place bvPlWF
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794025751352-err
+ok   the app recorded real samples and the exit samples 8, max rss 128040960, exit 7
+ok   the Node agent reported from inside the program lag samples 6
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2053 ms sampled in 2030 ms, top: busyWork 1394, (idle) 416, (garbage collector) 144, (program) 61, post 28, observerCallback 5: 
+ok   node: says how it sampled v8
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 28 of 30
+ok   node: live heap reached the samples 
+ok   node: collections are stored 790
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2013 ms sampled in 2013 ms, top: <module> 1676, busy_work 337, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 29 of 32
+ok   python: collections are stored 15
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2030 ms sampled in 2035 ms, top: busyWork 2029, (anonymous) 1, (root) 0, processTicksAndRejections 0, (program) 0, (anonymous) 0: 
+ok   bun: says how it sampled jsc
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":86894,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2281650,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 28 of 30
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-wall, 2135 ms sampled in 2152 ms, top: busy_work 2135, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-wall
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":609024,"unit":"bytes"},{"name":"Peak memory","value":1196536,"unit":"bytes"},{"name":"Collector runs","value":1709,"unit":"count"},{"name":"Values collected","value":17079940,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1693
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":597584,"unit":"bytes"},{"name":"Peak memory","value":1178280,"unit":"bytes"},{"name":"Collector runs","value":756,"unit":"count"},{"name":"Values collected","value":7560000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1410 ms sampled in 2147 ms, top: runtime.walltime 730, runtime.nanotime1 420, time.now 50, time.now 40, runtime.libcCall 30, runtime.walltime 30: 
+ok   go: says how it sampled pprof
+ok   go: heap snapshot holds what the program allocated 5 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.017358046769591857,"unit":"percent"},{"name":"Live objects","value":764986,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 29 of 31
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+brew install tesseract cliclick
+shell: /bin/bash -e {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+==> Downloading bottle manifests
+✔︎ Bottle Manifest tesseract (5.5.4)
+✔︎ Bottle Manifest cliclick (5.1)
+==> Would install 2 formulae:
+tesseract  5.5.4
+cliclick   5.1
+==> Would install 8 dependencies for tesseract:
+openjpeg    2.5.4_1
+leptonica   1.87.0
+libb2       0.98.1
+libarchive  3.8.11
+fribidi     1.0.18
+libdatrie   0.2.14
+libthai     0.1.30
+pango       1.58.2
+==> Fetching downloads for: tesseract and cliclick
+✔︎ Bottle Manifest openjpeg (2.5.4_1)
+✔︎ Bottle Manifest leptonica (1.87.0)
+✔︎ Bottle Manifest libb2 (0.98.1)
+✔︎ Bottle Manifest libarchive (3.8.11)
+✔︎ Bottle Manifest fribidi (1.0.18)
+✔︎ Bottle cliclick (5.1)
+✔︎ Bottle tesseract (5.5.4)
+✔︎ Bottle Manifest libdatrie (0.2.14)
+✔︎ Bottle libb2 (0.98.1)
+✔︎ Bottle Manifest libthai (0.1.30)
+✔︎ Bottle leptonica (1.87.0)
+✔︎ Bottle openjpeg (2.5.4_1)
+✔︎ Bottle Manifest pango (1.58.2)
+✔︎ Bottle libarchive (3.8.11)
+✔︎ Bottle fribidi (1.0.18)
+✔︎ Bottle libdatrie (0.2.14)
+✔︎ Bottle libthai (0.1.30)
+✔︎ Bottle pango (1.58.2)
+==> Installing dependencies for tesseract: openjpeg, leptonica, libb2, libarchive, fribidi, libdatrie, libthai and pango
+==> Installing tesseract dependency: openjpeg (2.5.4_1)
+==> Pouring openjpeg--2.5.4_1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/openjpeg/2.5.4_1: 518 files, 14.9MB
+==> Installing tesseract dependency: leptonica (1.87.0)
+==> Pouring leptonica--1.87.0.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/leptonica/1.87.0: 55 files, 7.1MB
+==> Installing tesseract dependency: libb2 (0.98.1)
+==> Pouring libb2--0.98.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libb2/0.98.1: 9 files, 112.8KB
+==> Installing tesseract dependency: libarchive (3.8.11)
+==> Pouring libarchive--3.8.11.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libarchive/3.8.11: 65 files, 4.1MB
+==> Installing tesseract dependency: fribidi (1.0.18)
+==> Pouring fribidi--1.0.18.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/fribidi/1.0.18: 69 files, 763.2KB
+==> Installing tesseract dependency: libdatrie (0.2.14)
+==> Pouring libdatrie--0.2.14.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libdatrie/0.2.14: 20 files, 276.1KB
+==> Installing tesseract dependency: libthai (0.1.30)
+==> Pouring libthai--0.1.30.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libthai/0.1.30: 30 files, 955KB
+==> Installing tesseract dependency: pango (1.58.2)
+==> Pouring pango--1.58.2.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/pango/1.58.2: 69 files, 3.7MB
+==> Installing tesseract
+==> Pouring tesseract--5.5.4.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/tesseract/5.5.4: 74 files, 26.1MB
+==> Pouring cliclick--5.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/cliclick/5.1: 6 files, 161.3KB
+==> Caveats
+==> tesseract
+This formula contains only the "eng" and "osd" language data files.
+If you need any other supported languages, run `brew install tesseract-lang`.
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PEAK_SMOKE_PLATFORM: darwin-aarch64
+expected   CRC32 $F89C9BC2
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-eNGUmC
+"disk31" ejected.
+(node:53849) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   node: connected 
+accessibility: 572:574: syntax error: Expected expression but found “on”. (-2741)
+accessibility tree on macOS: not usable, 0 items: 
+ok   node: the window names the runtime and its version 
+ok   node: and the agent's version 
+ok   node: and that it's connected 
+FAIL node: Record 5s can be pressed 
+never saw /Recording/ in:
+=
+@ peak
+File
+Edit
+View
+Window
+Help
+Q
+=
+Sat Nov 7 4:32AM
+—
+O
+ee
+peak
+peak.
+node --no-use...
+(0 Freeze
+® Running
+© Restart
+/private/var/folders/h5/t85nd63d71*27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+@® node --no-use-osr work-node-17..
+Connected
+98.3 MiB
+Node.js 22.23.4 Peak agent 0.1.1
+—
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Heap
+CPU
+2% Collect garbage
+Snapshots
+No snapshots yet
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+5 GiB of 7 GiB
+CPU 64.6%
+Load 3.64
+© History
+8 Settings
+co
+=
+cc
+“wf
+HOSS noe cogase« 1. #rAawWse
+al
+=
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=
+Sat
+Nov
+7
+4:32AM
+—
+O
+ee
+peak
+peak
+node
+--no-use..
+(0
+Freeze
+®
+Running
+©
+Restart
+/private/var/folders/h5/t85nd63d71*27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+@®
+node
+--no-use-osr
+work-node-17.
+Connected
+98.3
+MiB
+Node.js
+22.23.4
+Peak
+agent
+0.1.1
+—
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Heap
+CPU
+2%
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+5
+GiB
+of
+7
+GiB
+CPU
+64.6%
+Load
+3.64
+©
+History
+8
+Settings
+co
+=
+cc
+“wf
+HOSS
+noe
+cogase«
+1
+#rAawWse
+al
+FAIL node: shows it's recording 
+never saw /Profile\s+1/ in:
+File
+Edit
+View Window
+Sat Nov 7 4:33AM
+é
+peak
+Help
+Q Ss
+@ © @ peak
+peak.
+node --no-use-osr work...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Resources
+Running
+Overview Memory Profiler
+Stats Report Output
+Node.js 22.23.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+node --no-use-osr work-node-17..
+Force collection
+peak 109 MiB
+Heap
+CPU
+*3 Collect garbage
+Snapshots
+No snapshots yet.
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 16.1%
+Load 2.80
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+File
+Edit
+View
+Window
+Sat
+Nov
+7
+4:33AM
+é
+peak
+Help
+Q
+Ss
+@
+©
+@
+peak
+peak
+node
+--no-use-osr
+work..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Resources
+Running
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Node.js
+22.23.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+node
+--no-use-osr
+work-node-17.
+Force
+collection
+peak
+109
+MiB
+Heap
+CPU
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+4.9
+GiB
+of
+7
+GiB
+CPU
+16.1%
+Load
+2.80
+©
+History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+FAIL node: the profile appears, with its length 
+never saw /Sampled by V8/ in:
+File
+Edit
+View Window
+=
+Sat Nov 7 4:33AM
+é
+peak
+Help
+Q
+=
+@ © @ peak
+peak.
+node --no-use-osr work...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Resources
+Running
+Overview Memory Profiler
+Stats Report Output
+Node.js 22.23.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+node --no-use-osr work-node-17..
+Force collection
+peak 109 MiB
+Heap
+CPU
+*3 Collect garbage
+Snapshots
+No snapshots yet.
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 17.9%
+Load 2.65
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+File
+Edit
+View
+Window
+=
+Sat
+Nov
+7
+4:33AM
+é
+peak
+Help
+Q
+=
+@
+©
+@
+peak
+peak
+node
+--no-use-osr
+work..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Resources
+Running
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Node.js
+22.23.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+node
+--no-use-osr
+work-node-17.
+Force
+collection
+peak
+109
+MiB
+Heap
+CPU
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+4.9
+GiB
+of
+7
+GiB
+CPU
+17.9%
+Load
+2.65
+©
+History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+FAIL node: explained by how it was measured /Sampled by V8/
+FAIL node: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+File
+Edit
+View Window
+Sat Nov 7 4:34AM
+é
+peak
+Help
+Q Ss
+@ © @ peak
+peak.
+node --no-use-osr work...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Resources
+Running
+Overview Memory Profiler
+Stats Report Output
+Node.js 22.23.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+node --no-use-osr work-node-17..
+Force collection
+peak 109 MiB
+Heap
+CPU
+*3 Collect garbage
+Snapshots
+No snapshots yet.
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 28.4%
+Load 2.00
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+File
+Edit
+View
+Window
+Sat
+Nov
+7
+4:34AM
+é
+peak
+Help
+Q
+Ss
+@
+©
+@
+peak
+peak
+node
+--no-use-osr
+work..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Resources
+Running
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Node.js
+22.23.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+node
+--no-use-osr
+work-node-17.
+Force
+collection
+peak
+109
+MiB
+Heap
+CPU
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+4.9
+GiB
+of
+7
+GiB
+CPU
+28.4%
+Load
+2.00
+©
+History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+FAIL node: the snapshot appears 
+never saw /SmokeThing/ in:
+File
+Edit
+View Window
+Sat Nov 7 4:34AM
+é
+peak
+Help
+Q Ss
+@ © @ peak
+peak.
+node --no-use-osr work...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Resources
+Running
+Overview Memory Profiler
+Stats Report Output
+Node.js 22.23.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+node --no-use-osr work-node-17..
+Force collection
+peak 109 MiB
+Heap
+CPU
+*3 Collect garbage
+Snapshots
+No snapshots yet.
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+5 GiB of 7 GiB
+CPU 39.6%
+Load 1.92
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+File
+Edit
+View
+Window
+Sat
+Nov
+7
+4:34AM
+é
+peak
+Help
+Q
+Ss
+@
+©
+@
+peak
+peak
+node
+--no-use-osr
+work..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Resources
+Running
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Node.js
+22.23.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+node
+--no-use-osr
+work-node-17.
+Force
+collection
+peak
+109
+MiB
+Heap
+CPU
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+5
+GiB
+of
+7
+GiB
+CPU
+39.6%
+Load
+1.92
+©
+History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+FAIL node: and shows what the program holds /SmokeThing/
+FAIL node: Collect garbage can be pressed 
+FAIL node: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1412
+ok   node: the program's exit code is its own exit 0: 
+ok   node: after it ends, the window says the agent has gone 
+FAIL node: the buttons' results are in history cpu 0, snapshots 0
+ok   python: connected 
+ok   python: the window names the runtime and its version 
+ok   python: and the agent's version 
+ok   python: and that it's connected 
+ok   python: says why there's no live heap /no cheap total/
+FAIL python: Record 5s can be pressed 
+never saw /Recording/ in:
+@ peak
+File
+Edit
+View
+Window
+Help
+Q s
+Sat Nov 7 4:36AM
+@ © @ peak
+peak.
+pythons work-..
+® Running
+(0 Freeze
+G Restart
+/private/var/folders/h5/t85nd63d71*27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+® pythons work-py-1794026141112....
+Connected
+19.2 MiB
+——
+Python 3.12.10 Peak agent 0.1.1
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Live heap CPython has no cheap total for its heap, so memory here is the process's.
+node --no-use-osr
+work-node-17...
+peak 109 MiB
+Heap
+CPU
+2% Collect garbage
+Snapshots
+No snapshots yet.
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+CPU 87.7%
+Load 3.57
+© History
+8 Settings
+co
+=
+“wf
+1BOsSesecOeoCose 174M
+a
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+s
+Sat
+Nov
+7
+4:36AM
+@
+©
+@
+peak
+peak
+pythons
+work-.
+®
+Running
+(0
+Freeze
+G
+Restart
+/private/var/folders/h5/t85nd63d71*27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+®
+pythons
+work-py-1794026141112...
+Connected
+19.2
+MiB
+——
+Python
+3.12.10
+Peak
+agent
+0.1.1
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Live
+heap
+CPython
+has
+no
+cheap
+total
+for
+its
+heap
+so
+memory
+here
+is
+the
+process's
+node
+--no-use-osr
+work-node-17..
+peak
+109
+MiB
+Heap
+CPU
+2%
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+a
+heap
+snapshot
+to
+see
+what
+is
+holding
+memory
+This
+machine
+CPU
+87.7%
+Load
+3.57
+©
+History
+8
+Settings
+co
+=
+“wf
+1BOsSesecOeoCose
+174M
+a
+FAIL python: shows it's recording 
+never saw /Profile\s+1/ in:
+=
+@ peak
+File
+Edit
+View Window
+Help
+Q
+=
+Sat Nov 7 4:37AM
+@ @ @ peak
+peak.
+Exited - 0
+python3 work-py-1794026...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Python 3.12.10 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+pythons work-py-1794026141112....
+Live heap CPython has no cheap total for its heap, so memory here is the process's.
+peak 19.7 MiB
+node --no-use-osr work-node-17..
+Heap
+CPU
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+No snapshots yet
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 32.3%
+Load 3.41
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+=
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=
+Sat
+Nov
+7
+4:37AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+python3
+work-py-1794026..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Python
+3.12.10
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+pythons
+work-py-1794026141112...
+Live
+heap
+CPython
+has
+no
+cheap
+total
+for
+its
+heap
+so
+memory
+here
+is
+the
+process's
+peak
+19.7
+MiB
+node
+--no-use-osr
+work-node-17.
+Heap
+CPU
+peak
+109
+MiB
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+
+FAIL python: the profile appears, with its length 
+never saw /Python stack sampled/ in:
+@ peak
+File
+Edit
+View Window
+Help
+Q Ss
+Sat Nov 7 4:37AM
+@ @ @ peak
+peak.
+Exited - 0
+python3 work-py-1794026...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Python 3.12.10 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+pythons work-py-1794026141112....
+Live heap CPython has no cheap total for its heap, so memory here is the process's.
+peak 19.7 MiB
+node --no-use-osr work-node-17..
+Heap
+CPU
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+No snapshots yet
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 31.4%
+Load 3.30
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:37AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+python3
+work-py-1794026..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Python
+3.12.10
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+pythons
+work-py-1794026141112...
+Live
+heap
+CPython
+has
+no
+cheap
+total
+for
+its
+heap
+so
+memory
+here
+is
+the
+process's
+peak
+19.7
+MiB
+node
+--no-use-osr
+work-node-17.
+Heap
+CPU
+peak
+109
+MiB
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Ta
+FAIL python: explained by how it was measured /Python stack sampled/
+FAIL python: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+@ peak
+File
+Edit
+View Window
+Help
+Q Ss
+Sat Nov 7 4:39AM
+@ @ @ peak
+peak.
+Exited - 0
+python3 work-py-1794026...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Python 3.12.10 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+pythons work-py-1794026141112....
+Live heap CPython has no cheap total for its heap, so memory here is the process's.
+peak 19.7 MiB
+node --no-use-osr work-node-17..
+Heap
+CPU
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+No snapshots yet
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+5 GiB of 7 GiB
+CPU 39.1%
+Load 2.06
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:39AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+python3
+work-py-1794026..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Python
+3.12.10
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+pythons
+work-py-1794026141112...
+Live
+heap
+CPython
+has
+no
+cheap
+total
+for
+its
+heap
+so
+memory
+here
+is
+the
+process's
+peak
+19.7
+MiB
+node
+--no-use-osr
+work-node-17.
+Heap
+CPU
+peak
+109
+MiB
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Take
+FAIL python: the snapshot appears 
+never saw /SmokeThing/ in:
+@ peak
+File
+Edit
+View Window
+Help
+Q Ss
+Sat Nov 7 4:39AM
+@ @ @ peak
+peak.
+Exited - 0
+python3 work-py-1794026...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Python 3.12.10 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+pythons work-py-1794026141112....
+Live heap CPython has no cheap total for its heap, so memory here is the process's.
+peak 19.7 MiB
+node --no-use-osr work-node-17..
+Heap
+CPU
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+No snapshots yet
+No snapshot selected.
+Take a heap snapshot to see what is holding memory.
+This machine
+4.9 GiB of 7 GiB
+CPU 22.3%
+Load 1.89
+© History
+Settings
+5
+*
+1BOs2sesecOrcoesse~
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:39AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+python3
+work-py-1794026..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Python
+3.12.10
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+pythons
+work-py-1794026141112...
+Live
+heap
+CPython
+has
+no
+cheap
+total
+for
+its
+heap
+so
+memory
+here
+is
+the
+process's
+peak
+19.7
+MiB
+node
+--no-use-osr
+work-node-17.
+Heap
+CPU
+peak
+109
+MiB
+*3
+Collect
+garbage
+Snapshots
+No
+snapshots
+yet
+No
+snapshot
+selected
+Ta
+FAIL python: and shows what the program holds /SmokeThing/
+FAIL python: Collect garbage can be pressed 
+FAIL python: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1653
+ok   python: the program's exit code is its own exit 0: 
+ok   python: after it ends, the window says the agent has gone 
+FAIL python: the buttons' results are in history cpu 0, snapshots 0
+ok   bun: connected 
+ok   bun: the window names the runtime and its version 
+ok   bun: and the agent's version 
+ok   bun: and that it's connected 
+ok   bun: says why there's no collections /doesn't publish individual garbage collections/
+FAIL bun: Record 5s can be pressed 
+never saw /Recording/ in:
+File
+Edit
+View
+Window
+=
+Sat Nov 7 4:40AM
+é
+peak
+Help
+Q
+=
+@ © @ peak
+peak.
+bun work-bun.-...
+(0 Freeze
+@ Running
+G Restart
+/private/var/folders/h5/t85nd63d71x27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+@® bun work-bun-1794026398941. js
+Bun 1.4.4 Peak agent 0.1.1
+Connected
+44.1 MiB
+—
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Live objects
+Protected objects
+Extra memory
+192.3k
+11
+3.9 MiB
+pythons work-py-1794026141112....
+peak 19.7 MiB
+Garbage collections Bun doesn't publish individual garbage collections, so none are listed.
+node --no-use-osr
+work-node-17...
+peak 109 MiB
+Heap
+CPU
+GD
+2% Collect garbage
+Snapshots
+This machine
+4.9 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 71.1%
+Load 3.10
+Take a heap snapshot to see what is holding memory.
+=
+© History
+8 Settings
+co
+|
+o
+“wf
+9BOS#SOFCHE8e:
+ge SA
+n®
+File
+Edit
+View
+Window
+=
+Sat
+Nov
+7
+4:40AM
+é
+peak
+Help
+Q
+=
+@
+©
+@
+peak
+peak
+bun
+work-bun.-..
+(0
+Freeze
+@
+Running
+G
+Restart
+/private/var/folders/h5/t85nd63d71x27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+@®
+bun
+work-bun-1794026398941
+js
+Bun
+1.4.4
+Peak
+agent
+0.1.1
+Connected
+44.1
+MiB
+—
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Live
+objects
+Protected
+objects
+Extra
+memory
+192.3k
+11
+3.9
+MiB
+pythons
+work-py-1794026141112...
+peak
+19.7
+MiB
+Garbage
+collections
+Bun
+doesn't
+publish
+individual
+garbage
+collections
+so
+none
+are
+listed
+node
+--no-use-osr
+work-node-17..
+p
+FAIL bun: shows it's recording 
+never saw /Profile\s+1/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:41AM
+@ @ @ peak
+peak.
+bun work-bun-1794026398...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Bun 1.4.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+bun work-bun-1794026398941. js
+Live objects
+Protected objects
+Extra memory
+peak 52 MIB
+366.3k
+11
+7.4 MiB
+Garbage collections Bun doesn't publish individual garbage collections, so none are listed.
+pythons work-py-1794026141112....
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr work-node-17..
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+This machine
+4.9 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 14.0%
+Load 2.91
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+~
+1BOs2®eesecOrcoecss «
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:41AM
+@
+@
+@
+peak
+peak
+bun
+work-bun-1794026398..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Bun
+1.4.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+bun
+work-bun-1794026398941
+js
+Live
+objects
+Protected
+objects
+Extra
+memory
+peak
+52
+MIB
+366.3k
+11
+7.4
+MiB
+Garbage
+collections
+Bun
+doesn't
+publish
+individual
+garbage
+co
+FAIL bun: the profile appears, with its length 
+never saw /Sampled by JavaScriptCore/ in:
+=
+@ peak
+File
+Edit
+View Window’ Help
+Q
+2
+Sat Nov 7 4:41AM
+@ @ @ peak
+peak.
+bun work-bun-1794026398...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Bun 1.4.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+bun work-bun-1794026398941. js
+Live objects
+Protected objects
+Extra memory
+peak 52 MIB
+366.3k
+11
+7.4 MiB
+Garbage collections Bun doesn't publish individual garbage collections, so none are listed.
+pythons work-py-1794026141112....
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr work-node-17..
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+This machine
+4.9 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 42.0%
+Load 3.02
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+~
+1BOs2®eesecOrcoecss «
+a
+SSA
+ne
+=
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+2
+Sat
+Nov
+7
+4:41AM
+@
+@
+@
+peak
+peak
+bun
+work-bun-1794026398..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Bun
+1.4.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+bun
+work-bun-1794026398941
+js
+Live
+objects
+Protected
+objects
+Extra
+memory
+peak
+52
+MIB
+366.3k
+11
+7.4
+MiB
+Garbage
+collections
+Bun
+doesn't
+publish
+individual
+garbage
+
+FAIL bun: explained by how it was measured /Sampled by JavaScriptCore/
+FAIL bun: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:43AM
+@ @ @ peak
+peak.
+bun work-bun-1794026398...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Bun 1.4.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+bun work-bun-1794026398941. js
+Live objects
+Protected objects
+Extra memory
+peak 52 MIB
+366.3k
+11
+7.4 MiB
+Garbage collections Bun doesn't publish individual garbage collections, so none are listed.
+pythons work-py-1794026141112....
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr work-node-17..
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+This machine
+4.9 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 31.5%
+Load 2.32
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+~
+1BOs2®eesecOrcoecss «
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:43AM
+@
+@
+@
+peak
+peak
+bun
+work-bun-1794026398..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Bun
+1.4.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+bun
+work-bun-1794026398941
+js
+Live
+objects
+Protected
+objects
+Extra
+memory
+peak
+52
+MIB
+366.3k
+11
+7.4
+MiB
+Garbage
+collections
+Bun
+doesn't
+publish
+individual
+garbage
+co
+FAIL bun: the snapshot appears 
+never saw /SmokeThing/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:43AM
+@ @ @ peak
+peak.
+bun work-bun-1794026398...
+Exited - 0
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output
+Resources
+Running
+Bun 1.4.4 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+bun work-bun-1794026398941. js
+Live objects
+Protected objects
+Extra memory
+peak 52 MIB
+366.3k
+11
+7.4 MiB
+Garbage collections Bun doesn't publish individual garbage collections, so none are listed.
+pythons work-py-1794026141112....
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr work-node-17..
+peak 109 MiB
+*3 Collect garbage
+Snapshots
+This machine
+4.9 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 34.6%
+Load 2.43
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+~
+1BOs2®eesecOrcoecss «
+a
+SSA
+ne
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:43AM
+@
+@
+@
+peak
+peak
+bun
+work-bun-1794026398..
+Exited
+-
+0
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+Bun
+1.4.4
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+bun
+work-bun-1794026398941
+js
+Live
+objects
+Protected
+objects
+Extra
+memory
+peak
+52
+MIB
+366.3k
+11
+7.4
+MiB
+Garbage
+collections
+Bun
+doesn't
+publish
+individual
+garbage
+co
+FAIL bun: and shows what the program holds /SmokeThing/
+FAIL bun: Collect garbage can be pressed 
+FAIL bun: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1851
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: after it ends, the window says the agent has gone 
+FAIL bun: the buttons' results are in history cpu 0, snapshots 0
+ok   php: connected 
+ok   php: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+File
+Edit
+View
+Window
+Sat Nov 7 4:44AM
+é
+peak
+Help
+Q
+=°
+@ © @ peak
+peak.
+php work-php.-..
+@ Running
+(0 Freeze
+G Restart
+Ph
+/private/var/folders/h5/t85nd63d71x27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+@® php work-php-1794626655918. php
+24.1 MiB
+PHP 8.3.36 Peak agent 0.1.)
+Connected
+-——
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Memory now
+Peak memory
+Collector runs
+Values collected
+615 KiB
+1.1 MiB
+688
+6.9M
+bun work-bun-1794026398941. js
+peak 52 MIB
+Runtime delay PHP runs one request from Start to end, with no event loop to delay.
+Heap snapshots PHP has no built-in way to list what is in memory.
+pythons work-py-1794026141112...
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr
+work-node-17..
+peak 109 MiB
+aD
+© Record 10s
+Profiles
+This machine
+4.9 GiB of 7 GiB
+No CPU profiles yet.
+CPU 68.6%
+Load 2.91
+No profile selected.
+Record a few seconds to see where the time goes.
+=
+© History
+8 Settings
+co
+|
+o
+“wf
+9BOS#SOFCHE8e:
+ge SA
+n®
+File
+Edit
+View
+Window
+Sat
+Nov
+7
+4:44AM
+é
+peak
+Help
+Q
+=°
+@
+©
+@
+peak
+peak
+php
+work-php.-.
+@
+Running
+(0
+Freeze
+G
+Restart
+Ph
+/private/var/folders/h5/t85nd63d71x27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+@®
+php
+work-php-1794626655918
+php
+24.1
+MiB
+PHP
+8.3.36
+Peak
+agent
+0.1.)
+Connected
+-——
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Memory
+now
+Peak
+memory
+Collector
+runs
+Values
+collected
+615
+KiB
+1.1
+MiB
+688
+6.9M
+bun
+work-bun-1794026398941
+js
+peak
+52
+MIB
+Runtime
+de
+FAIL php: and the agent's version 
+ok   php: and that it's connected 
+ok   php: says why there's no delay /no event loop to delay/
+ok   php: says why there's no snapshots /no built-in way to list/
+FAIL php: Record 5s can be pressed 
+never saw /Recording/ in:
+File
+Edit
+View
+Window
+=
+Sat Nov 7 4:45AM
+é
+peak
+Help
+Q
+=
+@ © @ peak
+peak.
+php work-php.-..
+® Running
+(0 Freeze
+G Restart
+Ph
+/private/var/folders/h5/t85nd63d71x27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+@® php work-php-1794626655918. php
+24.1 MiB
+PHP 8.3.36 Peak agent 0.1.)
+Connected
+-—
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Memory now
+Peak memory
+Collector runs
+Values collected
+625 KiB
+1.1 MiB
+51.4M
+bun work-bun-1794026398941. js
+5,140
+peak 52 MIB
+Runtime delay PHP runs one request from Start to end, with no event loop to delay.
+Heap snapshots PHP has no built-in way to list what is in memory.
+pythons work-py-1794026141112...
+peak 19.7 MiB
+Heap
+CPU
+node --no-use-osr
+work-node-17..
+peak 109 MiB
+aD
+© Record 10s
+Profiles
+This machine
+4.9 GiB of 7 GiB
+No CPU profiles yet.
+CPU 52.5%
+Load 3.44
+No profile selected.
+Record a few seconds to see where the time goes.
+=
+© History
+8 Settings
+co
+|
+o
+“wf
+9BOS#SOFCHE8e:
+ge SA
+n®
+File
+Edit
+View
+Window
+=
+Sat
+Nov
+7
+4:45AM
+é
+peak
+Help
+Q
+=
+@
+©
+@
+peak
+peak
+php
+work-php.-.
+®
+Running
+(0
+Freeze
+G
+Restart
+Ph
+/private/var/folders/h5/t85nd63d71x27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+@®
+php
+work-php-1794626655918
+php
+24.1
+MiB
+PHP
+8.3.36
+Peak
+agent
+0.1.)
+Connected
+-—
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Memory
+now
+Peak
+memory
+Collector
+runs
+Values
+collected
+625
+KiB
+1.1
+MiB
+51.4M
+bun
+work-bun-1794026398941
+js
+5,140
+peak
+52
+MIB
+Runt
+FAIL php: shows it's recording 
+never saw /Profile\s+1/ in:
+File
+Edit
+Sat Nov 7 4:45AM
+é
+peak
+View Window’ Help
+Q Ss
+@ @ @ peak
+peak.
+php work-php-1794026655...
+Exited - 0
+G Run again
+wy
+Ph
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+PHP 8.3.36 Peak agent 0.1.1
+Agent has disconnected. This is what it reported
+Ended 4
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+php work-php-1794826655918. php
+Memory now
+Peak memory
+Collector runs
+Values collected
+peak 24.1 MiB
+1 1
+|
+607 KiB
+1.1 MiB
+66M
+6,596
+Runtime delay PHP runs one request from Start to end, with no event loop to delay.
+bun work-bun-1794026398941. js
+-
+-
+—_
+-
+Heap snapshots PHP has no built-in way to list what is in memory.
+peak 52 MIB
+imi
+r
+pythons work-py-1794026141112....
+—
+—
+Heap
+CPU
+peak 19.7 MiB
+imi
+r
+node --no-use-osr work-node-17..
+GED
+i
+—
+—
+=
+=
+peak 109 MiB: 1)
+[
+() Record 10s
+This run has ended, so nothing new can
+be recorded.
+This machine
+4.9 GiB of 7 GiB
+Profiles 0
+CPU 21.1%
+Load 2.98
+No profile selected.
+Record a few seconds to see where the time goes.
+No CPU profiles yet.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+File
+Edit
+Sat
+Nov
+7
+4:45AM
+é
+peak
+View
+Window’
+Help
+Q
+Ss
+@
+@
+@
+peak
+peak
+php
+work-php-1794026655..
+Exited
+-
+0
+G
+Run
+again
+wy
+Ph
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+PHP
+8.3.36
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+4
+Clear
+Li
+FAIL php: the profile appears, with its length 
+never saw /sampled by Excimer/ in:
+File
+Edit
+=
+Sat Nov 7 4:45AM
+é
+peak
+View Window’ Help
+Q
+2
+@ @ @ peak
+peak.
+php work-php-1794026655...
+Exited - 0
+G Run again
+wy
+Ph
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+PHP 8.3.36 Peak agent 0.1.1
+Agent has disconnected. This is what it reported
+Ended 4
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+php work-php-1794826655918. php
+Memory now
+Peak memory
+Collector runs
+Values collected
+peak 24.1 MiB
+1 1
+|
+607 KiB
+1.1 MiB
+66M
+6,596
+Runtime delay PHP runs one request from Start to end, with no event loop to delay.
+bun work-bun-1794026398941. js
+-
+-
+—_
+-
+Heap snapshots PHP has no built-in way to list what is in memory.
+peak 52 MIB
+imi
+r
+pythons work-py-1794026141112....
+—
+—
+Heap
+CPU
+peak 19.7 MiB
+imi
+r
+node --no-use-osr work-node-17..
+GED
+i
+—
+—
+=
+=
+peak 109 MiB: 1)
+[
+() Record 10s
+This run has ended, so nothing new can
+be recorded.
+This machine
+4.9 GiB of 7 GiB
+Profiles 0
+CPU 83.7%
+Load 2.90
+No profile selected.
+Record a few seconds to see where the time goes.
+No CPU profiles yet.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+File
+Edit
+=
+Sat
+Nov
+7
+4:45AM
+é
+peak
+View
+Window’
+Help
+Q
+2
+@
+@
+@
+peak
+peak
+php
+work-php-1794026655..
+Exited
+-
+0
+G
+Run
+again
+wy
+Ph
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+PHP
+8.3.36
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+4
+Clear
+
+FAIL php: explained by how it was measured /sampled by Excimer/
+FAIL php: Collect garbage can be pressed 
+FAIL php: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 2280
+ok   php: the program's exit code is its own exit 0: 
+ok   php: after it ends, the window says the agent has gone 
+FAIL php: the buttons' results are in history cpu 0, snapshots 0
+ok   php-alone: connected 
+ok   php-alone: the window names the runtime and its version 
+ok   php-alone: and the agent's version 
+ok   php-alone: and that it's connected 
+ok   php-alone: says why there's no live figures /pecl install excimer/
+ok   php-alone: says why there's no delay /no event loop to delay/
+ok   php-alone: says why there's no snapshots /no built-in way to list/
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: after it ends, the window says the agent has gone 
+ok   php-alone: the buttons' results are in history cpu 0, snapshots 0
+ok   go: builds against the installed SDK 
+ok   go: connected 
+ok   go: the window names the runtime and its version 
+ok   go: and the agent's version 
+ok   go: and that it's connected 
+FAIL go: Record 5s can be pressed 
+never saw /Recording/ in:
+File
+Edit
+View
+Window
+=
+Sat Nov 7 4:48AM
+é
+peak
+Help
+Q
+=
+@ © @ peak
+peak.
+'/var/folders...
+(0 Freeze
+® Running
+G Restart
+/private/var/folders/h5/t85nd63d71*27_8...
+Overview Memory Profiler
+Stats Report
+Output
+Resources
+Running
+e
+' /var/folders/h5/t85nd63d71..
+Go 1.27.3 Peak agent 0.1.1
+Connected
+572 MiB
+_——_“
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Ended
+Clear
+Force collection
+php work-php-aLlone-17946268...
+Goroutines
+Time in GC
+Live objects
+peak 21.7 MiB
+3
+0.10%
+2M
+php work-php-1794626655918....
+peak 24.1 MiB
+Heap
+CPU
+bun work-bun-1794826398941....
+GD
+peak 52 MIB
+2% Collect garbage
+pythons work-py-17940261411...
+Snapshots
+peak 19.7 MiB
+This machine
+5 GiB of 7 GiB
+No snapshots yet.
+No snapshot selected.
+CPU 55.7%
+Load 2.77
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+co
+|
+o
+“wf
+28Oe=sSO" CHO086-
+ge SA
+n®
+File
+Edit
+View
+Window
+=
+Sat
+Nov
+7
+4:48AM
+é
+peak
+Help
+Q
+=
+@
+©
+@
+peak
+peak
+'/var/folders..
+(0
+Freeze
+®
+Running
+G
+Restart
+/private/var/folders/h5/t85nd63d71*27_8..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+Resources
+Running
+e
+'
+/var/folders/h5/t85nd63d71.
+Go
+1.27.3
+Peak
+agent
+0.1.1
+Connected
+572
+MiB
+_——_“
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Ended
+Clear
+Force
+collection
+php
+work-php-aLlone-17946268..
+Goroutines
+Time
+in
+GC
+Live
+objects
+peak
+21.7
+MiB
+3
+0.10%
+2M
+php
+work-php-1794626655918...
+peak
+24.1
+MiB
+Heap
+CPU
+bun
+work-bun-1794826398941...
+GD
+peak
+52
+MIB
+2%
+Collect
+garbage
+pythons
+w
+FAIL go: shows it's recording 
+never saw /Profile\s+1/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:49AM
+@ @ @ peak
+peak.
+Exited - 0
+'/var/folders/h5/t85ndé...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+Go 1.27.3 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended ¢
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+'/var/folders/h5/t85nd63d71...
+Force collection
+peak 851 MiB: 1)
+4
+Goroutines
+Time in GC
+Live objects
+3
+0.10%
+3M
+php work-php-aLlone-17946268...
+peak 21.7 MiB: 1m 1...
+Heap
+CPU
+php work-php-1794626655918....
+peak 24.1 MiB
+V1...
+|
+xD
+bun work-bun-1794826398941....
+-
+=
+-
+-
+*3 Collect garbage
+peak 52 MIB: im 1
+r
+Snapshots
+pythons work-py-17940261411..
+This machine
+4.6 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 33.4%
+Load 2.59
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:49AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+'/var/folders/h5/t85ndé..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+Go
+1.27.3
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+¢
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+'/var/folders/h5/t85nd63d71..
+Force
+collection
+peak
+851
+MiB
+1)
+4
+Goroutines
+Time
+in
+GC
+Live
+objects
+3
+0.10%
+3M
+php
+work-php-
+FAIL go: the profile appears, with its length 
+never saw /all goroutines/ in:
+=
+@ peak
+File
+Edit
+View Window’ Help
+Q
+2
+Sat Nov 7 4:49AM
+@ @ @ peak
+peak.
+Exited - 0
+'/var/folders/h5/t85ndé...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+Go 1.27.3 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended ¢
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+'/var/folders/h5/t85nd63d71...
+Force collection
+peak 851 MiB: 1)
+4
+Goroutines
+Time in GC
+Live objects
+3
+0.10%
+3M
+php work-php-aLlone-17946268...
+peak 21.7 MiB: 1m 1...
+Heap
+CPU
+php work-php-1794626655918....
+peak 24.1 MiB
+V1...
+|
+xD
+bun work-bun-1794826398941....
+-
+=
+-
+-
+*3 Collect garbage
+peak 52 MIB: im 1
+r
+Snapshots
+pythons work-py-17940261411..
+This machine
+4.6 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 21.4%
+Load 2.54
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+=
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+2
+Sat
+Nov
+7
+4:49AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+'/var/folders/h5/t85ndé..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+Go
+1.27.3
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+¢
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+'/var/folders/h5/t85nd63d71..
+Force
+collection
+peak
+851
+MiB
+1)
+4
+Goroutines
+Time
+in
+GC
+Live
+objects
+3
+0.10%
+3M
+php
+work-ph
+FAIL go: explained by how it was measured /all goroutines/
+FAIL go: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:51AM
+@ @ @ peak
+peak.
+Exited - 0
+'/var/folders/h5/t85ndé...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+Go 1.27.3 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended ¢
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+'/var/folders/h5/t85nd63d71...
+Force collection
+peak 851 MiB: 1)
+4
+Goroutines
+Time in GC
+Live objects
+3
+0.10%
+3M
+php work-php-aLlone-17946268...
+peak 21.7 MiB: 1m 1...
+Heap
+CPU
+php work-php-1794626655918....
+peak 24.1 MiB
+V1...
+|
+xD
+bun work-bun-1794826398941....
+-
+=
+-
+-
+*3 Collect garbage
+peak 52 MIB: im 1
+r
+Snapshots
+pythons work-py-17940261411..
+This machine
+4.6 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 19.6%
+Load 2.17
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:51AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+'/var/folders/h5/t85ndé..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+Go
+1.27.3
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+¢
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+'/var/folders/h5/t85nd63d71..
+Force
+collection
+peak
+851
+MiB
+1)
+4
+Goroutines
+Time
+in
+GC
+Live
+objects
+3
+0.10%
+3M
+php
+work-php-
+FAIL go: the snapshot appears 
+never saw /smokeAlloc/ in:
+@ peak
+File
+Edit
+View Window’ Help
+Q Ss
+Sat Nov 7 4:51AM
+@ @ @ peak
+peak.
+Exited - 0
+'/var/folders/h5/t85ndé...
+G Run again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/...
+Overview Memory Profiler
+Stats Report Output 1
+Resources 1
+Running
+|
+rl
+Go 1.27.3 Peak agent 0.1.1
+Agent has disconnected. This is what it reported.
+Ended ¢
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+'/var/folders/h5/t85nd63d71...
+Force collection
+peak 851 MiB: 1)
+4
+Goroutines
+Time in GC
+Live objects
+3
+0.10%
+3M
+php work-php-aLlone-17946268...
+peak 21.7 MiB: 1m 1...
+Heap
+CPU
+php work-php-1794626655918....
+peak 24.1 MiB
+V1...
+|
+xD
+bun work-bun-1794826398941....
+-
+=
+-
+-
+*3 Collect garbage
+peak 52 MIB: im 1
+r
+Snapshots
+pythons work-py-17940261411..
+This machine
+4.7 GiB of 7 GiB
+No snapshots yet
+No snapshot selected.
+CPU 37.1%
+Load 2.21
+Take a heap snapshot to see what is holding memory.
+© History
+Settings
+5
+wf
+1BOSHKORCOOBS 17 2a6
+@
+peak
+File
+Edit
+View
+Window’
+Help
+Q
+Ss
+Sat
+Nov
+7
+4:51AM
+@
+@
+@
+peak
+peak
+Exited
+-
+0
+'/var/folders/h5/t85ndé..
+G
+Run
+again
+wy
+/private/var/folders/h5/t85nd63d71x27_8gl5qw3l_wO0000gn/..
+Overview
+Memory
+Profiler
+Stats
+Report
+Output
+1
+Resources
+1
+Running
+|
+rl
+Go
+1.27.3
+Peak
+agent
+0.1.1
+Agent
+has
+disconnected
+This
+is
+what
+it
+reported
+Ended
+¢
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+'/var/folders/h5/t85nd63d71..
+Force
+collection
+peak
+851
+MiB
+1)
+4
+Goroutines
+Time
+in
+GC
+Live
+objects
+3
+0.10%
+3M
+php
+work-php-
+FAIL go: and shows what the program holds /smokeAlloc/
+FAIL go: Collect garbage can be pressed 
+FAIL go: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1902
+ok   go: the program's exit code is its own exit 0: 
+ok   go: after it ends, the window says the agent has gone 
+FAIL go: the buttons' results are in history cpu 0, snapshots 0
+FAIL capture: the page opens 
+ok   capture: takes a command 
+FAIL capture: starts it 
+FAIL capture: the agent connected 
+ok   no agent: the window says profiling isn't available 
+ok   no agent: and that attaching only gives OS-level monitoring, or how to opt in 
+FAIL node, reopened: History opens 
+FAIL python, reopened: History opens 
+FAIL bun, reopened: History opens 
+FAIL bun, reopened: the run is listed and opens 
+FAIL bun, reopened: the Profiler tab opens 
+never saw /Bun\s+\d+\.\d+/ in:
+Finder
+File
+Edit
+View Go
+Window
+Sat Nov 7 4:57AM
+é
+Help
+Q Ss
+oo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 35.8%
+Load 2.56
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+Sat
+Nov
+7
+4:57AM
+é
+Help
+Q
+Ss
+oo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/runne
+FAIL bun, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 4:57AM
+é
+Help
+Q
+=
+oe
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 47.0%
+Load 2.52
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+4:57AM
+é
+Help
+Q
+=
+oe
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL bun, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 4:57AM
+é
+Help
+Q
+=
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.8 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 60.7%
+Load 2.98
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+4:57AM
+é
+Help
+Q
+=
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL bun, reopened: the CPU profile is there 
+FAIL php, reopened: History opens 
+FAIL php, reopened: the run is listed and opens 
+FAIL php, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 4:59AM
+é
+Help
+Q
+=
+ee
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 13.1%
+Load 3.34
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+4:59AM
+é
+Help
+Q
+=
+ee
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL php, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 4:59AM
+é
+Help
+Q
+=
+ee
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 11.1%
+Load 3.23
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+4:59AM
+é
+Help
+Q
+=
+ee
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL php, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 5:00AM
+é
+Help
+Q
+=
+oe
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 9.4%
+Load 3.15
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+5:00AM
+é
+Help
+Q
+=
+oe
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/runn
+FAIL php, reopened: the CPU profile is there 
+FAIL php-alone, reopened: History opens 
+FAIL php-alone, reopened: the run is listed and opens 
+FAIL php-alone, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 5:01AM
+é
+Help
+Q
+=
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 11.3%
+Load 2.48
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+5:01AM
+é
+Help
+Q
+=
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL php-alone, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 5:01AM
+é
+Help
+Q
+=
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.7 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 7.8%
+Load 2.60
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+5:01AM
+é
+Help
+Q
+=
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/runn
+FAIL php-alone, reopened: as what it reported, not as live 
+FAIL go, reopened: History opens 
+FAIL go, reopened: the run is listed and opens 
+FAIL go, reopened: the Profiler tab opens 
+never saw /Go\s+\d+\.\d+/ in:
+Finder
+File
+Edit
+View Go
+Window
+Sat Nov 7 5:03AM
+é
+Help
+Q Ss
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.8 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 19.8%
+Load 3.60
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+Sat
+Nov
+7
+5:03AM
+é
+Help
+Q
+Ss
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/runne
+FAIL go, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Finder
+File
+Edit
+View Go
+Window
+Sat Nov 7 5:03AM
+é
+Help
+Q Ss
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.8 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 11.0%
+Load 3.39
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+Sat
+Nov
+7
+5:03AM
+é
+Help
+Q
+Ss
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/runne
+FAIL go, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Finder
+File
+Edit
+View Go
+Window
+=
+Sat Nov 7 5:03AM
+é
+Help
+Q
+=
+eo
+peak.
++ Capture
+Capture a process.
+Running
+Run a script through peak, or attach to something already
+running, and watch its memory, CPU and I/O as it happens.
+Run a command.
+Attach to a process.
+r/
+ra
+Node.js, Bun, Python and PHP geta
+Your processes, largest first.
+profiling agent automatically. Go
+programs opt in with one import.
+Command
+/Systen/Library/CoreSer
+113 MiB
+j
+PID 445
+Working directory
+113 MiB
+/Systen/Library/Frameno
+j
+PID 475
+~
+/System/Library/Frame..
+96.7 MiB
+bun run build
+npm test
+/System/Volumes/Preboot/
+PID 66792
+python main.py
+node server.js
+/Users/runner/actions..
+93 MiB
+This machine
+4.8 GiB of 7 GiB
+/Users/runner/actions-run...
+PID 10085
+CPU 22.8%
+Load 3.28
+cargo build --release
+/System/Cryptexes/App/..
+92 MiB
+PID 2518
+© History
+Settings
+5
+=Tatare
+|
+BOs esecOrcoesse~
+e
+SSA
+ne
+—
+Finder
+File
+Edit
+View
+Go
+Window
+=
+Sat
+Nov
+7
+5:03AM
+é
+Help
+Q
+=
+eo
+peak
++
+Capture
+Capture
+a
+process
+Running
+Run
+a
+script
+through
+peak
+or
+attach
+to
+something
+already
+running
+and
+watch
+its
+memory
+CPU
+and
+I/O
+as
+it
+happens
+Run
+a
+command
+Attach
+to
+a
+process
+r/
+ra
+Node.js
+Bun
+Python
+and
+PHP
+geta
+Your
+processes
+largest
+first
+profiling
+agent
+automatically
+Go
+programs
+opt
+in
+with
+one
+import
+Command
+/Systen/Library/CoreSer
+113
+MiB
+j
+PID
+445
+Working
+directory
+113
+MiB
+/Systen/Library/Frameno
+j
+PID
+475
+~
+/System/Library/Frame.
+96.7
+MiB
+bun
+run
+build
+npm
+test
+/System/Volumes/Preboot/
+PID
+66792
+python
+main.py
+node
+server.js
+/Users/run
+FAIL go, reopened: the CPU profile is there 
+AGENTS UI FAILED
+with:
+  name: smoke-darwin-aarch64
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+(node:7062) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 40 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:7062) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 6564471
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is 74b841bb6751cf03252b3adea229cf7269513c6f0c95063b5d43ef155c286f09
+Finalizing artifact upload
+Artifact smoke-darwin-aarch64.zip successfully finalized. Artifact ID 13561547982
+Artifact smoke-darwin-aarch64 has been successfully uploaded! Final size is 6564471 bytes. Artifact ID is 13561547982
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42337392741/artifacts/13561547982
+Post job cleanup.
+Post job cleanup.
+[command]/opt/homebrew/bin/git version
+git version 2.56.0
+Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/69e6b25e-8c89-4a26-8b31-c36199879cca/.gitconfig'
+Temporarily overriding HOME='/Users/runner/work/_temp/69e6b25e-8c89-4a26-8b31-c36199879cca' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/peak/peak
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes

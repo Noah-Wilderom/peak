@@ -1,0 +1,14137 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go,php-excimer
+  DEBIAN_FRONTEND: noninteractive
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $D8F3D979
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $6CAEFEAB
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $59FEAE32
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_HFS : 4)…
+          disk image (Apple_HFS : 4): verified   CRC32 $473A2C7A
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $59FEAE32
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $3F97C9B0
+verified   CRC32 $325A8EE7
+/dev/disk2          	GUID_partition_scheme          	
+/dev/disk2s1        	Apple_HFS                      	/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak-dmg-6OwFZb
+"disk2" ejected.
+(node:26428) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (macOS app, commit 131e76a632e059633eb1a8cbf16e03a60fc7c5a5)
+collector: x86_64: /Users/runner/Library/Application Support/peak/collectors/x86_64-70916d98f22b4d6c/peak-collector (for Linux targets) 
+ok   names its bundled collector x86_64: /Users/runner/Library/Application Support/peak/collectors/x86_64-70916d98f22b4d6c/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sjc20-bb655-c52f0ec9-04f2-406b-87ed-f8e874b88b0e-AEF89DA268C1.local for runner — running without monitoring
+app pid 26546
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak place yUBr14
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794025996385-err
+ok   the app recorded real samples and the exit samples 8, max rss 110891008, exit 7
+ok   the Node agent reported from inside the program lag samples 6
+ok   node: identifies its runtime and agent node 22.23.2, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2272 ms sampled in 2115 ms, top: busyWork 1182, (garbage collector) 462, (idle) 370, post 191, (program) 24, listOnTimeout 18: 
+ok   node: says how it sampled v8
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 27 of 30
+ok   node: live heap reached the samples 
+ok   node: collections are stored 361
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2036 ms sampled in 2036 ms, top: <module> 1544, busy_work 492, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 28 of 31
+ok   python: collections are stored 16
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2003 ms sampled in 2050 ms, top: busyWork 1980, repeat 10, SmokeThing 7, sort 6, (root) 0, heap 0: 
+ok   bun: says how it sampled jsc
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":85985,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2261161,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 26 of 29
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-wall, 2025 ms sampled in 2055 ms, top: busy_work 2025, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-wall
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":608640,"unit":"bytes"},{"name":"Peak memory","value":1195624,"unit":"bytes"},{"name":"Collector runs","value":1249,"unit":"count"},{"name":"Values collected","value":12479940,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1249
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":597200,"unit":"bytes"},{"name":"Peak memory","value":1177896,"unit":"bytes"},{"name":"Collector runs","value":620,"unit":"count"},{"name":"Values collected","value":6200000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1220 ms sampled in 2150 ms, top: runtime.walltime 500, runtime.nanotime1 430, time.now 30, runtime.madvise 30, time.Now 20, main.busyWork 10: 
+ok   go: says how it sampled pprof
+ok   go: heap snapshot holds what the program allocated 7 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.07996918413662561,"unit":"percent"},{"name":"Live objects","value":766943,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 28 of 30
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+brew install tesseract cliclick
+shell: /bin/bash -e {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+==> Downloading bottle manifests
+✔︎ Bottle Manifest tesseract (5.5.3)
+✔︎ Bottle Manifest cliclick (5.1)
+==> Would install 2 formulae:
+tesseract cliclick
+==> Would install 8 dependencies for tesseract:
+openjpeg
+leptonica
+libb2
+libarchive
+fribidi
+libdatrie
+libthai
+pango
+==> Would upgrade 1 dependency for tesseract:
+little-cms2
+==> Fetching downloads for: tesseract and cliclick
+✔︎ Bottle tesseract (5.5.3)
+✔︎ Bottle cliclick (5.1)
+✔︎ Bottle Manifest little-cms2 (2.19.1)
+✔︎ Bottle little-cms2 (2.19.1)
+✔︎ Bottle Manifest openjpeg (2.5.4)
+✔︎ Bottle openjpeg (2.5.4)
+✔︎ Bottle Manifest leptonica (1.87.0)
+✔︎ Bottle leptonica (1.87.0)
+✔︎ Bottle Manifest libb2 (0.98.1)
+✔︎ Bottle libb2 (0.98.1)
+✔︎ Bottle Manifest libarchive (3.8.9)
+✔︎ Bottle libarchive (3.8.9)
+✔︎ Bottle Manifest fribidi (1.0.16)
+✔︎ Bottle fribidi (1.0.16)
+✔︎ Bottle Manifest libdatrie (0.2.14)
+✔︎ Bottle libdatrie (0.2.14)
+✔︎ Bottle Manifest libthai (0.1.30)
+✔︎ Bottle libthai (0.1.30)
+✔︎ Bottle Manifest pango (1.58.2)
+✔︎ Bottle pango (1.58.2)
+==> Installing dependencies for tesseract: openjpeg, leptonica, libb2, libarchive, fribidi, libdatrie, libthai and pango
+==> Installing tesseract dependency: openjpeg
+==> Pouring openjpeg--2.5.4.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/openjpeg/2.5.4: 512 files, 14.6MB
+==> Installing tesseract dependency: leptonica
+==> Pouring leptonica--1.87.0.sonoma.bottle.1.tar.gz
+🍺  /usr/local/Cellar/leptonica/1.87.0: 55 files, 6.3MB
+==> Installing tesseract dependency: libb2
+==> Pouring libb2--0.98.1.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/libb2/0.98.1: 8 files, 282.9KB
+==> Installing tesseract dependency: libarchive
+==> Pouring libarchive--3.8.9.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/libarchive/3.8.9: 65 files, 4MB
+==> Installing tesseract dependency: fribidi
+==> Pouring fribidi--1.0.16.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/fribidi/1.0.16: 68 files, 489.6KB
+==> Installing tesseract dependency: libdatrie
+==> Pouring libdatrie--0.2.14.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/libdatrie/0.2.14: 20 files, 231.3KB
+==> Installing tesseract dependency: libthai
+==> Pouring libthai--0.1.30.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/libthai/0.1.30: 30 files, 923.8KB
+==> Installing tesseract dependency: pango
+==> Pouring pango--1.58.2.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/pango/1.58.2: 69 files, 3.4MB
+==> Installing tesseract
+==> Pouring tesseract--5.5.3.sonoma.bottle.tar.gz
+==> Caveats
+This formula contains only the "eng", "osd", and "snum" language data files.
+If you need any other supported languages, run `brew install tesseract-lang`.
+==> Summary
+🍺  /usr/local/Cellar/tesseract/5.5.3: 75 files, 34.7MB
+==> Pouring cliclick--5.1.sonoma.bottle.tar.gz
+🍺  /usr/local/Cellar/cliclick/5.1: 5 files, 153.3KB
+==> Caveats
+==> tesseract
+This formula contains only the "eng", "osd", and "snum" language data files.
+If you need any other supported languages, run `brew install tesseract-lang`.
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  PEAK_SMOKE_PLATFORM: darwin-x86_64
+expected   CRC32 $325A8EE7
+/dev/disk2          	GUID_partition_scheme          	
+/dev/disk2s1        	Apple_HFS                      	/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak-dmg-764Hdm
+"disk2" ejected.
+(node:30472) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   node: connected 
+accessibility: 572:574: syntax error: Expected expression but found “on”. (-2741)
+accessibility tree on macOS: not usable, 0 items: 
+ok   node: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+4,
+Sat Nov 7 4:36AM
+oO
+peak
+peak.
+node
+--no-use-osr work-node-17940261617...
+(0 Freeze
+G Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node --no-use-osr work-node-179402)
+he
+l
+acte
+E
+——
+Node.js 22.23.2 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+see what is holding memor
+This machine
+B of 14
+————
+SPU 53
+12.7
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+4
+Sat
+Nov
+7
+4:36AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-17940261617..
+(0
+Freeze
+G
+Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node
+--no-use-osr
+work-node-179402)
+he
+l
+acte
+E
+——
+Node.js
+22.23.2
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+see
+what
+is
+holding
+memor
+This
+machine
+B
+of
+14
+————
+SPU
+53
+12.7
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: and the agent's version 
+never saw /Connected/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:36AM
+oO
+peak
+peak.
+node
+--no-use-osr work-node-17940261617...
+(0 Freeze
+G Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node --no-use-osr work-node-179402)
+—-
+l
+acte
+E
+|
+Node.js 22.23.2 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+see what is holding memor
+This machine
+B of 14
+E
+————
+SPU 57.1
+L
+11
+Z
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:36AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-17940261617..
+(0
+Freeze
+G
+Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node
+--no-use-osr
+work-node-179402)
+—-
+l
+acte
+E
+|
+Node.js
+22.23.2
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+see
+what
+is
+holding
+memor
+This
+machine
+B
+of
+14
+E
+————
+SPU
+57.1
+L
+11
+Z
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: and that it's connected 
+FAIL node: Record 5s can be pressed 
+never saw /Recording/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:37AM
+oO
+peak
+peak.
+node
+--no-use-osr work-node-17940261617...
+(0 Freeze
+G Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node --no-use-osr work-node-179402)
+l
+acte
+4
+Zz
+E
+— ie
+Node.js 22.23.2 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+see what is holding memor
+This machine
+1
+B of 14
+E
+———
+SPU 1
+L
+11
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:37AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-17940261617..
+(0
+Freeze
+G
+Restart
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+node
+--no-use-osr
+work-node-179402)
+l
+acte
+4
+Zz
+E
+—
+ie
+Node.js
+22.23.2
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+see
+what
+is
+holding
+memor
+This
+machine
+1
+B
+of
+14
+E
+———
+SPU
+1
+L
+11
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: shows it's recording 
+never saw /Profile\s+1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:37AM
+oO
+peak
+peak.
+node --no-use-osr work-node-1794026161792. js
+xited « C
+G Run again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+PID 307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent has
+ected
+T
+lat it re
+te
+Node.js 22.23.2 Peak agent
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+use
+osr
+ode
+4t)
+é
+peak 95.1 MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+memor
+lapshot
+This machine
+B of 14
+E
+————
+SPU 1
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:37AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-1794026161792
+js
+xited
+«
+C
+G
+Run
+again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+PID
+307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Node.js
+22.23.2
+Peak
+agent
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+use
+osr
+ode
+4t)
+é
+peak
+95.1
+MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+memor
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+1
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: the profile appears, with its length 
+never saw /Sampled by V8/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:38AM
+oO
+peak
+peak.
+node --no-use-osr work-node-1794026161792. js
+xited « C
+G Run again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+PID 307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent has
+ected
+T
+lat it re
+te
+Node.js 22.23.2 Peak agent
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+use
+osr
+ode
+4t)
+é
+peak 95.1 MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+memor
+lapshot
+This machine
+B of 14
+E
+————
+SPU 1
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:38AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-1794026161792
+js
+xited
+«
+C
+G
+Run
+again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+PID
+307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Node.js
+22.23.2
+Peak
+agent
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+use
+osr
+ode
+4t)
+é
+peak
+95.1
+MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+memor
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+1
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: explained by how it was measured /Sampled by V8/
+FAIL node: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:39AM
+oO
+peak
+peak.
+node --no-use-osr work-node-1794026161792. js
+xited « C
+G Run again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+PID 307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent has
+ected
+T
+lat it re
+te
+Node.js 22.23.2 Peak agent
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+use
+osr
+ode
+4t)
+é
+peak 95.1 MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+memor
+lapshot
+This machine
+1
+B of 14
+E
+————
+L
+51
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:39AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-1794026161792
+js
+xited
+«
+C
+G
+Run
+again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+PID
+307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Node.js
+22.23.2
+Peak
+agent
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+use
+osr
+ode
+4t)
+é
+peak
+95.1
+MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+memor
+lapshot
+This
+machine
+1
+B
+of
+14
+E
+————
+L
+51
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: the snapshot appears 
+never saw /SmokeThing/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:39AM
+oO
+peak
+peak.
+node --no-use-osr work-node-1794026161792. js
+xited « C
+G Run again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+PID 307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent has
+ected
+T
+lat it re
+te
+Node.js 22.23.2 Peak agent
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+use
+osr
+ode
+4t)
+é
+peak 95.1 MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+memor
+lapshot
+This machine
+B of 14
+E
+————
+a7 7
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:39AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-1794026161792
+js
+xited
+«
+C
+G
+Run
+again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+PID
+307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Node.js
+22.23.2
+Peak
+agent
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+use
+osr
+ode
+4t)
+é
+peak
+95.1
+MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+memor
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+a7
+7
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: and shows what the program holds /SmokeThing/
+FAIL node: Collect garbage can be pressed 
+FAIL node: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1306
+ok   node: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:41AM
+oO
+peak
+peak.
+node --no-use-osr work-node-1794026161792. js
+xited « C
+G Run again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime Zpv600
+PID 307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent has
+ected
+T
+lat it re
+te
+Node.js 22.23.2 Peak agent
+Ended
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+use
+osr
+ode
+4t)
+é
+peak 95.1 MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+memor
+lapshot
+This machine
+1
+B of 14
+E
+————
+~
+SPU 1
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:41AM
+oO
+peak
+peak
+node
+--no-use-osr
+work-node-1794026161792
+js
+xited
+«
+C
+G
+Run
+again
+Ww
+J
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Zpv600
+PID
+307
+1
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+l
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Node.js
+22.23.2
+Peak
+agent
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+use
+osr
+ode
+4t)
+é
+peak
+95.1
+MIE
+Heap
+CPU
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+memor
+lapshot
+This
+machine
+1
+B
+of
+14
+E
+————
+~
+SPU
+1
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL node: after it ends, the window says the agent has gone 
+FAIL node: the buttons' results are in history cpu 0, snapshots 0
+ok   python: connected 
+ok   python: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:41AM
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+(0 Freeze
+G Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons work-py-1794026482164 .py
+=
+).1
+acte
+|
+E
+—
+Python 3.12.10 P
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+Ended
+Clear
+ython has
+10 cheap tote
+ere is the
+e
+Live heap
+ts heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+1
+B of 14
+E
+———
+SPU 54.6
+—
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:41AM
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+(0
+Freeze
+G
+Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons
+work-py-1794026482164
+.py
+=
+).1
+acte
+|
+E
+—
+Python
+3.12.10
+P
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+Ended
+Clear
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+Live
+heap
+ts
+heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+1
+B
+of
+14
+E
+———
+SPU
+54.6
+—
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: and the agent's version 
+never saw /Connected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:41AM
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+(0 Freeze
+G Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons work-py-1794026482164 .py
+).1
+acte
+i me |
+E
+-—
+Python 3.12.10 P
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+Ended
+Clear
+ython has
+10 cheap tote
+ere is the
+e
+Live heap
+ts heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+CPU 3
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:41AM
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+(0
+Freeze
+G
+Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons
+work-py-1794026482164
+.py
+).1
+acte
+i
+me
+|
+E
+-—
+Python
+3.12.10
+P
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+Ended
+Clear
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+Live
+heap
+ts
+heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+CPU
+3
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL python: and that it's connected 
+never saw /no cheap total/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:41AM
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+(0 Freeze
+G Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons work-py-1794026482164 .py
+).1
+acte
+i 4
+4
+E
+——
+Python 3.12.10 P
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+Ended
+Clear
+ython has
+10 cheap tote
+ere is the
+e
+Live heap
+ts heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+co
+L
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:41AM
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+(0
+Freeze
+G
+Restart
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+pythons
+work-py-1794026482164
+.py
+).1
+acte
+i
+4
+4
+E
+——
+Python
+3.12.10
+P
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+Ended
+Clear
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+Live
+heap
+ts
+heap
+use
+osr
+ode
+5
+qj
+é
+it
+C
+peak
+Heap
+CPU
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+co
+L
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL python: says why there's no live heap /no cheap total/
+FAIL python: Record 5s can be pressed 
+never saw /Recording/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:42AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 17
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:42AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+17
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: shows it's recording 
+never saw /Profile\s+1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:43AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 13
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:43AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+13
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: the profile appears, with its length 
+never saw /Python stack sampled/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:43AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 1
+Fa
+-
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:43AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+1
+Fa
+-
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: explained by how it was measured /Python stack sampled/
+FAIL python: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:45AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 22.1
+L
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:45AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+22.1
+L
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: the snapshot appears 
+never saw /SmokeThing/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:45AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 7
+L
+© History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:45AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+i
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+qj
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+7
+L
+©
+History
+Settings
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: and shows what the program holds /SmokeThing/
+FAIL python: Collect garbage can be pressed 
+FAIL python: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1355
+ok   python: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:46AM
+é
+=_
+oO
+peak
+peak.
+python3 work-py-1794026482164.py
+Exited - C
+G Run again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID 409
+Sta rte
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent has
+ected
+T
+lat it re
+te
+Python 3.12.10 P
+Ended
+Clear
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Garbage collections
+4)
+2164
+ython has
+10 cheap tote
+ere is the
+e
+peak 14 MIE
+Live heap
+ts heap
+use
+osr
+ode
+Heap
+CPU
+peak 95.1 Kh
+C
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+SPU 52
+L
+2.41
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:46AM
+é
+=_
+oO
+peak
+peak
+python3
+work-py-1794026482164.py
+Exited
+-
+C
+G
+Run
+again
+Ww
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZBHZvV
+PID
+409
+Sta
+rte
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+).1
+Agent
+has
+ected
+T
+lat
+it
+re
+te
+Python
+3.12.10
+P
+Ended
+Clear
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Garbage
+collections
+4)
+2164
+ython
+has
+10
+cheap
+tote
+ere
+is
+the
+e
+peak
+14
+MIE
+Live
+heap
+ts
+heap
+use
+osr
+ode
+Heap
+CPU
+peak
+95.1
+Kh
+C
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+SPU
+52
+L
+2.41
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+%
+Ko
+“‘QOnoac
+g
+FAIL python: after it ends, the window says the agent has gone 
+FAIL python: the buttons' results are in history cpu 0, snapshots 0
+ok   bun: connected 
+ok   bun: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:47AM
+=_
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+(0 Freeze
+© Restart @ stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun work-bun-1794826814309. js
+Bun 1.4.4 Peal
+l
+acte
+agent
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Live
+njects
+Prote
+e
+e
+Extra mer
+5
+)
+é
+4
+61.6k
+11
+1.5 MiB
+neak 14 MIE
+Garbage
+ollections
+Bun doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+a
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:47AM
+=_
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+(0
+Freeze
+©
+Restart
+@
+stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun
+work-bun-1794826814309
+js
+Bun
+1.4.4
+Peal
+l
+acte
+agent
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Live
+njects
+Prote
+e
+e
+Extra
+mer
+5
+)
+é
+4
+61.6k
+11
+1.5
+MiB
+neak
+14
+MIE
+Garbage
+ollections
+Bun
+doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one
+are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+a
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL bun: and the agent's version 
+never saw /Connected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:47AM
+=_
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+(0 Freeze
+© Restart @ stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun work-bun-1794826814309. js
+Bun 1.4.4 Peal
+l
+acte
+£4
+agent
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ene
+et
+Clear
+Live
+njects
+Prote
+e
+e
+Extra mer
+)
+é
+4
+121.7k
+11
+2.7 MiB
+eak 14 MiE
+Garbage
+ollections
+Bun doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+1
+B of 14
+E
+————
+4
+a
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:47AM
+=_
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+(0
+Freeze
+©
+Restart
+@
+stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun
+work-bun-1794826814309
+js
+Bun
+1.4.4
+Peal
+l
+acte
+£4
+agent
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ene
+et
+Clear
+Live
+njects
+Prote
+e
+e
+Extra
+mer
+)
+é
+4
+121.7k
+11
+2.7
+MiB
+eak
+14
+MiE
+Garbage
+ollections
+Bun
+doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one
+are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+1
+B
+of
+14
+E
+————
+4
+a
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL bun: and that it's connected 
+never saw /doesn't publish individual garbage collections/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:47AM
+=_
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+(0 Freeze
+© Restart @ stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun work-bun-1794826814309. js
+Bun 1.4.4 Peal
+l
+acte
+E
+agent
+—
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Live
+njects
+Prote
+e
+e
+Extra mer
+5
+)
+é
+4
+151.7k
+11
+3.3 MiB
+neak 14 MIE
+Garbage
+ollections
+Bun doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73 Collect garbage
+Snapshots
+N
+ots
+et
+No snapshot selected.
+Take a heap
+lapshot
+This machine
+B of 14
+E
+————
+-
+a
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:47AM
+=_
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+(0
+Freeze
+©
+Restart
+@
+stop
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+ZEDhHU
+Memory
+Profiler
+tat
+Output
+Resource
+Running
+bun
+work-bun-1794826814309
+js
+Bun
+1.4.4
+Peal
+l
+acte
+E
+agent
+—
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Live
+njects
+Prote
+e
+e
+Extra
+mer
+5
+)
+é
+4
+151.7k
+11
+3.3
+MiB
+neak
+14
+MIE
+Garbage
+ollections
+Bun
+doe
+LI
+sh
+|
+dual
+|
+Fa]
+lecti
+one
+are
+ste
+5
+use
+osr
+ode
+qj
+é
+eak
+it
+CPU
+Heap
+73
+Collect
+garbage
+Snapshots
+N
+ots
+et
+No
+snapshot
+selected
+Take
+a
+heap
+lapshot
+This
+machine
+B
+of
+14
+E
+————
+-
+a
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL bun: says why there's no collections /doesn't publish individual garbage collections/
+FAIL bun: Record 5s can be pressed 
+never saw /Recording/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:48AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+ZEDh
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+l
+dual
+Fa]
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+Take ah
+siding memory
+This machine
+B of 14
+E
+————
+~
+L
+1.49
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:48AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+ZEDh
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+l
+dual
+Fa]
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+Take
+ah
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+~
+L
+1.49
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: shows it's recording 
+never saw /Profile\s+1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:48AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime cZEDhU
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+dual
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+Take ah
+siding memory
+This machine
+B of 14
+E
+————
+SPU 17.1
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:48AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+cZEDhU
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+dual
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+Take
+ah
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+SPU
+17.1
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: the profile appears, with its length 
+never saw /Sampled by JavaScriptCore/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:48AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+ZEDh
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+l
+dual
+Fa]
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+Take ah
+siding memory
+This machine
+B of 14
+E
+————
+~
+SPU 23
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:48AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+ZEDh
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+l
+dual
+Fa]
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+Take
+ah
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+~
+SPU
+23
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: explained by how it was measured /Sampled by JavaScriptCore/
+FAIL bun: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:50AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime cZEDhU
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+dual
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+Take ah
+siding memory
+This machine
+B of 14
+E
+————
+SPU 12
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:50AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+cZEDhU
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+dual
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+Take
+ah
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+SPU
+12
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: the snapshot appears 
+never saw /SmokeThing/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:50AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+ZEDh
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+l
+dual
+Fa]
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+Take ah
+siding memory
+This machine
+B of 14
+E
+————
+SPU 7.1
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:50AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+ZEDh
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+U
+17
+que
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+l
+dual
+Fa]
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+Take
+ah
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+SPU
+7.1
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: and shows what the program holds /SmokeThing/
+FAIL bun: Collect garbage can be pressed 
+FAIL bun: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1413
+ok   bun: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:52AM
+oO
+peak
+peak.
+bun work-bun-1794026814309. js
+Exited
+G Run again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+ZEDh
+PID 53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun 1.4.4 Peal
+l
+Agent has c
+ecte
+lat It
+agent
+Ended
+Clear
+Live heap
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+l
+179482¢
+14
+Live
+Prote
+e
+e
+Extra mer
+peak 49.7 M
+C
+372.1k
+11
+7.5 MiB
+)
+ollections
+Bun doe
+l
+dual
+Fa]
+le
+e are
+ae
+qj
+é
+2164
+Garbage
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna p shots
+N
+10
+No snapshot selected.
+siding memory
+This machine
+B of 14
+E
+————
+SPU 22.6
+L
+2.21
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:52AM
+oO
+peak
+peak
+bun
+work-bun-1794026814309
+js
+Exited
+G
+Run
+again
+Ww
+B
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+ZEDh
+PID
+53825
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+Bun
+1.4.4
+Peal
+l
+Agent
+has
+c
+ecte
+lat
+It
+agent
+Ended
+Clear
+Live
+heap
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+l
+179482¢
+14
+Live
+Prote
+e
+e
+Extra
+mer
+peak
+49.7
+M
+C
+372.1k
+11
+7.5
+MiB
+)
+ollections
+Bun
+doe
+l
+dual
+Fa]
+le
+e
+are
+ae
+qj
+é
+2164
+Garbage
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+Heap
+CPU
+peak
+it
+Sna
+p
+shots
+N
+10
+No
+snapshot
+selected
+siding
+memory
+This
+machine
+B
+of
+14
+E
+————
+SPU
+22.6
+L
+2.21
+©
+History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+FAIL bun: after it ends, the window says the agent has gone 
+FAIL bun: the buttons' results are in history cpu 0, snapshots 0
+ok   php: connected 
+ok   php: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:52AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+(0 Freeze
+Ph
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php work-php-1794827159695. php
+PHP 8.3.36 Pea
+t
+).]
+acte
+i
+E
+-—
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Me
+Peak me
+Collector
+le
+e
+e
+U
+1
+48026814309
+616 KiB
+1.1 MiB
+1,212
+12.1M_
+peak 49.7 M
+C
+F
+ere
+lest Tre
+t
+ttoe
+n
+event
+e
+Runtime delay
+Heap snapshots
+as no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak 14 MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G) Record 10s
+Profile
+N
+CPL p
+yet
+No profile selected.
+Record a
+if
+SW Sel
+Wy
+onds to set
+here the time goes
+This machine
+1
+B of 14
+E
+————
+CPU 6
+L
+2.4
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:52AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+(0
+Freeze
+Ph
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php
+work-php-1794827159695
+php
+PHP
+8.3.36
+Pea
+t
+).]
+acte
+i
+E
+-—
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Me
+Peak
+me
+Collector
+le
+e
+e
+U
+1
+48026814309
+616
+KiB
+1.1
+MiB
+1,212
+12.1M_
+peak
+49.7
+M
+C
+F
+ere
+lest
+Tre
+t
+ttoe
+n
+event
+e
+Runtime
+delay
+Heap
+snapshots
+as
+no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak
+14
+MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G)
+Record
+10s
+Profile
+N
+CPL
+p
+yet
+N
+FAIL php: and the agent's version 
+never saw /Connected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:52AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+(0 Freeze
+Ph
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php work-php-1794827159695. php
+PHP 8.3.36 Pea
+t
+).]
+acte
+i
+E
+-—
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Me
+Peak me
+Collector
+le
+e
+e
+U
+1
+48026814309
+618 KiB
+1.1 MiB
+1,968
+19.7M
+peak 49.7 M
+C
+F
+ere
+lest Tre
+t
+ttoe
+n
+event
+e
+Runtime delay
+Heap snapshots
+as no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak 14 MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G) Record 10s
+Profile
+N
+CPL p
+yet
+No profile selected.
+Record a
+if
+SW Sel
+Wy
+onds to set
+here the time goes
+This machine
+B of 14
+E
+————
+4
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:52AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+(0
+Freeze
+Ph
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php
+work-php-1794827159695
+php
+PHP
+8.3.36
+Pea
+t
+).]
+acte
+i
+E
+-—
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Me
+Peak
+me
+Collector
+le
+e
+e
+U
+1
+48026814309
+618
+KiB
+1.1
+MiB
+1,968
+19.7M
+peak
+49.7
+M
+C
+F
+ere
+lest
+Tre
+t
+ttoe
+n
+event
+e
+Runtime
+delay
+Heap
+snapshots
+as
+no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak
+14
+MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G)
+Record
+10s
+Profile
+N
+CPL
+p
+yet
+No
+profile
+sele
+FAIL php: and that it's connected 
+never saw /no event loop to delay/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:52AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+(0 Freeze
+Ph
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php work-php-1794827159695. php
+PHP 8.3.36 Pea
+t
+).]
+acte
+i
+E
+-—
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Me
+Peak me
+Collector
+le
+e
+e
+U
+1
+48026814309
+620 KiB
+1.1 MiB
+2,856
+28.6M
+peak 49.7 M
+C
+F
+ere
+lest Tre
+t
+ttoe
+n
+event
+e
+Runtime delay
+Heap snapshots
+as no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak 14 MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G) Record 10s
+Profile
+N
+CPL p
+yet
+No profile selected.
+Record a
+if
+SW Sel
+Wy
+onds to set
+here the time goes
+This machine
+B of 14
+E
+————
+SPU 52
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:52AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+(0
+Freeze
+Ph
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php
+work-php-1794827159695
+php
+PHP
+8.3.36
+Pea
+t
+).]
+acte
+i
+E
+-—
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Me
+Peak
+me
+Collector
+le
+e
+e
+U
+1
+48026814309
+620
+KiB
+1.1
+MiB
+2,856
+28.6M
+peak
+49.7
+M
+C
+F
+ere
+lest
+Tre
+t
+ttoe
+n
+event
+e
+Runtime
+delay
+Heap
+snapshots
+as
+no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak
+14
+MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G)
+Record
+10s
+Profile
+N
+CPL
+p
+yet
+No
+profile
+FAIL php: says why there's no delay /no event loop to delay/
+never saw /no built-in way to list/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:52AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+(0 Freeze
+Ph
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php work-php-1794827159695. php
+PHP 8.3.36 Pea
+t
+).]
+acte
+i
+E
+-—
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+Ended
+Clear
+Me
+Peak me
+Collector
+le
+e
+e
+U
+1
+48026814309
+621 KiB
+1.2 MiB
+3,316
+33.2M_
+peak 49.7 M
+C
+F
+ere
+lest Tre
+t
+ttoe
+n
+event
+e
+Runtime delay
+Heap snapshots
+as no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak 14 MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G) Record 10s
+Profile
+N
+CPL p
+yet
+No profile selected.
+Record a
+if
+SW Sel
+Wy
+onds to set
+here the time goes
+This machine
+B of 14
+E
+————
+CPU 6
+Fa
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:52AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+(0
+Freeze
+Ph
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+php
+work-php-1794827159695
+php
+PHP
+8.3.36
+Pea
+t
+).]
+acte
+i
+E
+-—
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+Ended
+Clear
+Me
+Peak
+me
+Collector
+le
+e
+e
+U
+1
+48026814309
+621
+KiB
+1.2
+MiB
+3,316
+33.2M_
+peak
+49.7
+M
+C
+F
+ere
+lest
+Tre
+t
+ttoe
+n
+event
+e
+Runtime
+delay
+Heap
+snapshots
+as
+no
+ult
+t
+li
+emory
+5
+)
+é
+4
+neak
+14
+MIE
+CPU
+Heap
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+C
+G)
+Record
+10s
+Profile
+N
+CPL
+p
+yet
+No
+pro
+FAIL php: says why there's no snapshots /no built-in way to list/
+FAIL php: Record 5s can be pressed 
+never saw /Recording/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:53AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+xited - C
+G Run again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+PID 65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP 8.3.36 Pea
+t
+).]
+Agent has c
+ecte
+T
+lat It
+Ended
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+nna
+_
+h
+17
+=P ae
+I
+Fa]
+Peak me
+Collector
+le
+e
+e
+eak
+6M
+C
+606 KiB
+1.2 MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime delay
+Hea p snaps
+ots
+ult
+t
+li
+emot
+peak 49.7 M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak 14 MIE
+use
+osr
+ode
+qj
+é
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+ere the time goe
+N
+Uy
+et
+This machine
+fi
+————
+SPU 1
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:53AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+xited
+-
+C
+G
+Run
+again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+PID
+65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP
+8.3.36
+Pea
+t
+).]
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+nna
+_
+h
+17
+=P
+ae
+I
+Fa]
+Peak
+me
+Collector
+le
+e
+e
+eak
+6M
+C
+606
+KiB
+1.2
+MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime
+delay
+Hea
+p
+snaps
+ots
+ult
+t
+li
+emot
+peak
+49.7
+M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak
+14
+MIE
+use
+osr
+ode
+qj
+é
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No
+profile
+selected
+Hel
+rd
+if
+eV
+Sec
+L
+ds
+to
+see
+ere
+
+FAIL php: shows it's recording 
+never saw /Profile\s+1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:54AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+xited - C
+G Run again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+PID 65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP 8.3.36 Pea
+t
+).]
+Agent has c
+ecte
+T
+lat It
+Ended
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+nna
+_
+h
+17
+=P ae
+I
+Fa]
+Peak me
+Collector
+le
+e
+e
+eak
+6M
+C
+606 KiB
+1.2 MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime delay
+Hea p snaps
+ots
+ult
+t
+li
+emot
+peak 49.7 M
+C
+2164
+CPU
+Heap
+9eak 14 MIE
+use
+osr
+ode
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+ere the time goe
+N
+Uy
+et
+This machine
+B of 14
+E
+————
+~
+PU 7.7
+L
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:54AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+xited
+-
+C
+G
+Run
+again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+PID
+65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP
+8.3.36
+Pea
+t
+).]
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+nna
+_
+h
+17
+=P
+ae
+I
+Fa]
+Peak
+me
+Collector
+le
+e
+e
+eak
+6M
+C
+606
+KiB
+1.2
+MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime
+delay
+Hea
+p
+snaps
+ots
+ult
+t
+li
+emot
+peak
+49.7
+M
+C
+2164
+CPU
+Heap
+9eak
+14
+MIE
+use
+osr
+ode
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No
+profile
+selected
+Hel
+rd
+if
+eV
+Sec
+L
+ds
+to
+see
+ere
+the
+time
+goe
+N
+Uy
+
+FAIL php: the profile appears, with its length 
+never saw /sampled by Excimer/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:54AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+xited - C
+G Run again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+PID 65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP 8.3.36 Pea
+t
+).]
+Agent has c
+ecte
+T
+lat It
+Ended
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+nna
+_
+h
+17
+=P ae
+I
+Fa]
+Peak me
+Collector
+le
+e
+e
+eak
+6M
+C
+606 KiB
+1.2 MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime delay
+Hea p snaps
+ots
+ult
+t
+li
+emot
+peak 49.7 M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak 14 MIE
+use
+osr
+ode
+qj
+é
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+ere the time goe
+N
+Uy
+yet
+This machine
+B of 14
+E
+————
+~
+Lu
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:54AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+xited
+-
+C
+G
+Run
+again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+PID
+65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP
+8.3.36
+Pea
+t
+).]
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+nna
+_
+h
+17
+=P
+ae
+I
+Fa]
+Peak
+me
+Collector
+le
+e
+e
+eak
+6M
+C
+606
+KiB
+1.2
+MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime
+delay
+Hea
+p
+snaps
+ots
+ult
+t
+li
+emot
+peak
+49.7
+M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak
+14
+MIE
+use
+osr
+ode
+qj
+é
+peak
+it
+C
+e
+i]
+ere
+orded
+Profile
+No
+profile
+selected
+Hel
+rd
+if
+eV
+Sec
+L
+ds
+to
+s
+FAIL php: explained by how it was measured /sampled by Excimer/
+FAIL php: Collect garbage can be pressed 
+FAIL php: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1615
+ok   php: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:56AM
+oO
+peak
+peak.
+php work-php-1794027139695. php
+xited - C
+G Run again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+S8Dv1L
+PID 65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP 8.3.36 Pea
+t
+).]
+ent
+|
+ecte
+T
+lat It
+Ended
+Clear
+Live heap
+Garbage collections
+CPU profiles
+Force collection
+nna
+_
+h
+17
+=P ae
+I
+Fa]
+Peak me
+Collector
+le
+e
+e
+eak
+6M
+C
+606 KiB
+1.2 MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime delay
+Hea p snaps
+ots
+ult
+t
+li
+emot
+peak 49.7 M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak 14 MIE
+l
+IS€
+osr
+ode
+qj
+é
+peak
+it
+C
+1
+ere
+orded
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+ere the time goe
+N
+Uy
+yet
+This machine
+B of 14
+E
+————
+CPU 7
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:56AM
+oO
+peak
+peak
+php
+work-php-1794027139695
+php
+xited
+-
+C
+G
+Run
+again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+S8Dv1L
+PID
+65827
+Sta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP
+8.3.36
+Pea
+t
+).]
+ent
+|
+ecte
+T
+lat
+It
+Ended
+Clear
+Live
+heap
+Garbage
+collections
+CPU
+profiles
+Force
+collection
+nna
+_
+h
+17
+=P
+ae
+I
+Fa]
+Peak
+me
+Collector
+le
+e
+e
+eak
+6M
+C
+606
+KiB
+1.2
+MiB
+6,180
+F
+ere
+le
+Tr
+t
+e
+evel
+e
+U
+17
+que
+14
+Runtime
+delay
+Hea
+p
+snaps
+ots
+ult
+t
+li
+emot
+peak
+49.7
+M
+C
+ae
+)
+qj
+é
+2164
+CPU
+Heap
+9eak
+14
+MIE
+l
+IS€
+osr
+ode
+qj
+é
+peak
+it
+C
+1
+ere
+orded
+Profile
+No
+profile
+selected
+Hel
+rd
+if
+eV
+Sec
+L
+ds
+to
+see
+ere
+the
+ti
+FAIL php: after it ends, the window says the agent has gone 
+FAIL php: the buttons' results are in history cpu 0, snapshots 0
+ok   php-alone: connected 
+ok   php-alone: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:56AM
+=_
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+(0 Freeze
+© Restart @ stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php work-php-aLlone-1794027378859. pl
+PHP 8.3.36 Pea
+).]
+acte
+Live heap
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+_
+h
+nana =
+“Pa
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak 15.6 N
+C
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection |
+he
+.
+CIMEeEr e€
+el
+ecl il
+t
+ra]
+U
+17
+que
+14
+ak 49.7 M
+C
+CPU
+Heap
+ik 141
+C
+qj
+use
+osr
+ode
+é
+~
+ik
+it
+Inst
+the E
+er exten
+for this
+e
+ime
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+N
+Uy
+yet
+ere the time goe
+This machine
+B of 14
+E
+————
+SPU 54
+© History
+Settings
+co
+e_o8
+ww
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:56AM
+=_
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+(0
+Freeze
+©
+Restart
+@
+stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php
+work-php-aLlone-1794027378859
+pl
+PHP
+8.3.36
+Pea
+).]
+acte
+Live
+heap
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+
+CIMEeEr
+e€
+Fa]
+ecl
+insta
+Fa]
+_
+h
+nana
+=
+“Pa
+Runtime
+delay
+F
+e
+re
+lest
+Tre
+t
+e
+I
+even
+e
+stall
+the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak
+15.6
+N
+C
+Hea
+p
+snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection
+|
+he
+
+CI
+FAIL php-alone: and the agent's version 
+never saw /Connected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:56AM
+=_
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+(0 Freeze
+© Restart @ stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php work-php-aLlone-1794027378859. pl
+PHP 8.3.36 Pea
+).]
+acte
+Live heap
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+_
+h
+nana =
+“Pa
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak 15.6 N
+C
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection |
+he
+.
+CIMEeEr e€
+el
+ecl il
+t
+ra]
+U
+17
+que
+14
+ak 49.7 M
+C
+CPU
+Heap
+ik 141
+C
+qj
+use
+osr
+ode
+é
+~
+ik
+it
+Inst
+the E
+er exten
+for this
+e
+ime
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+N
+Uy
+yet
+ere the time goe
+This machine
+B of 14
+E
+————
+2.4
+© History
+Settings
+co
+e_o8
+ww
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:56AM
+=_
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+(0
+Freeze
+©
+Restart
+@
+stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php
+work-php-aLlone-1794027378859
+pl
+PHP
+8.3.36
+Pea
+).]
+acte
+Live
+heap
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+
+CIMEeEr
+e€
+Fa]
+ecl
+insta
+Fa]
+_
+h
+nana
+=
+“Pa
+Runtime
+delay
+F
+e
+re
+lest
+Tre
+t
+e
+I
+even
+e
+stall
+the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak
+15.6
+N
+C
+Hea
+p
+snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection
+|
+he
+
+CIMEe
+FAIL php-alone: and that it's connected 
+never saw /pecl install excimer/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:56AM
+=_
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+(0 Freeze
+© Restart @ stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php work-php-aLlone-1794027378859. pl
+PHP 8.3.36 Pea
+).]
+acte
+Live heap
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+_
+h
+nana =
+“Pa
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak 15.6 N
+C
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection |
+he
+.
+CIMEeEr e€
+el
+ecl il
+t
+ra]
+U
+17
+que
+14
+ak 49.7 M
+C
+CPU
+Heap
+ik 141
+C
+qj
+use
+osr
+ode
+é
+~
+ik
+it
+Inst
+the E
+er exten
+for this
+e
+ime
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+N
+Uy
+yet
+ere the time goe
+This machine
+B of 14
+E
+————
+SPU 51.6
+L
+© History
+Settings
+co
+e_o8
+ww
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:56AM
+=_
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+(0
+Freeze
+©
+Restart
+@
+stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php
+work-php-aLlone-1794027378859
+pl
+PHP
+8.3.36
+Pea
+).]
+acte
+Live
+heap
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+
+CIMEeEr
+e€
+Fa]
+ecl
+insta
+Fa]
+_
+h
+nana
+=
+“Pa
+Runtime
+delay
+F
+e
+re
+lest
+Tre
+t
+e
+I
+even
+e
+stall
+the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak
+15.6
+N
+C
+Hea
+p
+snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection
+|
+he
+FAIL php-alone: says why there's no live figures /pecl install excimer/
+never saw /no event loop to delay/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:56AM
+=_
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+(0 Freeze
+© Restart @ stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php work-php-aLlone-1794027378859. pl
+PHP 8.3.36 Pea
+).]
+acte
+Live heap
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+_
+h
+nana =
+“Pa
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak 15.6 N
+C
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection |
+he
+.
+CIMEeEr e€
+el
+ecl il
+t
+ra]
+U
+17
+que
+14
+ak 49.7 M
+C
+CPU
+Heap
+ik 141
+C
+qj
+use
+osr
+ode
+é
+~
+ik
+it
+Inst
+the E
+er exten
+for this
+e
+ime
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+N
+Uy
+yet
+ere the time goe
+This machine
+B of 14
+E
+————
+i
+Lu
+© History
+Settings
+co
+e_o8
+ww
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:56AM
+=_
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+(0
+Freeze
+©
+Restart
+@
+stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php
+work-php-aLlone-1794027378859
+pl
+PHP
+8.3.36
+Pea
+).]
+acte
+Live
+heap
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+
+CIMEeEr
+e€
+Fa]
+ecl
+insta
+Fa]
+_
+h
+nana
+=
+“Pa
+Runtime
+delay
+F
+e
+re
+lest
+Tre
+t
+e
+I
+even
+e
+stall
+the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak
+15.6
+N
+C
+Hea
+p
+snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection
+|
+he
+
+CIME
+FAIL php-alone: says why there's no delay /no event loop to delay/
+never saw /no built-in way to list/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4,
+Sat Nov 7 4:57AM
+=_
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+(0 Freeze
+© Restart @ stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php work-php-aLlone-1794027378859. pl
+PHP 8.3.36 Pea
+).]
+acte
+Live heap
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+_
+h
+nana =
+“Pa
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak 15.6 N
+C
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection |
+he
+.
+CIMEeEr e€
+el
+ecl il
+t
+ra]
+U
+17
+que
+14
+ak 49.7 M
+C
+CPU
+Heap
+ik 141
+C
+qj
+use
+osr
+ode
+é
+~
+ik
+it
+Inst
+the E
+er exten
+for this
+e
+ime
+Profile
+No profile selected.
+Hel
+rd
+if
+eV Sec L ds to see
+N
+Uy
+yet
+ere the time goe
+This machine
+B of 14
+E
+————
+L
+~
+© History
+Settings
+co
+e_o8
+ww
+*
+oy
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+a4
+Sat
+Nov
+7
+4:57AM
+=_
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+(0
+Freeze
+©
+Restart
+@
+stop
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/pea
+runtime
+KaGLac
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+php
+work-php-aLlone-1794027378859
+pl
+PHP
+8.3.36
+Pea
+).]
+acte
+Live
+heap
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+Ended
+Clear
+Garbage
+ollections
+|
+the
+
+CIMEeEr
+e€
+Fa]
+ecl
+insta
+Fa]
+_
+h
+nana
+=
+“Pa
+Runtime
+delay
+F
+e
+re
+lest
+Tre
+t
+e
+I
+even
+e
+stall
+the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+ak
+15.6
+N
+C
+Hea
+p
+snaps
+ots
+1
+I
+ult
+t
+li
+emot
+Force
+ollection
+|
+he
+
+CIMEe
+FAIL php-alone: says why there's no snapshots /no built-in way to list/
+ok   php-alone: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:58AM
+oO
+peak
+peak.
+php work-php-aLlone-1794027378859. php
+xited
+{
+G Run again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime KaGLac
+PID 74931
+ta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP 8.3.36 Pea
+).]
+Agent has c
+ecte
+T
+lat It
+Ended
+Clear
+I
+Fa]
+Peak me
+Collector
+le
+e
+e
+h
+Mn
+que
+727
+583 KiB
+1.1 MiB
+6,212
+peak 13.4 M
+C
+Fi
+es Tra
+en the prot
+al
+e
+nana =
+_
+I
+eE
+net
+e
+e
+sion Tor this
+ra]
+net
+h
+17
+“Pa
+Live heap
+Garbage
+ollections
+|
+the
+.
+CIMEeEr e€
+Fa]
+ecl insta
+Fa]
+eak
+C
+Runtime delay
+F
+e re
+lest Tre
+t
+e
+I
+even
+e
+stall the
+EF
+cimeré
+ens
+JT
+¢
+e
+e
+cime
+U
+17
+que
+14
+Hea p snaps
+ots
+1
+I
+ult
+t
+li
+emot
+.
+peak 49.7 M
+C
+Force
+ollection |
+he
+imer é
+e
+I
+ecl il
+t
+ra]
+ae
+)
+qj
+é
+2164
+9eak 14 MIE
+Heap
+CPU
+l
+IS€
+osr
+ode
+qj
+é
+peak
+it
+e
+i]
+ere
+orded
+Profile
+No profile selected.
+R
+|
+SVV SELL
+rie
+JO€ 2
+N
+Uy
+yet
+This machine
+fi
+E
+————
+© History
+Settings
+co
+e_o8
+=
+‘@
+ww
+the
+*
+7
+oy
+“e@Boae @
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:58AM
+oO
+peak
+peak
+php
+work-php-aLlone-1794027378859
+php
+xited
+{
+G
+Run
+again
+Ww
+Ph
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+KaGLac
+PID
+74931
+ta
+Memory
+Profiler
+Stats
+Output
+Resource
+Running
+PHP
+8.3.36
+Pea
+).]
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ended
+Clear
+I
+Fa]
+Peak
+me
+Collector
+le
+e
+e
+h
+Mn
+que
+727
+583
+KiB
+1.1
+MiB
+6,212
+peak
+13.4
+M
+C
+Fi
+es
+Tra
+en
+the
+prot
+al
+e
+nana
+=
+_
+I
+eE
+net
+e
+e
+sion
+Tor
+this
+ra]
+net
+h
+17
+“Pa
+Live
+heap
+Garbage
+ollections
+|
+the
+
+C
+FAIL php-alone: after it ends, the window says the agent has gone 
+ok   php-alone: the buttons' results are in history cpu 0, snapshots 0
+ok   go: builds against the installed SDK 
+ok   go: connected 
+ok   go: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:58AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb534...
+(0 Freeze
+G Restart
+G
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+=
+acte
+at
+E
+Go 1.27.3 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Endec
+Clear
+Gore
+tine
+Time in
+L
+€ obje
+727
+h
+a)
+3
+0.05%
+922.7K
+ik
+i.
+af
+nna
+_
+Heap
+CPU
+h
+17
+4
+“Pa
+ik
+i.
+6 I
+C
+U
+17
+Pa
+14
+ik
+49.7 M
+73 Collect garbage
+Snapshots
+ik
+1i4}f
+C
+N
+ots
+et
+No snapshot selected.
+5
+qj
+use
+osr
+ode
+é
+Take a heap
+lapshot
+~
+ik
+it
+C
+This machine
+f1
+————
+~
+© History
+Settings
+—
+e_o8
+=
+ww
+re
+the
+%
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:58AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb534..
+(0
+Freeze
+G
+Restart
+G
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+=
+acte
+at
+E
+Go
+1.27.3
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Endec
+Clear
+Gore
+tine
+Time
+in
+L
+€
+obje
+727
+h
+a)
+3
+0.05%
+922.7K
+ik
+i
+af
+nna
+_
+Heap
+CPU
+h
+17
+4
+“Pa
+ik
+i
+6
+I
+C
+U
+17
+Pa
+14
+ik
+49.7
+M
+73
+Collect
+garbage
+Snapshots
+ik
+1i4}f
+C
+N
+ots
+et
+No
+snapshot
+selected
+5
+qj
+use
+osr
+ode
+é
+Take
+a
+heap
+lapshot
+~
+ik
+it
+C
+This
+machine
+f1
+————
+~
+©
+History
+Settings
+—
+e_o8
+=
+ww
+re
+the
+%
+eOBaae
+FAIL go: and the agent's version 
+never saw /Connected/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:58AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb534...
+(0 Freeze
+G
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+acte
+iE
+Go 1.27.3 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Gore
+tine
+Time in
+L
+€ obje
+727
+h
+ne
+3
+0.05%
+802.2k
+eak 13.4M
+C
+nna
+_
+Heap
+CPU
+h
+179
+“Pa
+eak 1
+6M
+C
+U
+17
+4826814309
+eak 49.7 M
+C
+73 Collect garbage
+5
+)
+é
+4
+Snapshots
+eak 14 MiE
+N
+ots
+et
+No snapshot selected.
+5
+qj
+use
+US
+I
+ode
+é
+Take a heap
+lapshot
+eak
+it
+This machine
+Z
+B of 14
+E
+———
+© History
+Settings
+—
+e_o8
+=
+ww
+re
+the
+%
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:58AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb534..
+(0
+Freeze
+G
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+acte
+iE
+Go
+1.27.3
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Gore
+tine
+Time
+in
+L
+€
+obje
+727
+h
+ne
+3
+0.05%
+802.2k
+eak
+13.4M
+C
+nna
+_
+Heap
+CPU
+h
+179
+“Pa
+eak
+1
+6M
+C
+U
+17
+4826814309
+eak
+49.7
+M
+C
+73
+Collect
+garbage
+5
+)
+é
+4
+Snapshots
+eak
+14
+MiE
+N
+ots
+et
+No
+snapshot
+selected
+5
+qj
+use
+US
+I
+ode
+é
+Take
+a
+heap
+lapshot
+eak
+it
+This
+machine
+Z
+B
+of
+14
+E
+———
+©
+His
+FAIL go: and that it's connected 
+FAIL go: Record 5s can be pressed 
+never saw /Recording/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:59AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb534...
+(0 Freeze
+G
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+=
+acte
+455 MiB
+_— |
+Go 1.27.3 Peak agent
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+Ended
+Clear
+Gore
+tine
+Time in
+L
+€ obje
+727
+h
+a)
+3
+0.06%
+2.7M
+9eak 13.4 M
+C
+nna
+_
+Heap
+CPU
+h
+17
+“Pa
+eak 1
+6M
+C
+U
+17
+4826814309
+peak 49.7 M
+C
+73 Collect garbage
+5
+)
+é
+4
+Snapshots
+neak 14 MIE
+N
+ots
+et
+No snapshot selected.
+5
+qj
+use
+osr
+ode
+é
+Take a heap
+lapshot
+eak
+it
+This machine
+B of 14
+E
+———
+SPU 53
+L
+© History
+Settings
+co
+—
+e_o8
+=
+ww
+re
+the
+%
+eOBaae
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:59AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb534..
+(0
+Freeze
+G
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+=
+acte
+455
+MiB
+_—
+|
+Go
+1.27.3
+Peak
+agent
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+Ended
+Clear
+Gore
+tine
+Time
+in
+L
+€
+obje
+727
+h
+a)
+3
+0.06%
+2.7M
+9eak
+13.4
+M
+C
+nna
+_
+Heap
+CPU
+h
+17
+“Pa
+eak
+1
+6M
+C
+U
+17
+4826814309
+peak
+49.7
+M
+C
+73
+Collect
+garbage
+5
+)
+é
+4
+Snapshots
+neak
+14
+MIE
+N
+ots
+et
+No
+snapshot
+selected
+5
+qj
+use
+osr
+ode
+é
+Take
+a
+heap
+lapshot
+eak
+it
+
+FAIL go: shows it's recording 
+never saw /Profile\s+1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 4:59AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T...
+Exited: 0
+G Run again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak runtime bHFdiG
+PID 78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go 1.27.3 Peal
+agent
+l
+Agent has c
+ecte
+T
+lat It
+Ender
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time in
+Li
+€ obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak 13.4 h
+C
+Heap
+CPU
+nana =
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak 49.7 M
+C
+Sna p shots
+2164
+N
+10
+No snapshot selected.
+9eak 14 MIE
+olding memor
+use
+osr
+ode
+it
+peak
+This machine
+Z
+B of 14
+E
+———
+SPU 26
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+4:59AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T..
+Exited
+0
+G
+Run
+again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+PID
+78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go
+1.27.3
+Peal
+agent
+l
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ender
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time
+in
+Li
+€
+obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak
+13.4
+h
+C
+Heap
+CPU
+nana
+=
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak
+49.7
+M
+C
+Sna
+p
+shots
+2164
+N
+10
+No
+snapshot
+selected
+9eak
+14
+MIE
+olding
+memor
+use
+osr
+ode
+it
+peak
+This
+machine
+Z
+B
+of
+14
+E
+———
+SPU
+26
+©
+History
+FAIL go: the profile appears, with its length 
+never saw /all goroutines/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 5:00AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T...
+Exited: 0
+G Run again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak runtime bHFdiG
+PID 78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go 1.27.3 Peal
+agent
+l
+Agent has c
+ecte
+T
+lat It
+Ender
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+fol
+I
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time in
+Li
+€ obje
+3
+0.06%
+2.7M
+h
+a)
+que
+peak 13.4 h
+C
+Heap
+CPU
+nana =
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak 49.7 M
+C
+Sna p shots
+)
+ae
+qj
+é
+2164
+N
+10
+No snapshot selected.
+9eak 14 MIE
+olding memor
+U
+osr
+ode
+qj
+é
+it
+peak
+This machine
+B of 14
+E
+———
+SPU 1
+i
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+5:00AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T..
+Exited
+0
+G
+Run
+again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+PID
+78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go
+1.27.3
+Peal
+agent
+l
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ender
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+fol
+I
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time
+in
+Li
+€
+obje
+3
+0.06%
+2.7M
+h
+a)
+que
+peak
+13.4
+h
+C
+Heap
+CPU
+nana
+=
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak
+49.7
+M
+C
+Sna
+p
+shots
+)
+ae
+qj
+é
+2164
+N
+10
+No
+snapshot
+selected
+9eak
+14
+MIE
+olding
+memor
+U
+osr
+ode
+qj
+é
+it
+peak
+This
+machine
+B
+of
+14
+E
+———
+FAIL go: explained by how it was measured /all goroutines/
+FAIL go: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 5:01AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T...
+Exited: 0
+G Run again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak runtime bHFdiG
+PID 78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go 1.27.3 Peal
+agent
+l
+Agent has c
+ecte
+T
+lat It
+Ender
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time in
+Li
+€ obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak 13.4 h
+C
+Heap
+CPU
+nana =
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak 49.7 M
+C
+Sna p shots
+2164
+N
+10
+No snapshot selected.
+9eak 14 MIE
+olding memor
+use
+osr
+ode
+it
+peak
+This machine
+B of 14
+E
+———
+SPU 21.5
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+5:01AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T..
+Exited
+0
+G
+Run
+again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+PID
+78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go
+1.27.3
+Peal
+agent
+l
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ender
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time
+in
+Li
+€
+obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak
+13.4
+h
+C
+Heap
+CPU
+nana
+=
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak
+49.7
+M
+C
+Sna
+p
+shots
+2164
+N
+10
+No
+snapshot
+selected
+9eak
+14
+MIE
+olding
+memor
+use
+osr
+ode
+it
+peak
+This
+machine
+B
+of
+14
+E
+———
+SPU
+21.5
+©
+History
+FAIL go: the snapshot appears 
+never saw /smokeAlloc/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 5:02AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T...
+Exited: 0
+G Run again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak runtime bHFdiG
+PID 78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go 1.27.3 Peal
+agent
+l
+Agent has c
+ecte
+T
+lat It
+Ender
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time in
+Li
+€ obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak 13.4 h
+C
+Heap
+CPU
+nana =
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak 49.7 M
+C
+Sna p shots
+2164
+N
+10
+No snapshot selected.
+9eak 14 MIE
+olding memor
+use
+osr
+ode
+it
+peak
+This machine
+B of 14
+E
+———
+~
+2.4
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+5:02AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T..
+Exited
+0
+G
+Run
+again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+PID
+78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go
+1.27.3
+Peal
+agent
+l
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ender
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time
+in
+Li
+€
+obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak
+13.4
+h
+C
+Heap
+CPU
+nana
+=
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak
+49.7
+M
+C
+Sna
+p
+shots
+2164
+N
+10
+No
+snapshot
+selected
+9eak
+14
+MIE
+olding
+memor
+use
+osr
+ode
+it
+peak
+This
+machine
+B
+of
+14
+E
+———
+~
+2.4
+©
+History
+Setti
+FAIL go: and shows what the program holds /smokeAlloc/
+FAIL go: Collect garbage can be pressed 
+FAIL go: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 1536
+ok   go: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 5:03AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T...
+Exited: 0
+G Run again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak runtime bHFdiG
+PID 78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go 1.27.3 Peal
+agent
+l
+Agent has c
+ecte
+T
+lat It
+Ender
+Clear
+Live heap
+Garbage collections
+Runtime delay
+CPU profiles
+Heap snapshots
+Force collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time in
+Li
+€ obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak 13.4 h
+C
+Heap
+CPU
+nana =
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak 49.7 M
+C
+Sna p shots
+2164
+N
+10
+No snapshot selected.
+9eak 14 MIE
+olding memor
+use
+osr
+ode
+it
+peak
+This machine
+B of 14
+E
+———
+Fa
+L
+© History
+Settings
+co
+e_o8
+=
+ww
+the
+*
+oy
+eOBaae
+é
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+5:03AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb5344m0000gn/T..
+Exited
+0
+G
+Run
+again
+Ww
+G
+private/Var/folders/20/jp1_On3n/kKndh6rnbqb
+344m0000gn/T/peak
+runtime
+bHFdiG
+PID
+78733
+Sta
+Memory
+Profiler
+Stats
+Output
+HReESOUrce
+Running
+Go
+1.27.3
+Peal
+agent
+l
+Agent
+has
+c
+ecte
+T
+lat
+It
+Ender
+Clear
+Live
+heap
+Garbage
+collections
+Runtime
+delay
+CPU
+profiles
+Heap
+snapshots
+Force
+collection
+fol
+el
+Pa
+jpl
+In3n7knd
+orPnpi
+Gore
+tines
+Time
+in
+Li
+€
+obje
+C
+3
+0.06%
+2.7M
+h
+a)
+que
+peak
+13.4
+h
+C
+Heap
+CPU
+nana
+=
+_
+h
+17
+“Pa
+eak
+C
+U
+17
+que
+14
+peak
+49.7
+M
+C
+Sna
+p
+shots
+2164
+N
+10
+No
+snapshot
+selected
+9eak
+14
+MIE
+olding
+memor
+use
+osr
+ode
+it
+peak
+This
+machine
+B
+of
+14
+E
+———
+Fa
+L
+©
+History
+Setting
+FAIL go: after it ends, the window says the agent has gone 
+FAIL go: the buttons' results are in history cpu 0, snapshots 0
+FAIL capture: the page opens 
+ok   capture: takes a command 
+FAIL capture: starts it 
+FAIL capture: the agent connected 
+ok   no agent: the window says profiling isn't available 
+never saw /Attaching to a running process only gives OS-level monitoring|Peak has profiling agents for/ in:
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4,
+Sat Nov 7 5:05AM
+oO
+peak
+peak.
+'/var/folders/20/jp1_On3n7kndhérnbqb534...
+(0 Freeze
+Sh
+© Restart @ stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak runtime
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+E
+'®)
+Ended
+Clear
+el
+Pa
+jpl
+In3n7k
+d
+orndi
+Heap and CPU profiling aren't available.
+eak 45
+C
+Peak has
+FOTII
+C ents for Node
+Bun, Python, PHP ar
+Go
+lf th
+cc
+nmana
+t
+rt
+t
+95e,
+start it from
+727
+with
+J€aK
+ru
+=
+h
+Lone
+1
+capture
+9eak 13.4 MIE
+h
+nna
+“Pa
+_
+eak 1
+6 Mig
+U
+1
+que
+14
+9eak 49.7 MIE
+neak 14 MIE
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+This machine
+1
+B of 14
+E
+————
+SPU 34
+L
+2.21
+© History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko,
+“‘QOnoac g
+peak
+File
+Edit
+View
+Window
+Help
+Q
+=_
+a4
+Sat
+Nov
+7
+5:05AM
+oO
+peak
+peak
+'/var/folders/20/jp1_On3n7kndhérnbqb534..
+(0
+Freeze
+Sh
+©
+Restart
+@
+stop
+private/Var/folders/20/jp1
+es
+In3Sn/Kndh6rnbaqb
+344m0000gn/T/peak
+runtime
+Memory
+Profiler
+tat
+Report
+Output
+Resource
+Running
+'/var/folders/28/jp1_98n3n7kndhérnbi
+E
+'®)
+Ended
+Clear
+el
+Pa
+jpl
+In3n7k
+d
+orndi
+Heap
+and
+CPU
+profiling
+aren't
+available
+eak
+45
+C
+Peak
+has
+FOTII
+C
+ents
+for
+Node
+Bun
+Python
+PHP
+ar
+Go
+lf
+th
+cc
+nmana
+t
+rt
+t
+95e
+start
+it
+from
+727
+with
+J€aK
+ru
+=
+h
+Lone
+1
+capture
+9eak
+13.4
+MIE
+h
+nna
+“Pa
+_
+eak
+1
+6
+Mig
+U
+1
+que
+14
+9eak
+49.7
+MIE
+neak
+14
+MIE
+use
+osr
+ode
+5
+qj
+é
+eak
+it
+This
+machine
+1
+B
+of
+14
+E
+————
+SPU
+34
+L
+2.21
+©
+History
+Settings
+co
+—
+e_o8
+=
+‘@
+ww
+re
+the
+%
+Ko
+“‘QOnoac
+g
+FAIL no agent: and that attaching only gives OS-level monitoring, or how to opt in 
+FAIL node, reopened: History opens 
+FAIL python, reopened: History opens 
+FAIL bun, reopened: History opens 
+FAIL bun, reopened: the run is listed and opens 
+FAIL bun, reopened: the Profiler tab opens 
+never saw /Bun\s+\d+\.\d+/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:08AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+—————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU
+Lu
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:08AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+proce
+FAIL bun, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:09AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+—————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 12.1
+L
+2.17
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:09AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+p
+FAIL bun, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:09AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+This machine
+B of 14
+E
+———
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 26
+L
+2.1
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:09AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+pro
+FAIL bun, reopened: the CPU profile is there 
+FAIL php, reopened: History opens 
+FAIL php, reopened: the run is listed and opens 
+FAIL php, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:11AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+This machine
+1
+B of 14
+E
+———
+peak run -- bun run build
+~
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 5
+2.11
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:11AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+proces
+FAIL php, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:11AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+—————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 12.5
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:11AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+pro
+FAIL php, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:11AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+—————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 3
+L
+1
+1
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:11AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+pr
+FAIL php, reopened: the CPU profile is there 
+FAIL php-alone, reopened: History opens 
+FAIL php-alone, reopened: the run is listed and opens 
+FAIL php-alone, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:13AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+This machine
+B of 14
+E
+————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 1
+L
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:13AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+process
+FAIL php-alone, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:13AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+—————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 3
+L
+17
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:13AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+p
+FAIL php-alone, reopened: as what it reported, not as live 
+FAIL go, reopened: History opens 
+FAIL go, reopened: the run is listed and opens 
+FAIL go, reopened: the Profiler tab opens 
+never saw /Go\s+\d+\.\d+/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:15AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+This machine
+B of 14
+E
+————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+CPU 16
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:15AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+process
+
+FAIL go, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:15AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+SPU 14
+L
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:15AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+proc
+FAIL go, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+a4,
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat Nov 7 5:15AM
+peak.
++ Capture
+Capture a process.
+|
+1
+Script
+|
+|
+yr attach ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f pens
+UNMING, ana
+Run a command.
+Attach to a process.
+Python
+A
+t
+f
+Jode.js, Bun
+PHP get a profiling
+|
+rgest first
+automatically. (
+IT
+ns opt in with one import
+Lomma
+/Users/runner/actions- rurmer;ceched/2 538.2
+ers
+unne
+ctions
+ru
+inet
+e
+rd
+Zz
+65.8 MiB
+i
+s,
+Working directory
+/Users/runner/actions-runner/cached/2.338.2
+o6.9 Hip
+i
+bun
+run build
+/System/Cryptexes/App/System/Library/CoreSe
+npm test
+python main.py
+66.9 iB
+4
+i
+iz
+node server.js
+cargo build —reLease
+59.3 MiB
+/System/Library/CoreServices/Dock.app/Conte
+ID 437
+51.8 MiB
+/System/Library/Frameworks/WebKit. framewor..
+ste
+|
+I
+ote c
+{
+ster
+L
+I
+PIL
+4
+&
+/System/Volumes/Preboot/Cryptexes/App/Syste
+51.7 MiB
+~
+From your terminal.
+ers
+unner/Libra
+onta
+ers
+Tl
+ple. Safari
+Tal
+ID
+Prefix an
+comma
+tput stays
+ur termi
+| anc
+treams here te
+node scripts/e2e/desktop/agents-ui.mjs art..
+46.4 M18
+-
+ers
+unne
+Work
+PIL
+ere
+é
+-
+This machine
+B of 14
+E
+————
+peak run -- bun run build
+/System/AppLications/News.app/Contents/Plug
+43.6 MiB
+CPU 26
+ers
+unner/Libra
+onta
+ers
+Tl
+ra]
+J
+ID 4
+}
+© History
+Settings
+co
+a
+/System/Library/CoreServices/Spotlight.app/
+43.3 MiB
+—
+e
+e_o8
+‘@
+ww
+%
+Ko,
+“‘QOnoac g
+a4
+é
+Finder
+File
+Edit
+View
+Go
+Window
+Help
+Q
+=_
+Sat
+Nov
+7
+5:15AM
+peak
++
+Capture
+Capture
+a
+process
+|
+1
+Script
+|
+|
+yr
+attach
+ft
+|
+1
+Running
+atch
+Memor'
+and
+i
+f
+pens
+UNMING
+ana
+Run
+a
+command
+Attach
+to
+a
+proces
+FAIL go, reopened: the CPU profile is there 
+AGENTS UI FAILED
+with:
+  name: smoke-darwin-x86_64
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+(node:15729) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 40 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:15729) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 8388608
+Uploaded bytes 10116715
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is f44229062cd41b362423f5dee038f941861835d60357e9877e83c4c21b5cca81
+Finalizing artifact upload
+Artifact smoke-darwin-x86_64.zip successfully finalized. Artifact ID 13562370542
+Artifact smoke-darwin-x86_64 has been successfully uploaded! Final size is 10116715 bytes. Artifact ID is 13562370542
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42337392741/artifacts/13562370542
+Post job cleanup.
+Post job cleanup.
+[command]/usr/local/bin/git version
+git version 2.55.0
+Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/96f9b419-748b-47b1-84cf-5385760279b6/.gitconfig'
+Temporarily overriding HOME='/Users/runner/work/_temp/96f9b419-748b-47b1-84cf-5385760279b6' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/local/bin/git config --global --add safe.directory /Users/runner/work/peak/peak
+[command]/usr/local/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/local/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/usr/local/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/local/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/local/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes

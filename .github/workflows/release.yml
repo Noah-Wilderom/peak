@@ -110,7 +110,7 @@ jobs:
           cargo install tauri-driver --locked
       - name: What reads the screen on macOS, if its accessibility tree can't
         if: startsWith(matrix.platform, 'darwin')
-        run: brew install tesseract cliclick
+        run: brew install tesseract cliclick imagemagick
       - name: The agents in the installed window
         if: always()
         shell: bash

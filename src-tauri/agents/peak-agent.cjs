@@ -238,7 +238,10 @@
       const began = performance.now()
       await new Promise((r) => setTimeout(r, Math.max(1, Number(ms) || 1000)))
       const { profile } = await post("Profiler.stop")
-      return { durationMs: performance.now() - began, sampling: "v8", root: cpuTree(profile) }
+      // V8's own range: starting the profiler can take a while on a busy machine, and samples from
+      // that time count, so a timer started around the call would come up short of them.
+      const range = (profile.endTime - profile.startTime) / 1000
+      return { durationMs: range > 0 ? range : performance.now() - began, sampling: "v8", root: cpuTree(profile) }
     } finally {
       profiling = false
       post("Profiler.disable").catch(() => {})

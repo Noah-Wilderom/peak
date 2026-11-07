@@ -4,13 +4,44 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `f5116c8` failed its first native run, for causes below. Fixes are in the working tree, tested locally, awaiting the next native run.** The real window hasn't been driven through these agents yet. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
+- **State:** **`v0.1.1` candidate `131e76a`: the smoke test passes on all four targets, and the window proof on Linux and Windows. macOS's window proof and two of four `v0.1.0` button rehearsals (Linux, macOS x64) still fail, for harness reasons with fixes awaiting a native run.** Not ready to tag. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Second native run: `131e76a`
+
+Update proof 42337392754 and Release 42337392741 failed. Tests 42337392765 passed, with the backend at **99.16% lines on CI** and the frontend gate met. Raw logs, per-platform results and screenshots: `docs/evidence/release/ci-candidate-131e76a/`.
+
+| Check, on production packages | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Independent updater signatures | Pass | Pass | Pass | Pass |
+| Smoke: installed app and separate CLI, all runtimes, identity, profiles, history, a user's own options | **Pass** | **Pass** | **Pass** | **Pass** |
+| PHP with Excimer | Pass, `excimer-cpu` | None for Windows | Pass, `excimer-wall` | Pass, `excimer-wall` |
+| PHP alone | Pass | Pass | Pass | Pass |
+| Window proof, `agents-ui.mjs` | **Pass, 144 checks** | **Pass, 123 checks** | **Fail, 76 of 129** | **Fail, 101 of 129** |
+| Pressing the published `v0.1.0`'s buttons | Fail | **Pass** | **Pass, by reading the screen** | Fail |
+
+- **macOS with Excimer now connects.** The missing `EXCIMER_CPU` was the explanation fixed for, and the agent reports `excimer-wall` there, so that's supported, though not observed directly.
+- **Node with `--no-use-osr` holds `busyWork` on all four.** That fits the OSR explanation. It doesn't confirm it, since no run has shown the frames of a failure.
+- **macOS window failures** are the harness, not the app. The accessibility script had a syntax error of mine (`on` is reserved in AppleScript), which left an unproven screen reader, and that one can't read light text on dark buttons, so "Take snapshot" and "Record 5s" were never found. Screenshots show the right window. **macOS is not yet proven.**
+- **Linux and macOS x64 rehearsals:** buttons pressed and the answer on screen in both screenshots. Only reading that small text failed.
+
+**Sampled time above recording length (2545 ms in 2013 ms on Windows, 2183 in 2027 on macOS x64 at `f5116c8`; 2272 in 2115 on macOS x64 at `131e76a`).** The tree's sum comes from V8's `timeDeltas`, in microseconds, and the units are right. Only Node showed this. The reported length was a timer started after `Profiler.start` returned, and V8's own sampling starts before that. Measured locally: timer 801 ms, V8's range 813 ms, deltas 812 ms. On a loaded runner that gap is likely larger, as starting the profiler walks existing code. **Fixed by reporting V8's own range**, and a new check fails any single-threaded profile whose samples exceed its recording by more than 3% plus 30 ms. Whether this accounts for the largest gaps will show on the next run. Go is checked against its CPU count instead, as it samples every goroutine.
+
+**Changed since, not yet run natively:**
+
+- Linux presses buttons by WebDriver in the rehearsal and upgrade, as it already does in the window proof, rather than by reading the screen.
+- macOS: the script is fixed, with a request for WebKit's tree. If there's still nothing, the screen reader now reads each dark button as its own shape. Tried locally against real macOS captures from this run: it reads "Take snapshot", "Stop", "Capture", and "Node.js 22.23.4 Peak agent 0.1.1".
+- macOS, off-screen rows: a run is found through History's search box, instead of being skipped.
+- macOS, disabled state, if the attribute can't be read: the control is pressed and nothing may come of it. If it can't be found on screen, the record says "unobserved" rather than pass. **Pressing is not the same as reading the attribute**, and the evidence says which was done.
+- New check: a result from the terminal, on a run that isn't on screen, leaves the window on the one it's showing.
+- PHP's empty heap view no longer says "Take a heap snapshot". The Linux screenshot showed that it did.
+
+Local on this tree: frontend 313 tests at 100%, Node agent tests pass. No Rust changed since CI's 99.16%, and `agents-ui.mjs` and `drive.mjs` can't run on this server.
 
 ### First native run: `f5116c8`
 
@@ -27,7 +58,7 @@ Update proof 42333866409, Release 42333866414, Tests 42333866424, **all failed**
 
 **Passed on that run:**
 
-- Packages built on all four targets, up to the smoke step. The later independent signature check isn't assessed here as a whole, since the job failed after.
+- Packages built on all four targets. The independent signature check runs before the smoke step, and passed on all four (`steps` in the run's job list).
 - Windows pressed the published `v0.1.0`'s real buttons: Settings, Check for updates, and "This is the latest version." came back.
 - Go, Bun and Python through the installed app and separate CLI on all four targets: identity, CPU profiles, snapshots and history. Node's other checks too. PHP without Excimer on Windows. PHP with Excimer on Linux.
 - Tests: Frontend, Go SDK on 1.21 and stable, agents on PHP 8.1 and 8.3 with Excimer live, PHP 8.4 without.
@@ -78,7 +109,7 @@ Node and Python pass the same checks. PHP alone, against real PHP in `service.rs
 
 The one failure in that run is expected: "the installed copy says what it is", since this was a source build.
 
-Gates on this later tree, local: frontend 312 tests at 100%. Backend 99.16% lines, clippy clean (`docs/evidence/release/local-agents-v0.1.1/backend-coverage.log`). Agents: 9 Node tests with 1 skipped (the Excimer one, unless pointed at a build), 8 Python. The Bun agent's tests also pass on real Bun 1.2.15 and 1.3.7. Go SDK: passes under `-race`.
+Gates locally, on the tree committed as `131e76a` before its last change (results reaching the window, which then got a compile check only): frontend 313 tests at 100%. Backend 99.16% lines, clippy clean (`docs/evidence/release/local-agents-v0.1.1/backend-coverage.log`). **CI then measured `131e76a` itself at 99.16%.** Agents: 9 Node tests with 1 skipped (the Excimer one, unless pointed at a build), 8 Python. The Bun agent's tests also pass on real Bun 1.2.15 and 1.3.7. Go SDK: passes under `-race`.
 
 **That was the local picture before the first native run**, with a source build and before the version bump. The native results are above.
 

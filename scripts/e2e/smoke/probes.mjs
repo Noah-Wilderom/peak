@@ -1,5 +1,6 @@
 // Real programs of every runtime through the installed app and a separate CLI process.
 import { spawnSync } from "node:child_process"
+import { availableParallelism } from "node:os"
 import { IS_WINDOWS, PLATFORM, cli, dataDir, join, log, mkdirSync, mkdtempSync, shot, sleep, storedRunById, storedSamples, tmpdir, waitFor, writeFileSync } from "./lib.mjs"
 
 const works = (bin, ...args) => spawnSync(bin, args, { encoding: "utf8", shell: IS_WINDOWS }).status === 0
@@ -114,6 +115,9 @@ export async function runProbes({ check, record, out, only }) {
       const sampled = frames.reduce((sum, f) => sum + (f.self ?? 0), 0)
       check(label("CPU profile holds the program's own function, in milliseconds"), frames.some((f) => f.name.includes(frame)) && sampled > 100 && sampled < 20_000 && profile.durationMs >= 1900, `${profile?.sampling}, ${Math.round(sampled)} ms sampled in ${Math.round(profile?.durationMs)} ms, top: ${frames.sort((a, b) => (b.self ?? 0) - (a.self ?? 0)).slice(0, 6).map((f) => `${f.name} ${Math.round(f.self)}`).join(", ")}: ${cpu.err.trim()}`)
       if (sampling) check(label("says how it sampled"), sampling.includes(profile?.sampling), profile?.sampling)
+    // One thread's samples can't add up to more than the recording. Go's cover every goroutine.
+    if (profile?.sampling !== "pprof") check(label("sampled time fits within the recording"), sampled <= profile?.durationMs * 1.03 + 30, `${Math.round(sampled)} ms sampled in ${Math.round(profile?.durationMs)} ms`)
+    else check(label("sampled time is plausible for this many threads"), sampled <= profile.durationMs * Math.max(4, availableParallelism()), `${Math.round(sampled)} ms sampled in ${Math.round(profile.durationMs)} ms on ${availableParallelism()} CPUs`)
     } else {
       const cpu = await cli(["profile", found.id, "--ms", "500"]).done
       check(label("a CPU profile is refused, with how to get one"), cpu.code === 1 && cpu.err.includes(agent.unavailable?.cpu ?? "?"), cpu.err.trim())

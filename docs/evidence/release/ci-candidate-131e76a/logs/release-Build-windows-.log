@@ -1,0 +1,396 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go
+  DEBIAN_FRONTEND: noninteractive
+(node:4468) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (Windows installer, commit 131e76a632e059633eb1a8cbf16e03a60fc7c5a5)
+collector: x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-06e4d71c104dfbf3\peak-collector (for Linux targets) 
+ok   names its bundled collector x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-06e4d71c104dfbf3\peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmm7ud1 for runneradmin — running without monitoring
+app pid 7756
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started C:\Users\RUNNER~1\AppData\Local\Temp\peak place 6XGtkM
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794025238849-err
+ok   the app recorded real samples and the exit samples 9, max rss 121401344, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2054 ms sampled in 2038 ms, top: busyWork 1520, (idle) 376, (program) 63, (garbage collector) 38, post 18, SmokeThing 14: 
+ok   node: says how it sampled v8
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 34 of 36
+ok   node: live heap reached the samples 
+ok   node: collections are stored 769
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2006 ms sampled in 2006 ms, top: busy_work 1499, <module> 474, <genexpr> 33, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: heap snapshot holds what the program allocated 60 entries, top type: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 34 of 38
+ok   python: collections are stored 26
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2025 ms sampled in 2031 ms, top: busyWork 2022, stringify 2, repeat 1, (anonymous) 0, (root) 0, processTicksAndRejections 0: 
+ok   bun: says how it sampled jsc
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":89188,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2345807,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 34 of 36
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":604216,"unit":"bytes"},{"name":"Peak memory","value":1180704,"unit":"bytes"},{"name":"Collector runs","value":756,"unit":"count"},{"name":"Values collected","value":7560000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1750 ms sampled in 2002 ms, top: time.Time.Before 210, time.now 170, main.busyWork 160, time.now 110, time.runtimeNow 90, time.Now 90: 
+ok   go: says how it sampled pprof
+ok   go: heap snapshot holds what the program allocated 9 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.027596056491024045,"unit":"percent"},{"name":"Live objects","value":783225,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 34 of 36
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: C:\Users\runneradmin\.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+  Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  OPENSSL_CONF: C:\Program Files\Common Files\SSL\openssl.cnf
+  PEAK_SMOKE_PLATFORM: windows
+(node:2636) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   node: connected 
+ok   node: the window names the runtime and its version 
+ok   node: and the agent's version 
+ok   node: and that it's connected 
+ok   node: Record 5s can be pressed 
+ok   node: shows it's recording 
+ok   node: the profile appears, with its length 
+ok   node: explained by how it was measured /Sampled by V8/
+ok   node: Take snapshot can be pressed 
+ok   node: the snapshot appears 
+ok   node: and shows what the program holds /SmokeThing/
+ok   node: Collect garbage can be pressed 
+ok   node: a profile from the terminal appears in the window  3439
+ok   node: the program's exit code is its own exit 0: 
+ok   node: after it ends, the window says the agent has gone 
+ok   node: the buttons' results are in history cpu 2, snapshots 1
+ok   python: connected 
+ok   python: the window names the runtime and its version 
+ok   python: and the agent's version 
+ok   python: and that it's connected 
+ok   python: says why there's no live heap /no cheap total/
+ok   python: Record 5s can be pressed 
+ok   python: shows it's recording 
+ok   python: the profile appears, with its length 
+ok   python: explained by how it was measured /Python stack sampled/
+ok   python: Take snapshot can be pressed 
+ok   python: the snapshot appears 
+ok   python: and shows what the program holds /SmokeThing/
+ok   python: Collect garbage can be pressed 
+ok   python: a profile from the terminal appears in the window  3800
+ok   python: the program's exit code is its own exit 0: 
+ok   python: after it ends, the window says the agent has gone 
+ok   python: the buttons' results are in history cpu 2, snapshots 1
+ok   bun: connected 
+ok   bun: the window names the runtime and its version 
+ok   bun: and the agent's version 
+ok   bun: and that it's connected 
+ok   bun: says why there's no collections /doesn't publish individual garbage collections/
+ok   bun: Record 5s can be pressed 
+ok   bun: shows it's recording 
+ok   bun: the profile appears, with its length 
+ok   bun: explained by how it was measured /Sampled by JavaScriptCore/
+ok   bun: Take snapshot can be pressed 
+ok   bun: the snapshot appears 
+ok   bun: and shows what the program holds /SmokeThing/
+ok   bun: Collect garbage can be pressed 
+ok   bun: a profile from the terminal appears in the window  3569
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: after it ends, the window says the agent has gone 
+ok   bun: the buttons' results are in history cpu 2, snapshots 1
+ok   php with Excimer isn't claimed here no Excimer
+ok   php-alone: connected 
+ok   php-alone: the window names the runtime and its version 
+ok   php-alone: and the agent's version 
+ok   php-alone: and that it's connected 
+ok   php-alone: says why there's no live figures /pecl install excimer/
+ok   php-alone: says why there's no delay /no event loop to delay/
+ok   php-alone: says why there's no snapshots /no built-in way to list/
+ok   php-alone: recording is disabled 
+ok   php-alone: taking a snapshot is disabled 
+ok   php-alone: collecting garbage is disabled 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: after it ends, the window says the agent has gone 
+ok   php-alone: the buttons' results are in history cpu 0, snapshots 0
+ok   go: builds against the installed SDK 
+ok   go: connected 
+ok   go: the window names the runtime and its version 
+ok   go: and the agent's version 
+ok   go: and that it's connected 
+ok   go: Record 5s can be pressed 
+ok   go: shows it's recording 
+ok   go: the profile appears, with its length 
+ok   go: explained by how it was measured /all goroutines/
+ok   go: Take snapshot can be pressed 
+ok   go: the snapshot appears 
+ok   go: and shows what the program holds /smokeAlloc/
+ok   go: Collect garbage can be pressed 
+ok   go: a profile from the terminal appears in the window  2956
+ok   go: the program's exit code is its own exit 0: 
+ok   go: after it ends, the window says the agent has gone 
+ok   go: the buttons' results are in history cpu 2, snapshots 1
+ok   capture: the page opens 
+ok   capture: takes a command 
+ok   capture: starts it 
+ok   capture: the agent connected 0.1.1
+ok   capture: the window names the runtime 
+ok   capture: ended on its own, with its own exit code 0
+ok   no agent: the window says profiling isn't available 
+ok   no agent: and that attaching only gives OS-level monitoring, or how to opt in 
+ok   node, reopened: History opens 
+ok   node, reopened: the run is listed and opens 
+ok   node, reopened: the Profiler tab opens 
+ok   node, reopened: the agent's identity is still there 
+ok   node, reopened: as what it reported, not as live 
+ok   node, reopened: the CPU profile is there 
+ok   python, reopened: History opens 
+ok   python, reopened: the run is listed and opens 
+ok   python, reopened: the Profiler tab opens 
+ok   python, reopened: the agent's identity is still there 
+ok   python, reopened: as what it reported, not as live 
+ok   python, reopened: the CPU profile is there 
+ok   bun, reopened: History opens 
+ok   bun, reopened: the run is listed and opens 
+ok   bun, reopened: the Profiler tab opens 
+ok   bun, reopened: the agent's identity is still there 
+ok   bun, reopened: as what it reported, not as live 
+ok   bun, reopened: the CPU profile is there 
+ok   php-alone, reopened: History opens 
+ok   php-alone, reopened: the run is listed and opens 
+ok   php-alone, reopened: the Profiler tab opens 
+ok   php-alone, reopened: the agent's identity is still there 
+ok   php-alone, reopened: as what it reported, not as live 
+ok   go, reopened: History opens 
+ok   go, reopened: the run is listed and opens 
+ok   go, reopened: the Profiler tab opens 
+ok   go, reopened: the agent's identity is still there 
+ok   go, reopened: as what it reported, not as live 
+ok   go, reopened: the CPU profile is there 
+ok   capture-bun, reopened: History opens 
+ok   capture-bun, reopened: the run is listed and opens 
+ok   capture-bun, reopened: the Profiler tab opens 
+ok   capture-bun, reopened: the agent's identity is still there 
+ok   capture-bun, reopened: as what it reported, not as live 
+AGENTS UI OK
+with:
+  name: smoke-windows
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: C:\Users\runneradmin\.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+  Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  OPENSSL_CONF: C:\Program Files\Common Files\SSL\openssl.cnf
+(node:5088) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 38 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:5088) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 3826764
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is 9dab5492e2303026d6e5343d7721e8c31d41fd0c456e02945316e1145fc89cbb
+Finalizing artifact upload
+Artifact smoke-windows.zip successfully finalized. Artifact ID 13560064498
+Artifact smoke-windows has been successfully uploaded! Final size is 3826764 bytes. Artifact ID is 13560064498
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42337392741/artifacts/13560064498
+with:
+  name: release-windows
+  path: artifacts
+  if-no-files-found: error
+  retention-days: 30
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: C:\Users\runneradmin\.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+  Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  OPENSSL_CONF: C:\Program Files\Common Files\SSL\openssl.cnf
+(node:2148) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 3 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:2148) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 5158832
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is e831ca4ac07bf8e7490d3b4a399d735d65bbef7717e1a14b83a3d64e76f19f8e
+Finalizing artifact upload
+Artifact release-windows.zip successfully finalized. Artifact ID 13560607649
+Artifact release-windows has been successfully uploaded! Final size is 5158832 bytes. Artifact ID is 13560607649
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42337392741/artifacts/13560607649
+Post job cleanup.
+Post job cleanup.
+(node:6684) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Post job cleanup.
+Post job cleanup.
+(node:1252) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Post job cleanup.
+Cache Provider:
+    github
+Workspaces:
+    D:\a\peak\peak\src-tauri
+Cache Paths:
+    C:\Users\runneradmin\.cargo\bin
+    C:\Users\runneradmin\.cargo\.crates.toml
+    C:\Users\runneradmin\.cargo\.crates2.json
+    C:\Users\runneradmin\.cargo\registry
+    C:\Users\runneradmin\.cargo\git
+    D:\a\peak\peak\src-tauri\target
+Restore Key:
+    v0-rust-x86_64-pc-windows-msvc-build-Windows_NT-x64-e70cdc14
+Cache Key:
+    v0-rust-x86_64-pc-windows-msvc-build-Windows_NT-x64-e70cdc14-a5fcb27f
+.. Prefix:
+  - v0-rust-x86_64-pc-windows-msvc-build-Windows_NT-x64
+.. Environment considered:
+  - Rust Versions:
+    - 1.99.1 x86_64-pc-windows-msvc 58cf8f9c35b355199727627d07ae34a4e2846d67
+  - CARGO_HOME
+  - CARGO_INCREMENTAL
+  - CARGO_TERM_COLOR
+.. Lockfiles considered:
+  - D:\a\peak\peak\src-tauri\Cargo.lock
+  - D:\a\peak\peak\src-tauri\Cargo.toml
+  - D:\a\peak\peak\src-tauri\peak-collector\Cargo.toml
+  - D:\a\peak\peak\src-tauri\peak-core\Cargo.toml
+
+... Cleaning D:\a\peak\peak\src-tauri\target ...
+... Cleaning cargo registry (cache-all-crates: false) ...
+... Cleaning cargo/bin ...
+... Cleaning cargo git cache ...
+... Saving cache ...
+[command]"C:\Program Files\Git\usr\bin\tar.exe" --posix -cf cache.tzst --exclude cache.tzst -P -C D:/a/peak/peak --files-from manifest.txt --force-local --use-compress-program "zstd -T0"
+Sent 0 of 550441577 (0.0%), 0.0 MBs/sec
+Sent 416223849 of 550441577 (75.6%), 198.3 MBs/sec
+Sent 550441577 of 550441577 (100.0%), 233.9 MBs/sec
+Post job cleanup.
+(node:6748) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Post job cleanup.
+Post job cleanup.
+[command]"C:\Program Files\Git\bin\git.exe" version
+git version 2.56.0.windows.4
+Temporarily overriding HOME='D:\a\_temp\3d97951a-d64b-4f00-a8b2-fd4aa431c121' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\peak\peak
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Cleaning up orphan processes
+Terminate orphan process: pid (3992) (vctip)

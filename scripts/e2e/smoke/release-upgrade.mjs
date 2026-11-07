@@ -9,8 +9,8 @@
 // With --rehearse, before vNEW exists: installs vOLD and shows the buttons can be pressed.
 import { execFileSync } from "node:child_process"
 import { DatabaseSync } from "node:sqlite"
-import { IS_WINDOWS, PLATFORM, cli, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, pidAlive, shot, sleep, storedRun, waitFor, workload, writeFileSync } from "./lib.mjs"
-import { present, press } from "./drive.mjs"
+import { IS_WINDOWS, PLATFORM, cli, dataDir, install, join, liveApps, log, mkdirSync, mkdtempSync, pidAlive, tmpdir, shot, sleep, storedRun, waitFor, workload, writeFileSync } from "./lib.mjs"
+import { closeApp, openApp, present, press, stopDriving } from "./drive.mjs"
 import { runProbes } from "./probes.mjs"
 
 const rehearse = process.argv.includes("--rehearse")
@@ -26,29 +26,32 @@ const check = (name, ok, detail) => {
   log(ok ? "ok  " : "FAIL", name, detail ?? "")
   if (!ok) process.exitCode = 1
 }
-const finish = () => {
-  closeApps()
+const finish = async () => {
+  await closeApp()
+  stopDriving()
   writeFileSync(join(out, `release-upgrade-${PLATFORM}.json`), JSON.stringify({ from, to, rehearse, feed: FEED, record }, null, 2))
   log(process.exitCode ? "RELEASE UPGRADE FAILED" : rehearse ? "REHEARSAL OK" : "RELEASE UPGRADE OK")
   process.exit(process.exitCode ?? 0)
 }
 const installed = async () => (await cli(["version"]).done).out.trim()
 /** Keep trying, as a notice can take a moment to appear. */
-const pressWhenThere = (name, ms) => waitFor(`"${name}"`, () => (press(name) ? true : null), ms).catch(async (e) => {
+const pressWhenThere = (name, ms) => waitFor(`"${name}"`, async () => ((await press(name)) ? true : null), ms).catch(async (e) => {
   shot(out, `${PLATFORM}-missing-${name.replaceAll(" ", "-")}`)
   throw e
 })
 
 const announced = await fetch(FEED, { redirect: "follow" }).then((r) => r.json())
 check("the feed announces what's expected", announced.version === (rehearse ? announced.version : toVersion), announced.version)
-if (!rehearse && announced.version !== toVersion) finish()
+if (!rehearse && announced.version !== toVersion) await finish()
 
-execFileSync(process.execPath, ["scripts/e2e/smoke/public-install.mjs", from, join(out, "older")], { stdio: "inherit" })
-install(join(out, "older"))
+// Not in the output directory, which is uploaded.
+const older = mkdtempSync(join(tmpdir(), "peak-older-"))
+execFileSync(process.execPath, ["scripts/e2e/smoke/public-install.mjs", from, older], { stdio: "inherit" })
+install(older)
 const before = await installed()
 check("the older release is installed, from its public files", before.includes(fromVersion), before)
 
-launch()
+await openApp()
 const old = await waitFor("the older app", () => liveApps()[0])
 await sleep(4000)
 shot(out, `${PLATFORM}-older-app`)
@@ -57,20 +60,20 @@ if (rehearse) {
   await pressWhenThere("Settings", 60_000)
   await sleep(1500)
   await pressWhenThere("Check for updates", 30_000)
-  const said = await waitFor("an answer from the update check", () => present(announced.version === fromVersion ? (IS_WINDOWS ? "This is the latest version." : "latest version") : "Download and install") || null, 60_000).catch(() => false)
+  const said = await waitFor("an answer from the update check", async () => (await present(announced.version === fromVersion ? (IS_WINDOWS ? "This is the latest version." : "latest version") : "Download and install")) || null, 60_000).catch(() => false)
   shot(out, `${PLATFORM}-rehearsal`)
   check("the production app's buttons can be pressed from outside, and it answers", said)
-  finish()
+  await finish()
 }
 
 // A setting of the user's, and a run in history, to find again afterwards.
-closeApps()
+await closeApp()
 await waitFor("the older app to close", () => !pidAlive(old.pid) || null, 30_000)
 const db = new DatabaseSync(join(dataDir(), "peak.db"))
 const settings = { retentionDays: 11, maxRuns: 77, alertsEnabled: true, notifications: false, alertMemoryMib: 777, alertCpuPercent: 0, alertCpuSeconds: 0, checkForUpdates: true }
 db.prepare("INSERT INTO settings (key, value) VALUES ('settings', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify(settings))
 db.close()
-launch()
+await openApp()
 const running = await waitFor("the older app again", () => liveApps()[0])
 const historyId = `history-${Date.now()}`
 const first = await cli(["run", "--", ...workload(historyId, 3, 5)]).done
@@ -111,4 +114,4 @@ await waitFor("the new run stored", () => storedRun(postId)?.exit_code === 6, 30
 await runProbes({ check, record, out })
 const end = await across.done
 check("that workload finished with its own exit code", end.code === 9, `exit ${end.code}`)
-finish()
+await finish()

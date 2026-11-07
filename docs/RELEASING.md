@@ -36,8 +36,10 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
 | Runtime agents report from inside the program (`smoke.mjs`), for 0.1.0: Node, Python | CI | CI | CI | CI |
-| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), for 0.1.1 | Not yet run | Not yet run | Not yet run | Not yet run |
-| The previous release's own update to this one (`release-upgrade.mjs`) | Not yet run | Not yet run | Not yet run | Not yet run |
+| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `131e76a` | CI | CI, PHP without Excimer | CI | CI |
+| The agents in the installed window (`agents-ui.mjs`), candidate `131e76a` | CI | CI | **Failing:** harness, fix not yet run | **Failing:** harness, fix not yet run |
+| Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `131e76a` | **Failing:** fix not yet run | CI | CI, by reading the screen | **Failing:** fix not yet run |
+| The previous release's own update to this one (`release-upgrade.mjs`) | After publication | After publication | After publication | After publication |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
 | Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |

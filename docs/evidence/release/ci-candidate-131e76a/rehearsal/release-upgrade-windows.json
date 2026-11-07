@@ -1,0 +1,19 @@
+{
+  "from": "v0.1.0",
+  "to": "v0.1.1",
+  "rehearse": true,
+  "feed": "https://github.com/Noah-Wilderom/peak/releases/latest/download/latest.json",
+  "record": {
+    "the feed announces what's expected": {
+      "ok": true,
+      "detail": "0.1.0"
+    },
+    "the older release is installed, from its public files": {
+      "ok": true,
+      "detail": "peak 0.1.0 (Windows installer, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)"
+    },
+    "the production app's buttons can be pressed from outside, and it answers": {
+      "ok": true
+    }
+  }
+}

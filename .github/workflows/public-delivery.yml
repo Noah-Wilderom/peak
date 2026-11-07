@@ -149,10 +149,11 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick xdotool tesseract-ocr tesseract-ocr-eng
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick webkit2gtk-driver
+          cargo install tauri-driver --locked
       - name: What reads and presses the screen on macOS, if its accessibility tree can't
         if: startsWith(matrix.platform, 'darwin')
-        run: brew install tesseract cliclick
+        run: brew install tesseract cliclick imagemagick
       - uses: ./.github/actions/runtimes
       - name: Install the previous release, and update it through the real feed
         shell: bash

@@ -69,6 +69,8 @@ describe("the Profiler with runtime agents", () => {
     expect(screen.getByRole("button", { name: /Take snapshot/ })).toBeDisabled()
     expect(screen.getByRole("button", { name: /Collect garbage/ })).toBeDisabled()
     expect(screen.getAllByText("PHP has no way to list memory.").length).toBeGreaterThan(0)
+    expect(screen.getByText("No heap snapshots here.")).toBeInTheDocument()
+    expect(screen.queryByText(/Take a heap snapshot to see/)).not.toBeInTheDocument()
   })
 
   it("falls back on wording of its own when an agent gives no reason", async () => {
@@ -91,6 +93,7 @@ describe("the Profiler with runtime agents", () => {
     expect(screen.getByText("Heap by allocating function.")).toBeInTheDocument()
     expect(screen.getByText("Sampled allocation sites.")).toBeInTheDocument()
     expect(screen.getByText("Function")).toBeInTheDocument()
+    expect(screen.getByText("1 functions")).toBeInTheDocument()
     expect(screen.getByText("Allocation sites.")).toBeInTheDocument()
   })
 

@@ -5,9 +5,8 @@
 // did something. On Linux the window takes WebDriver, on Windows UI Automation, on macOS the
 // accessibility API, as a release has no debug port.
 //   PEAK_SMOKE_PLATFORM=... [PEAK_TAURI_DRIVER=...] agents-ui.mjs <artifacts dir> <output dir>
-import { spawn, spawnSync } from "node:child_process"
-import { IS_MAC, IS_WINDOWS, PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, paths, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
-import { contents, press as nativePress, pressNth, readsState } from "../smoke/drive.mjs"
+import { IS_WINDOWS, PLATFORM, cli, install, join, liveApps, log, mkdirSync, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
+import { closeApp, contents, openApp, press, readsState, scrollDown, stopDriving, typeInto } from "../smoke/drive.mjs"
 import { phpHasExcimer, programs } from "../smoke/probes.mjs"
 
 const [artifacts, out] = process.argv.slice(2)
@@ -20,45 +19,27 @@ const check = (name, ok, detail) => {
 }
 
 // ─── the window ─────────────────────────────────────────────────────────────
-const LINUX = !IS_WINDOWS && !IS_MAC
-const DRIVER = "http://127.0.0.1:4444"
-let session = null
-async function wd(method, path, body) {
-  const url = path === "/session" || path === "/status" ? `${DRIVER}${path}` : `${DRIVER}/session/${session}${path}`
-  const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) })
-  const json = await res.json()
-  if (json.value?.error) throw new Error(`${json.value.error}: ${json.value.message}`)
-  return json.value
-}
-const LIST = "return [...document.querySelectorAll('button,[role=tab],[role=radio],a')].map((e) => ({ name: (e.getAttribute('aria-label') || e.innerText || '').replace(/\\s+/g, ' ').trim(), enabled: !e.disabled }))"
-const FIND = "const name = arguments[0]; return [...document.querySelectorAll('button,[role=tab],[role=radio],a')].find((e) => (e.getAttribute('aria-label') || e.innerText || '').replace(/\\s+/g, ' ').trim() === name)"
-
-/** Everything readable in the window, and its controls. */
 async function look() {
-  if (LINUX) {
-    const text = await wd("POST", "/execute/sync", { script: "return document.body ? document.body.innerText : ''", args: [] })
-    return { text, items: await wd("POST", "/execute/sync", { script: LIST, args: [] }) }
-  }
-  const items = contents()
+  const items = await contents()
   return { text: items.map((i) => i.name).join("\n"), items }
 }
 async function see(pattern, ms = 30_000) {
   const end = Date.now() + ms
   let text = ""
+  let scrolled = 0
   while (Date.now() < end) {
     text = (await look()).text
     if (pattern.test(text)) return true
     await sleep(500)
+    // Reading the screen, what's further down the page takes scrolling to. A few times, and only
+    // once it isn't simply taking a moment.
+    if (!readsState() && scrolled < 4 && Date.now() > end - ms * 0.5) {
+      scrollDown()
+      scrolled++
+    }
   }
   log(`never saw ${pattern} in:\n${text.slice(0, 1500)}`)
   return false
-}
-async function press(name) {
-  if (!LINUX) return nativePress(name)
-  const el = await wd("POST", "/execute/sync", { script: FIND, args: [name] })
-  if (!el) return false
-  await wd("POST", `/element/${Object.values(el)[0]}/click`, {})
-  return true
 }
 /** Press a control by its name's pattern, such as a tab whose name holds a count. */
 async function pressMatching(pattern, ms = 30_000) {
@@ -70,56 +51,32 @@ async function pressMatching(pattern, ms = 30_000) {
   }
   return false
 }
-/** Disabled, as far as this platform can read it. Where only words can be read, says so in the record. */
-async function checkDisabled(label, name) {
-  if (!LINUX && !readsState()) {
-    record[label] = { ok: true, detail: "not readable here: only the screen's words are, so only the reason beside it is checked" }
+/**
+ * That a control is disabled. Where the platform can't read the attribute, that's not assumed: it's
+ * pressed, and nothing may come of it. The record says which of the two this was.
+ */
+async function checkDisabled(label, name, run) {
+  if (readsState()) {
+    return check(label, (await look()).items.find((i) => i.name === name)?.enabled === false)
+  }
+  const before = storedRunById(run)
+  const pressed = await press(name)
+  await sleep(2500)
+  const after = storedRunById(run)
+  const quiet = before?.cpuProfiles === after?.cpuProfiles && before?.snapshots === after?.snapshots && !/Recording|Capturing/.test((await look()).text)
+  if (!pressed) {
+    // Greyed out, its words may not read. That's not evidence either way, so it's recorded as neither.
+    record[label] = { ok: true, unobserved: true, detail: `"${name}" couldn't be found on screen, so whether it's disabled wasn't observed` }
+    log("NOT OBSERVED", label)
     return
   }
-  check(label, (await look()).items.find((i) => i.name === name)?.enabled === false)
+  check(label, quiet, "attribute not readable here: pressed instead, and nothing came of it")
 }
-/** Enter a command on the Capture page, which is focused on arrival. */
-async function typeCommand(text) {
-  if (LINUX) {
-    const el = await wd("POST", "/execute/sync", { script: "return document.querySelector('form input')", args: [] })
-    await wd("POST", `/element/${Object.values(el)[0]}/value`, { text })
-    return true
-  }
-  if (IS_MAC) return spawnSync("cliclick", [`t:${text}`]).status === 0
-  const script = `
-Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes
-$A = [Windows.Automation.AutomationElement]
-$edit = New-Object Windows.Automation.PropertyCondition($A::ControlTypeProperty, [Windows.Automation.ControlType]::Edit)
-foreach ($w in $A::RootElement.FindAll([Windows.Automation.TreeScope]::Children, [Windows.Automation.Condition]::TrueCondition)) {
-  if ($w.Current.Name -notlike '*peak*') { continue }
-  foreach ($e in $w.FindAll([Windows.Automation.TreeScope]::Descendants, $edit)) {
-    if ($e.Current.Name -like '*Command*') {
-      $e.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).SetValue($env:PEAK_TYPED); exit 0
-    }
-  }
-}
-exit 3`
-  return spawnSync("powershell", ["-NoProfile", "-Command", script], { env: { ...process.env, PEAK_TYPED: text } }).status === 0
-}
-const shot = async (name) => {
-  const file = `${PLATFORM}-${name}`
-  if (LINUX) writeFileSync(join(out, `${file}.png`), Buffer.from(await wd("GET", "/screenshot"), "base64"))
-  else desktopShot(out, file)
-}
+const shot = (name) => desktopShot(out, `${PLATFORM}-${name}`)
 async function openWindow() {
-  if (LINUX) {
-    session = (await wd("POST", "/session", { capabilities: { alwaysMatch: { browserName: "wry", "tauri:options": { application: paths().gui } } } })).sessionId
-  } else {
-    launch()
-  }
+  await openApp()
   await waitFor("the app", () => liveApps()[0], 60_000)
   await sleep(4000)
-}
-async function closeWindow() {
-  if (LINUX) await wd("DELETE", "").catch(() => {})
-  session = null
-  closeApps()
-  await sleep(2500)
 }
 
 const asJson = (t) => {
@@ -134,10 +91,6 @@ const version = (await (async () => {
   return (await cli(["--version"]).done).out.match(/\d+\.\d+\.\d+/)?.[0]
 })())
 
-if (LINUX) {
-  spawn(process.env.PEAK_TAURI_DRIVER, ["--native-driver", "/usr/bin/WebKitWebDriver"], { stdio: "inherit" })
-  await waitFor("the driver", () => wd("GET", "/status").catch(() => null), 15_000)
-}
 await openWindow()
 await shot("window")
 
@@ -168,7 +121,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     await shot(`${name}-cpu`)
   } else {
     await pressMatching(/^CPU$/, 5000)
-    await checkDisabled(t("recording is disabled"), "Record 5s")
+    await checkDisabled(t("recording is disabled"), "Record 5s", run.id)
     await shot(`${name}-cpu-refused`)
   }
   await pressMatching(/^Heap$/, 5000)
@@ -178,11 +131,11 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
     await shot(`${name}-heap`)
   } else {
-    await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot")
+    await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
     await shot(`${name}-heap-refused`)
   }
   if (gc) check(t("Collect garbage can be pressed"), await pressMatching(/^Collect garbage$/))
-  else await checkDisabled(t("collecting garbage is disabled"), "Collect garbage")
+  else await checkDisabled(t("collecting garbage is disabled"), "Collect garbage", run.id)
 
   // A result from the terminal reaches the window that's already open.
   if (cpu) {
@@ -228,7 +181,7 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
   const command = `bun "${join(program.cwd, marker).replaceAll("\\", "/")}"`
   check("capture: the page opens", await pressMatching(/^Capture$/))
   await sleep(1000)
-  check("capture: takes a command", await typeCommand(command))
+  check("capture: takes a command", await typeInto("Command", command))
   check("capture: starts it", await pressMatching(/^Run and capture/))
   const run = await waitFor("the captured run's agent", async () => (asJson((await cli(["ps", "--json"]).done).out) ?? []).find((r) => r.command.includes(marker) && r.profiling) ?? null, 30_000).catch(() => null)
   check("capture: the agent connected", run?.agent?.agentVersion === version, run?.agent?.agentVersion)
@@ -245,6 +198,31 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
   }
 }
 
+// A result from the terminal, on a run that isn't the one on screen, leaves the window where it is.
+{
+  const shown = programs.node(30)
+  const other = programs.python(30)
+  const running = [cli(["run", "--", ...shown.command], { cwd: shown.cwd }), cli(["run", "--", ...other.command], { cwd: other.cwd })]
+  const find = (program) => waitFor("a run's agent", async () => (asJson((await cli(["ps", "--json"]).done).out) ?? []).find((r) => r.command.includes(program.command.find((p) => p.includes("work-"))) && r.profiling) ?? null, 60_000).catch(() => null)
+  const [a, b] = [await find(shown), await find(other)]
+  check("selection: both runs connected", a && b)
+  if (a && b) {
+    await cli(["open", a.id]).done
+    check("selection: the first run is on screen", await see(/Node\.js\s+\d/))
+    const result = await cli(["profile", b.id, "--ms", "800", "--json"]).done
+    check("selection: the other run was profiled from the terminal", result.code === 0, result.err.trim())
+    await sleep(2500)
+    const text = (await look()).text
+    check("selection: the window stayed on the first run", /Node\.js\s+\d/.test(text) && !/Python\s+\d/.test(text))
+    await shot("selection-kept")
+    await cli(["open", b.id]).done
+    await pressMatching(/^CPU$/, 5000)
+    check("selection: and the other run has the result", await see(/Profile\s+1/, 15_000))
+    await shot("selection-other-run")
+  }
+  await Promise.all(running.map((r) => r.done))
+}
+
 // A runtime with no agent gets its setup, not empty charts.
 const plain = programs.goPlain(25)
 const plainRun = cli(["run", "--", ...plain.command], { cwd: plain.cwd })
@@ -256,23 +234,22 @@ await shot("no-agent")
 await plainRun.done
 
 // ─── reopened from history, after a restart ─────────────────────────────────
-await closeWindow()
+await closeApp()
 await openWindow()
-// Where only words can be read, a row is found by its place: newest first, under the no-agent run.
-const newestFirst = [...kept].reverse()
 for (const run of kept) {
   const t = (what) => `${run.name}, reopened: ${what}`
   check(t("History opens"), await pressMatching(/^History$/))
   await sleep(1000)
   const leaf = run.marker.split(/[\\/]/).at(-1)
-  const byName = LINUX || readsState()
-  const row = newestFirst.indexOf(run) + 1
-  if (!byName && row > 4) {
-    record[t("not checked here")] = { ok: true, detail: "further down the list than this screen shows, and only words can be read" }
-    await pressMatching(/^Close$/, 2000)
-    continue
+  if (readsState()) {
+    check(t("the run is listed and opens"), await pressMatching(new RegExp(`^Open .*${leaf.replaceAll(".", "\\.")}`)))
+  } else {
+    // A row can't be told by its hidden label here, or reached if it's off-screen. Searching leaves
+    // only this one, wherever it was.
+    check(t("searching finds the run"), await typeInto("Search", leaf))
+    await sleep(1500)
+    check(t("the run is listed and opens"), await pressMatching(/^Open$/))
   }
-  check(t("the run is listed and opens"), byName ? await pressMatching(new RegExp(`^Open .*${leaf.replaceAll(".", "\\.")}`)) : pressNth("Open", row))
   await sleep(1000)
   check(t("the Profiler tab opens"), await pressMatching(/^Profiler\b/))
   check(t("the agent's identity is still there"), await see(new RegExp(`${run.label}\\s+${number}`)))
@@ -283,7 +260,8 @@ for (const run of kept) {
   }
   await shot(`${run.name}-reopened`)
 }
-await closeWindow()
+await closeApp()
 writeFileSync(join(out, `agents-ui-${PLATFORM}.json`), JSON.stringify(record, null, 2))
+stopDriving()
 log(process.exitCode ? "AGENTS UI FAILED" : "AGENTS UI OK")
 process.exit(process.exitCode ?? 0)
