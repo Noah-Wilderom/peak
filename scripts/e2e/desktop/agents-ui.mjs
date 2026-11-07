@@ -23,7 +23,7 @@ async function look() {
 async function see(pattern, ms = 30_000) {
   // Reading a screen takes seconds a go, and what's wanted may be further down the page.
   const sight = !readsState()
-  const end = Date.now() + (sight ? Math.max(ms, 45_000) : ms)
+  const end = Date.now() + (sight ? Math.max(ms, 90_000) : ms)
   let text = ""
   let scrolled = 0
   if (sight) scrollToTop()
@@ -153,7 +153,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("Take snapshot can be pressed"), await pressMatching(/^Take snapshot$/))
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
-    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/allocating\s+functions/, 8000))
+    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/Objects, estimated/, 8000) && !/\d+ types/.test((await look()).text))
     await shot(`${name}-heap`)
   } else {
     await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
@@ -266,8 +266,13 @@ await closeApp()
 await openWindow()
 for (const run of kept) {
   const t = (what) => `${run.name}, reopened: ${what}`
-  check(t("History opens"), await pressMatching(/^History$/))
-  await sleep(1000)
+  // Pressing isn't enough: the page has to be there, with its search box.
+  let opened = false
+  for (let i = 0; i < 3 && !opened; i++) {
+    await pressMatching(/^History$/)
+    opened = await see(/Search by command|History\. Every run/, 20_000)
+  }
+  check(t("History opens"), opened)
   const leaf = run.marker.split(/[\\/]/).at(-1)
   if (readsState()) {
     check(t("the run is listed and opens"), await pressMatching(new RegExp(`^Open .*${leaf.replaceAll(".", "\\.")}`)))

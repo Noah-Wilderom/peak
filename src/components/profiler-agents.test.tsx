@@ -120,7 +120,7 @@ describe("the Profiler with runtime agents", () => {
     expect(screen.getByText("Sampled allocation sites.")).toBeInTheDocument()
     expect(screen.getByText("Function")).toBeInTheDocument()
     expect(screen.getByText("Objects, estimated")).toBeInTheDocument()
-    expect(screen.getByText("From 1 allocating functions")).toBeInTheDocument()
+    expect(screen.getByText("1 functions")).toBeInTheDocument()
     expect(screen.queryByText(/\d+ types/)).not.toBeInTheDocument()
     expect(screen.getByText("Allocation sites.")).toBeInTheDocument()
   })

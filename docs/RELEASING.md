@@ -36,9 +36,9 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
 | Runtime agents report from inside the program (`smoke.mjs`), for 0.1.0: Node, Python | CI | CI | CI | CI |
-| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `5f34c8b` | CI | CI, PHP without Excimer | CI | CI |
-| The agents in the installed window (`agents-ui.mjs`), candidate `5f34c8b` | CI | CI | **Failing:** 38 of 152, harness; fix not yet run | **Failing:** 55 of 152, harness; fix not yet run |
-| Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `5f34c8b` | CI | CI | CI, by reading the screen | CI, by reading the screen |
+| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `bdd2b42` | CI | CI, PHP without Excimer | CI | CI |
+| The agents in the installed window (`agents-ui.mjs`), candidate `bdd2b42` | CI | CI | **Failing:** 30 of 152, fix not yet run | **Failing:** 31 of 152, fix not yet run |
+| Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `bdd2b42` | CI | CI | CI, by reading the screen | CI, by reading the screen |
 | The previous release's own update to this one (`release-upgrade.mjs`) | After publication | After publication | After publication | After publication |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |

@@ -270,8 +270,11 @@ export async function typeInto(field, text) {
     if (field === "Search" && !bySight("Search", true)) return false
     // Pasted, not typed: typed keys can land in macOS's own shortcuts, which once opened the
     // character viewer over the window and took the rest of the text.
-    spawnSync("pbcopy", { input: text })
-    return run("cliclick", ["kd:cmd", "t:v", "ku:cmd"]).status === 0
+    // And by the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.
+    spawnSync("pbcopy", [], { input: text })
+    if (!bySight("Edit", true)) return false
+    await sleep(800)
+    return bySight("Paste", true)
   }
   const ps = `
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes

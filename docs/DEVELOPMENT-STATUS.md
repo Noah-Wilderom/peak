@@ -4,13 +4,30 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `5f34c8b`: the window proof passes on Linux and Windows, and the real `v0.1.0`'s buttons can be pressed on all four. macOS's window proof still fails, with fixes awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `bdd2b42`: everything passes except macOS's window proof, which now fails on 30 and 31 checks: Capture, History search and reopening, and one wording check. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Sixth native run: `bdd2b42`
+
+**Update proof 42363115587, including the `v0.1.0` rehearsal on all four, and Tests 42363115625 passed**, with the backend at 99.16% on CI. Release 42363115590 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-bdd2b42/`. The new record format ran for the first time, counting each check as an observed pass, a failure or unobserved:
+
+| Window proof | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Counts | **153 pass**, 0, 0 | **132 pass**, 0, 0 | 122 pass, 30 fail, 0 unobserved | 121 pass, 31 fail, 0 unobserved |
+
+**Now observed on macOS:** recording, snapshots and garbage collection with the real buttons, CPU and heap results in its window, PHP's refusals and reasons, results from the terminal, and the non-selected-run check.
+
+**Still failing on macOS, with causes from the logs and captures:**
+
+- **Capture and History search:** the pasted text never reached either field. A capture shows History opened, unfiltered, on the most recent run instead. cliclick's simulated Command-V didn't paste on the runner. **Now pasted through the Edit menu**, which is clicking, and clicking does work there.
+- **Reopening Node:** the History button was pressed while the window was still on its start page, and nothing checked that the page had opened. It's now checked, and retried.
+- **Go's "allocating functions":** the hint is truncated in a 1024-point window. It's now "N functions", under "Objects, estimated", and the check reads the label.
+- **"SmokeThing" in the snapshot table on macOS x64:** it's three screens down, and reading a 1920 by 1080 screen took too long to get there. This capture, read by the same code here, does find it. Reading is now allowed 90 seconds.
 
 ### Fifth native run: `5f34c8b`
 

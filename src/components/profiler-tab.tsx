@@ -300,7 +300,7 @@ function HeapProfiler({ proc }: { proc: Proc }) {
         <motion.div key={snap.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="flex min-w-0 flex-col gap-4">
           <div className="grid grid-cols-3 gap-4">
             <Metric label="Heap used" value={<Bytes value={snap.heapUsed} />} hint={base ? `${snap.heapUsed >= base.heapUsed ? "+" : "−"}${formatBytes(Math.abs(snap.heapUsed - base.heapUsed))} vs snapshot ${index}` : "First snapshot"} />
-            <Metric label={go ? "Objects, estimated" : "Objects"} value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={go ? `From ${rows.length} allocating functions` : `${rows.length} types`} />
+            <Metric label={go ? "Objects, estimated" : "Objects"} value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={go ? `${rows.length} functions` : `${rows.length} types`} />
             {grower ? (
               <div className="rounded-card bg-danger/10 p-5 ring-1 ring-danger/25 ring-inset">
                 <p className="flex items-center gap-1.5 text-xs font-semibold text-danger">
