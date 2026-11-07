@@ -103,6 +103,26 @@ jobs:
         run: |
           if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
           else node scripts/e2e/smoke/smoke.mjs artifacts smoke-output; fi
+      - name: What drives the window on Linux
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get install -y --no-install-recommends webkit2gtk-driver
+          cargo install tauri-driver --locked
+      - name: What reads the screen on macOS, if its accessibility tree can't
+        if: startsWith(matrix.platform, 'darwin')
+        run: brew install tesseract cliclick
+      - name: The agents in the installed window
+        if: always()
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+        run: |
+          export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+            WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+          else
+            node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

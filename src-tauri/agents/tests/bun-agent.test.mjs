@@ -1,6 +1,9 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
+import { copyFileSync, mkdtempSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { startHub, run } from "./harness.mjs"
 
@@ -36,7 +39,11 @@ test("bun agent reports only what it measures and answers requests", { skip: !av
     assert.equal(hello.pid, child.pid)
     assert.equal(hello.agent.agentVersion, "9.9.9")
     assert.match(hello.agent.runtimeVersion, /^\d+\.\d+\.\d+/)
-    assert.deepEqual([...hello.agent.capabilities].sort(), ["cpu", "forcegc", "heap", "lag", "snapshot"])
+    // Bun before 1.3.7 throws on any use of node:inspector, and the agent has to say so.
+    const [major, minor, patch] = hello.agent.runtimeVersion.split(".").map(Number)
+    const hasCpu = major > 1 || minor > 3 || (minor === 3 && patch >= 7)
+    assert.deepEqual([...hello.agent.capabilities].sort(), [...(hasCpu ? ["cpu"] : []), "forcegc", "heap", "lag", "snapshot"])
+    if (!hasCpu) assert.match(hello.agent.unavailable.cpu, /1\.3\.7/)
     assert.ok(hello.agent.unavailable.gc, "says why there are no GC events")
 
     const heap = await hub.waitFor((m) => m.type === "heap" && typeof m.loopLag === "number")
@@ -46,16 +53,18 @@ test("bun agent reports only what it measures and answers requests", { skip: !av
     const gauges = await hub.waitFor((m) => m.type === "gauges")
     assert.ok(gauges.values.find((g) => g.name === "Live objects").value > 100)
 
-    const cpu = await hub.request("cpuprofile", 1, { ms: 1500 })
-    assert.equal(cpu.ok, true, cpu.error)
-    assert.equal(cpu.data.sampling, "jsc")
-    assert.ok(cpu.data.durationMs >= 1400)
-    const frames = flat(cpu.data.root)
-    const hot = frames.find((f) => f.name === "hotLoop")
-    assert.ok(hot, `no hotLoop in ${frames.map((f) => f.name)}`)
-    const sampled = frames.reduce((sum, f) => sum + f.self, 0)
-    assert.ok(sampled > 100 && sampled < 5000, `sampled ${sampled} ms in 1.5 s`)
-    assert.ok(hot.self > 50, `hotLoop self ${hot.self} ms`)
+    if (hasCpu) {
+      const cpu = await hub.request("cpuprofile", 1, { ms: 1500 })
+      assert.equal(cpu.ok, true, cpu.error)
+      assert.equal(cpu.data.sampling, "jsc")
+      assert.ok(cpu.data.durationMs >= 1400)
+      const frames = flat(cpu.data.root)
+      const hot = frames.find((f) => f.name === "hotLoop")
+      assert.ok(hot, `no hotLoop in ${frames.map((f) => f.name)}`)
+      const sampled = frames.reduce((sum, f) => sum + f.self, 0)
+      assert.ok(sampled > 100 && sampled < 5000, `sampled ${sampled} ms in 1.5 s`)
+      assert.ok(hot.self > 50, `hotLoop self ${hot.self} ms`)
+    }
 
     const snap = await hub.request("snapshot", 2)
     assert.equal(snap.ok, true, snap.error)
@@ -98,4 +107,25 @@ test("bun agent stays out of the way", { skip: !available }, async () => {
   const help = spawnSync(bun, ["install", "--help"], { env })
   assert.equal(help.status, 0)
   await hub.close()
+})
+
+// macOS keeps the agent under "Application Support", and Bun drops a preload that's quoted any other way.
+test("bun loads the agent from a path with a space, next to a user's own options", { skip: !available }, async () => {
+  const dir = mkdtempSync(join(tmpdir(), "peak agent with space "))
+  const spaced = join(dir, "peak-agent-bun.js")
+  copyFileSync(agent, spaced)
+  const hub = await startHub()
+  const child = run(bun, ["-e", "setTimeout(() => {}, 20000)"], {
+    PEAK_AGENT_ADDR: hub.addr,
+    PEAK_AGENT_TOKEN: "t",
+    BUN_OPTIONS: `"--preload=${spaced.replaceAll("\\", "/")}" --smol`,
+  })
+  try {
+    const hello = await hub.waitFor((m) => m.type === "hello")
+    assert.equal(hello.runtime, "bun")
+    if (process.env.PEAK_TEST_BUN_VERSION) assert.equal(hello.agent.runtimeVersion, process.env.PEAK_TEST_BUN_VERSION)
+  } finally {
+    child.kill("SIGKILL")
+    await hub.close()
+  }
 })

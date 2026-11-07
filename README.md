@@ -126,7 +126,7 @@ tasks.
 
 ## Profiling each runtime
 
-Run a program from the Capture page or with `peak run --` and Peak reads it from inside, through a small agent. `peak agents` prints this for your install. Peak can't attach an agent to a process that's already running, or look inside a program without one. Those runs still get memory, CPU and I/O from the OS, and Peak doesn't present those figures as the runtime's own.
+Run a program from the Capture page or with `peak run --` and Peak reads it from inside, through a small agent. `peak agents` prints this for your install. Attaching to a process that's already running still works, and gives its memory, CPU and I/O from the OS, as does a program without an agent. Peak doesn't present those figures as the runtime's own.
 
 | | Node.js | Bun | Python | PHP with Excimer | PHP alone | Go |
 |---|---|---|---|---|---|---|
@@ -134,7 +134,7 @@ Run a program from the Capture page or with `peak run --` and Peak reads it from
 | Live heap | Yes | Yes | No: the process's memory | Yes, between PHP operations | No | Yes |
 | Garbage collections | Pause and estimated size | No: Bun doesn't publish them | Pause and estimated size | Pause on PHP 8.3+, values counted but not bytes | No | Pause and estimated size |
 | Runtime delay | Event loop | How late a timer fires | How late a sleep wakes | No: there's no loop to delay | No | Scheduler wait |
-| CPU profile | V8 sampler, main thread | JavaScriptCore sampler | Main thread stacks, including blocking | On-CPU on Linux, elapsed on macOS | No | On-CPU, all goroutines |
+| CPU profile | V8 sampler, main thread | JavaScriptCore sampler, Bun 1.3.7+ | Main thread stacks, including blocking | On-CPU on Linux, elapsed on macOS | No | On-CPU, all goroutines |
 | Heap snapshot | By type, with allocation stacks | By type | By type, with allocation stacks | No | No | Allocation sites, by function, estimated |
 | Force a collection | Yes | Yes | Yes | Yes, the cycle collector | No | Yes |
 | Other readings | | Live objects, extra memory | | Memory, peak memory, collector runs | The same, once, at exit | Goroutines, time in GC, live objects |

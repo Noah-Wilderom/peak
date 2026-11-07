@@ -110,6 +110,17 @@ describe("TauriMonitor", () => {
     expect(m.getSnapshot()).toMatchObject({ ready: true, error: "Error: boom", selectedId: null })
   })
 
+  it("shows results from `peak profile` without changing what's selected", async () => {
+    const { m, emit } = setup([makeProc({ id: "a" }), makeProc({ id: "b" })])
+    await m.start()
+    await flush()
+    m.select("a")
+    const profile = { id: "c1", t: 5, durationMs: 800, sampling: "pprof" as const, root: { name: "(root)", self: 0, children: [] } }
+    emit("peak://results", makeProc({ id: "b", cpuProfiles: [profile] }))
+    expect(m.getSnapshot().selectedId).toBe("a")
+    expect(m.getSnapshot().procs.find((p) => p.id === "b")!.cpuProfiles).toHaveLength(1)
+  })
+
   it("selects a run that `peak open` asks for", async () => {
     const { m, emit } = setup([makeProc({ id: "a" }), makeProc({ id: "b" })])
     await m.start()

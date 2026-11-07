@@ -256,7 +256,7 @@ where
     let mut cmd = crate::runner::shell_command(command);
     cmd.stdin(Stdio::inherit()).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some((_, env)) = &link {
-        cmd.envs(with_inherited(env.clone(), &|key| std::env::var(key).ok()));
+        cmd.envs(with_inherited(env.clone(), &crate::runner::host_var));
     }
     // SAFETY: reset_signals only calls async-signal-safe functions.
     #[cfg(unix)]
@@ -844,21 +844,19 @@ mod tests {
         assert_eq!(main(Cli::Open(id.clone()), &dirs), 0);
 
         let mut agent = TcpStream::connect(hub.addr()).unwrap();
+        let until = |ready: fn(&[Value]) -> bool| {
+            let listings = std::iter::repeat_with(|| {
+                thread::sleep(Duration::from_millis(10));
+                list_runs(&dirs, &here).unwrap()
+            });
+            listings.take(300).find(|runs| ready(runs)).expect("the run never got there")
+        };
         let hello = json!({ "type": "hello", "token": id, "pid": 4242, "runtime": "go", "agent": {
             "runtimeVersion": "1.27", "agentVersion": "0.1.1", "capabilities": ["cpu", "forcegc"],
             "unavailable": { "snapshot": "not on this one" }
         }});
         writeln!(agent, "{hello}").unwrap();
-        let runs = (0..200)
-            .find_map(|_| {
-                let runs = list_runs(&dirs, &here).unwrap();
-                if runs[0]["profiling"] == true {
-                    return Some(runs);
-                }
-                thread::sleep(Duration::from_millis(10));
-                None
-            })
-            .unwrap();
+        let runs = until(|runs| runs[0]["profiling"] == true);
         assert_eq!(runs[0]["runtime"], "go");
         assert_eq!(runs[0]["agent"]["runtimeVersion"], "1.27");
         assert!(format_runs(&runs).contains("1.27 cpu,forcegc"));
@@ -870,7 +868,7 @@ mod tests {
 
         let answers = BufReader::new(agent.try_clone().unwrap());
         let responder = thread::spawn(move || {
-            for line in answers.lines().map_while(Result::ok).take(2) {
+            for line in answers.lines().map_while(Result::ok).take(3) {
                 let req: Value = serde_json::from_str(&line).unwrap();
                 let data = json!({ "durationMs": 500, "sampling": "pprof", "root": {
                     "name": "(root)", "self": 0, "children": [{ "name": "main.work", "file": "a.go:3", "self": 400, "children": [] }]
@@ -882,20 +880,12 @@ mod tests {
         let data = profile(&cpu(&id, "cpu"), &dirs, &here).unwrap();
         assert_eq!(data["sampling"], "pprof");
         assert_eq!(m.lock().unwrap().get(&id).unwrap().cpu_profiles.len(), 1);
+        assert_eq!(main(Cli::Profile(cpu(&id, "cpu")), &dirs), 0);
         let readable = ProfileArgs { json: false, ..cpu(&id, "cpu") };
         assert_eq!(main(Cli::Profile(readable), &dirs), 0);
         responder.join().unwrap();
         // The agent has gone. What it said stays with the run, but it's no longer live.
-        let ended = (0..200)
-            .find_map(|_| {
-                let runs = list_runs(&dirs, &here).unwrap();
-                if runs[0]["profiling"] != true {
-                    return Some(runs);
-                }
-                thread::sleep(Duration::from_millis(10));
-                None
-            })
-            .unwrap();
+        let ended = until(|runs| runs[0]["profiling"] != true);
         assert!(format_runs(&ended).contains("ended 1.27"));
     }
 
@@ -913,6 +903,17 @@ mod tests {
         assert!(list_runs(&dirs, &here).unwrap_err().contains("turned this connection away"));
         assert!(profile(&cpu, &dirs, &here).unwrap_err().contains("turned this connection away"));
         assert_eq!(main(Cli::Ps { json: false }, &dirs), 1);
+
+        // An app too old to know these commands hangs up.
+        let dir = tempfile::tempdir().unwrap();
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let older = publish(dir.path(), listener.local_addr().unwrap().to_string(), "s");
+        thread::spawn(move || {
+            let (c, _) = listener.accept().unwrap();
+            let mut line = String::new();
+            BufReader::new(c).read_line(&mut line).unwrap();
+        });
+        assert!(list_runs(&older, &here).unwrap_err().contains("turned this connection away"));
 
         // Something answering, but not like Peak, or in a shape this doesn't expect.
         for (reply, expected) in [

@@ -1,0 +1,160 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go
+  DEBIAN_FRONTEND: noninteractive
+(node:2156) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (Windows installer, commit f5116c8a7f2214ccc3e4d3d13639f08c72a85756)
+collector: x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-1d7c3eaa160b41e3\peak-collector (for Linux targets) 
+ok   names its bundled collector x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-1d7c3eaa160b41e3\peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmm7ud1 for runneradmin — running without monitoring
+app pid 7636
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started C:\Users\RUNNER~1\AppData\Local\Temp\peak place vZbDcm
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794022396923-err
+ok   the app recorded real samples and the exit samples 9, max rss 121282560, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+FAIL node: CPU profile holds the program's own function, in milliseconds v8, 2545 ms sampled in 2013 ms: 
+ok   node: says how it sampled v8
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 34 of 36
+ok   node: live heap reached the samples 
+ok   node: collections are stored 790
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2004 ms sampled in 2004 ms: 
+ok   python: says how it sampled stack
+ok   python: heap snapshot holds what the program allocated 60 entries, top type: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 34 of 38
+ok   python: collections are stored 26
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2026 ms sampled in 2030 ms: 
+ok   bun: says how it sampled jsc
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":88948,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2337450,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 33 of 36
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php-without-excimer: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-without-excimer: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-without-excimer: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-without-excimer: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-without-excimer: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-without-excimer: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-without-excimer: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-without-excimer: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-without-excimer: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-without-excimer: the app opens its profiler 
+ok   php-without-excimer: the program's exit code is its own exit 0: 
+ok   php-without-excimer: history keeps what the agent reported [{"name":"Memory now","value":604320,"unit":"bytes"},{"name":"Peak memory","value":1180800,"unit":"bytes"},{"name":"Collector runs","value":280,"unit":"count"},{"name":"Values collected","value":2800000,"unit":"count"}]
+ok   php-without-excimer: no delay is claimed 
+ok   php-without-excimer: no collections are invented 0
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1770 ms sampled in 2011 ms: 
+ok   go: says how it sampled pprof
+ok   go: heap snapshot holds what the program allocated 13 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.05010672733520166,"unit":"percent"},{"name":"Live objects","value":783154,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 34 of 36
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE FAILED
+with:
+  name: smoke-windows
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: C:\Users\runneradmin\.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+  Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+  OPENSSL_CONF: C:\Program Files\Common Files\SSL\openssl.cnf
+(node:7796) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 8 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:7796) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 729042
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is db659654fc007f80480b17cf5ebffcca437b7380cfb8d256e14469ecf9ca7ac8
+Finalizing artifact upload
+Artifact smoke-windows.zip successfully finalized. Artifact ID 13557864952
+Artifact smoke-windows has been successfully uploaded! Final size is 729042 bytes. Artifact ID is 13557864952
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42333866414/artifacts/13557864952
+Post job cleanup.
+Post job cleanup.
+[command]"C:\Program Files\Git\bin\git.exe" version
+git version 2.56.0.windows.4
+Temporarily overriding HOME='D:\a\_temp\6bd2f71d-2999-484d-a77c-69750e9a26bf' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\peak\peak
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Cleaning up orphan processes
+Terminate orphan process: pid (4292) (vctip)

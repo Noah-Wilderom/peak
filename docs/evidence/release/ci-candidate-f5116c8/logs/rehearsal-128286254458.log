@@ -1,0 +1,60 @@
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse
+else node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse; fi
+shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  PEAK_SMOKE_PLATFORM: darwin-x86_64
+##[endgroup]
+(node:5851) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the feed announces what's expected 0.1.0
+peak_0.1.0_x64.dmg: 7414667 bytes, sha256 b3287f2be0a4e566cd2c0c54c7c36c13a4f213a3a4168c57459ef0407b4cdfbf
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $A94DAEC5
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $0B237E55
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $42471872
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_HFS : 4)…
+          disk image (Apple_HFS : 4): verified   CRC32 $645532F6
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $42471872
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $488BF74D
+verified   CRC32 $F8CA03F7
+/dev/disk2          	GUID_partition_scheme          	
+/dev/disk2s1        	Apple_HFS                      	/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak-dmg-LamsrL
+"disk2" ejected.
+ok   the older release is installed, from its public files peak 0.1.0 (macOS app, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+file:///Users/runner/work/peak/peak/scripts/e2e/smoke/lib.mjs:109
+  throw new Error(`timed out waiting for ${what}`)
+        ^
+
+Error: timed out waiting for "Settings"
+    at waitFor (file:///Users/runner/work/peak/peak/scripts/e2e/smoke/lib.mjs:109:9)
+    at async file:///Users/runner/work/peak/peak/scripts/e2e/smoke/release-upgrade.mjs:57:3
+
+Node.js v22.23.2
+##[error]Process completed with exit code 1.
+##[group]Run actions/upload-artifact@v4
+with:
+  name: upgrade-rehearsal-darwin-x86_64
+  path: rehearsal
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+##[endgroup]
+(node:7672) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 3 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:7672) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 7983772
+Finished uploading artifact content to blob storage!

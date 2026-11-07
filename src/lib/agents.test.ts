@@ -30,12 +30,12 @@ describe("agent facts", () => {
     expect(formatGauge({ name: "a", value: 12, unit: "count" })).toBe("12")
   })
 
-  it("tells each runtime how to get an agent, without promising to attach", () => {
+  it("tells each runtime how to get an agent, and what attaching gives", () => {
     expect(setupFor("go").code).toContain("sdk/go/auto")
     expect(setupFor("go").body).toMatch(/can't have anything injected/)
     expect(setupFor("bun").body).toMatch(/1\.2\.15/)
     expect(setupFor("php").code).toBe("pecl install excimer")
-    for (const runtime of ["node", "python", "bun", "php"] as const) expect(setupFor(runtime).body).toMatch(/can't be attached to/)
+    for (const runtime of ["node", "python", "bun", "php"] as const) expect(setupFor(runtime).body).toMatch(/Attaching to a running process only gives OS-level monitoring/)
     expect(setupFor("python").body).toMatch(/Python/)
     expect(setupFor("shell").code).toBeUndefined()
   })

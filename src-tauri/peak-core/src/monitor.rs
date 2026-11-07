@@ -92,7 +92,9 @@ pub fn with_inherited(env: Vec<(String, String)>, inherited: &dyn Fn(&str) -> Op
             let value = match inherited(&key).filter(|theirs| !theirs.is_empty()) {
                 None => ours,
                 Some(theirs) => match key.as_str() {
-                    "NODE_OPTIONS" | "BUN_OPTIONS" => format!("{theirs} {ours}"),
+                    "NODE_OPTIONS" => format!("{theirs} {ours}"),
+                    // Bun only honours a quoted option at the start.
+                    "BUN_OPTIONS" => format!("{ours} {theirs}"),
                     "PYTHONPATH" => format!("{ours}{PATH_SEP}{theirs}"),
                     // Ours starts with a separator. Theirs goes first and decides what's in the
                     // list, including whether PHP's own directory is.
@@ -821,7 +823,7 @@ fn launch(shared: &Shared, command: &str, program: runner::Program<'_>, cwd: &st
     let (id, dir, env) = {
         let mut m = shared.lock().unwrap();
         let id = m.new_id();
-        let env = with_inherited(m.agent_env.vars(&id), &|key| std::env::var(key).ok());
+        let env = with_inherited(m.agent_env.vars(&id), &runner::host_var);
         (id, m.cwd_path(cwd), env)
     };
     let s1 = shared.clone();
@@ -1013,7 +1015,7 @@ mod tests {
         };
         let v: HashMap<_, _> = with_inherited(vars.clone(), &theirs).into_iter().collect();
         assert_eq!(v["NODE_OPTIONS"], "--max-old-space-size=4096 --require \"/a/agent.cjs\"");
-        assert_eq!(v["BUN_OPTIONS"], "--smol \"--preload=/a b/agent.js\"");
+        assert_eq!(v["BUN_OPTIONS"], "\"--preload=/a b/agent.js\" --smol");
         assert_eq!(v["PYTHONPATH"], "/a/py:/x");
         assert_eq!(v["PHP_INI_SCAN_DIR"], "/etc/php.d:/a/php");
         assert_eq!(v["PEAK_AGENT_TOKEN"], "tok");

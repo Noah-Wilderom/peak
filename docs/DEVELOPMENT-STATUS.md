@@ -4,13 +4,43 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **Go, Bun and PHP agents built and locally validated; `v0.1.1` candidate awaiting its first native CI run.** Nothing about them is proven on Windows or macOS yet, and the real desktop window hasn't shown them. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
+- **State:** **`v0.1.1` candidate `f5116c8` failed its first native run, for causes below. Fixes are in the working tree, tested locally, awaiting the next native run.** The real window hasn't been driven through these agents yet. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### First native run: `f5116c8`
+
+Update proof 42333866409, Release 42333866414, Tests 42333866424, **all failed**, and no draft was made. Raw logs, results and screenshots: `docs/evidence/release/ci-candidate-f5116c8/`.
+
+| What failed | Where | Cause | Fix in the working tree |
+|---|---|---|---|
+| Backend coverage, 98.99% against 99% | CI | Test-only skip paths and wait loops, and too little of the new CLI covered | More real cases, same gate: 99.16% locally. **Not yet confirmed on CI** |
+| "commands don't inherit the app's environment" | Linux | Real bug from the `peak run` merge: the AppImage launcher's own `PYTHONPATH` got merged into programs | `runner::host_var` leaves out what the AppImage set |
+| PHP with Excimer: agent never connected | macOS, both | Most likely: `EXCIMER_CPU` isn't defined there, so the agent threw before its hello and said nothing. **Inferred from the code, not observed** | Checks with `defined()`. The probe now logs the program's output if this recurs |
+| Node CPU profile lacked `busyWork` | Windows, macOS arm64 | V8 can't see code optimized on-stack before a profile starts: a known limit, as the agent tests already note. Not confirmed to be the cause here, so the check now prints top frames | `--no-use-osr` in the test program |
+| Rehearsal: Linux | Linux | The screenshot shows the buttons pressed and "This is the latest version." on screen. Only the final reading of that small text failed | Matches "latest version" |
+| Rehearsal: macOS | macOS, both | The accessibility API raised no error and found no "Settings", though the window was up | Logs what it sees, and falls back to reading the screen and clicking |
+
+**Passed on that run:**
+
+- Packages built on all four targets, up to the smoke step. The later independent signature check isn't assessed here as a whole, since the job failed after.
+- Windows pressed the published `v0.1.0`'s real buttons: Settings, Check for updates, and "This is the latest version." came back.
+- Go, Bun and Python through the installed app and separate CLI on all four targets: identity, CPU profiles, snapshots and history. Node's other checks too. PHP without Excimer on Windows. PHP with Excimer on Linux.
+- Tests: Frontend, Go SDK on 1.21 and stable, agents on PHP 8.1 and 8.3 with Excimer live, PHP 8.4 without.
+
+**Found since, by tests added on your list:**
+
+- **Bun's preload only works if its quoted option comes first.** With a user's `BUN_OPTIONS` ahead of it, Bun silently dropped it and the run had no agent. It now goes first, tested on real Bun 1.2.15, 1.3.7 and 1.4.3.
+- **Bun before 1.3.7 throws on any use of `node:inspector`**, so the agent wrongly offered CPU profiles there. 1.3.6 fails and 1.3.7 works, checked on real builds of each. It now says so and doesn't offer them. The README is corrected. Bun 1.2.15 remains the floor for the agent itself.
+- **A result from `peak profile` didn't reach the open window.** The macOS screenshot shows "Snapshots 0" just after a snapshot was stored. The app now tells the window.
+
+**Added: the installed window.** `scripts/e2e/desktop/agents-ui.mjs`, in Release, against the production package on each target. It names each runtime and agent, presses Record, Take snapshot and Collect garbage, checks disabled states and stated reasons, the no-agent setup, a run started from the window's Capture page, and each run reopened from history after a restart. Linux uses WebDriver, Windows UI Automation, macOS the accessibility tree or the screen. **None of it has run yet.**
+
+**Limit to expect on macOS:** if the tree stays empty, a control's disabled state can't be read, only the stated reason next to it, and only the rows visible in History are reopened. The record says which.
 
 ### What exists now
 
@@ -48,9 +78,9 @@ Node and Python pass the same checks. PHP alone, against real PHP in `service.rs
 
 The one failure in that run is expected: "the installed copy says what it is", since this was a source build.
 
-Gates: frontend 312 tests, 100% lines and functions and the statements and branches gate passes. Backend 99.05% lines, clippy clean. Agents: 9 Node tests with 1 skipped (the Excimer one, unless pointed at a build), 8 Python. Go SDK: passes under `-race`, 90.9% of statements.
+Gates on this later tree, local: frontend 312 tests at 100%. Backend 99.16% lines, clippy clean (`docs/evidence/release/local-agents-v0.1.1/backend-coverage.log`). Agents: 9 Node tests with 1 skipped (the Excimer one, unless pointed at a build), 8 Python. The Bun agent's tests also pass on real Bun 1.2.15 and 1.3.7. Go SDK: passes under `-race`.
 
-**Not shown yet by anything:** Windows and macOS for all of this, including whether `BUN_OPTIONS` and `PHP_INI_SCAN_DIR` work with their paths; whether Excimer installs on macOS on CI; PHP 8.1 and 8.4; the real window showing these agents; pressing v0.1.0's buttons from outside.
+**That was the local picture before the first native run**, with a source build and before the version bump. The native results are above.
 
 ### Flutter: deferred
 
@@ -639,7 +669,7 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** commit and push the paths in my latest handoff to `release-validation/0.1.1`. It runs Update proof, with the rehearsal, Release and Tests.
+**PM:** commit and push the paths in my latest handoff to `release-validation/0.1.1`. It runs Update proof, with the rehearsal, Release, with the window proof, and Tests.
 
 **Then:** I read native results and fix what they find. Once they pass: PM tags `v0.1.1` and `sdk/go/v0.1.1`, reviews the draft and publishes. Then I verify from the public side, including the real `v0.1.0` to `v0.1.1` update on all four targets.
 

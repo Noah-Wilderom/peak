@@ -195,6 +195,21 @@ pub fn appimage_env_fixes(vars: impl Iterator<Item = (String, String)>) -> Vec<(
         .collect()
 }
 
+/// A variable as a program outside this app would have had it. An AppImage's launcher sets some
+/// of its own, such as PYTHONPATH, and they aren't the user's to keep.
+pub fn host_var(key: &str) -> Option<String> {
+    let vars = std::env::vars_os().filter_map(|(k, v)| Some((k.into_string().ok()?, v.into_string().ok()?)));
+    host_var_in(key, vars.collect())
+}
+
+fn host_var_in(key: &str, vars: Vec<(String, String)>) -> Option<String> {
+    let fixes = appimage_env_fixes(vars.clone().into_iter());
+    match fixes.into_iter().find(|(k, _)| k == key) {
+        Some((_, fixed)) => fixed,
+        None => vars.into_iter().find(|(k, _)| k == key).map(|(_, v)| v),
+    }
+}
+
 /// A command for something outside this app, with the environment it would have had if
 /// the app weren't running from an AppImage.
 pub fn host_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
@@ -378,6 +393,23 @@ mod tests {
         apply_env_fixes(&mut c, vec![("FIXED".into(), Some("/usr/bin".into())), ("GONE".into(), None)]);
         let out = c.output().unwrap();
         assert_eq!(String::from_utf8_lossy(&out.stdout).trim(), "/usr/bin|");
+    }
+
+    #[test]
+    fn host_vars_leave_out_what_an_appimage_set() {
+        let vars = |list: &[(&str, &str)]| list.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect::<Vec<_>>();
+        let env = vars(&[
+            ("APPDIR", "/tmp/.mount_x"),
+            ("PYTHONPATH", "/tmp/.mount_x/py"),
+            ("NODE_OPTIONS", "--a"),
+            ("PATH", "/tmp/.mount_x/bin:/usr/bin"),
+        ]);
+        assert_eq!(host_var_in("PYTHONPATH", env.clone()), None);
+        assert_eq!(host_var_in("NODE_OPTIONS", env.clone()), Some("--a".into()));
+        assert_eq!(host_var_in("PATH", env.clone()), Some("/usr/bin".into()));
+        assert_eq!(host_var_in("MISSING", env), None);
+        assert_eq!(host_var_in("PYTHONPATH", vars(&[("PYTHONPATH", "/mine")])), Some("/mine".into()));
+        assert!(host_var("PATH").is_some());
     }
 
     #[test]

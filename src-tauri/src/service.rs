@@ -212,6 +212,11 @@ impl Service {
         self.db.lock().unwrap().add_alert(id, alert)
     }
 
+    /// A run as it stands, for telling the window about a result it didn't ask for.
+    pub fn proc(&self, id: &str) -> Option<Proc> {
+        self.monitor.lock().unwrap().get(id).cloned()
+    }
+
     /// `peak profile`, through the same paths as the buttons, so results are kept the same way.
     pub fn control(&self, action: &str, id: &str, ms: u64) -> Result<Value, String> {
         let value = |v: Result<Value, serde_json::Error>| v.map_err(|e| e.to_string());
@@ -507,8 +512,10 @@ mod tests {
         profiles_a_real_program(command, expect_frame, |_| {});
     }
 
-    fn installed(program: &str, arg: &str) -> bool {
-        std::process::Command::new(program).arg(arg).output().is_ok_and(|o| o.status.success())
+    /// Runs `test` only where the runtime is here. CI has them all.
+    fn with_runtime(program: &str, arg: &str, test: impl FnOnce()) {
+        let found = std::process::Command::new(program).arg(arg).output();
+        found.is_ok_and(|o| o.status.success()).then(test);
     }
 
     fn real_service(dir: &std::path::Path) -> Service {
@@ -565,9 +572,10 @@ mod tests {
 
     #[test]
     fn profiles_real_bun_processes() {
-        if !installed("bun", "--version") {
-            return;
-        }
+        with_runtime("bun", "--version", profile_bun);
+    }
+
+    fn profile_bun() {
         let stored = profiles_a_real_program(
             "bun -e 'function busyWork(){const e=Date.now()+50;while(Date.now()<e);} setInterval(busyWork,60)'",
             "busyWork",
@@ -580,9 +588,10 @@ mod tests {
 
     #[test]
     fn profiles_real_go_programs_through_the_bundled_sdk() {
-        if !installed("go", "version") {
-            return;
-        }
+        with_runtime("go", "version", profile_go);
+    }
+
+    fn profile_go() {
         let stored = profiles_a_real_program("go run .", "main.busyWork", |dir| {
             // The copy that's installed with the agents, as a user would build against it.
             crate::hub::install_agents(dir, "unused").unwrap();
@@ -604,14 +613,13 @@ mod tests {
     /// Without any extension, PHP can only report as it ends. That has to reach history anyway.
     #[test]
     fn keeps_what_real_php_reports_at_exit() {
-        if !installed("php", "--version") {
-            return;
-        }
-        let modules = std::process::Command::new("php").arg("-m").output().unwrap().stdout;
-        if String::from_utf8_lossy(&modules).to_lowercase().contains("excimer") {
-            eprintln!("Excimer is installed here, so PHP's report at exit isn't what's tested");
-            return;
-        }
+        let modules = std::process::Command::new("php").arg("-m").output();
+        let excimer = modules.is_ok_and(|m| String::from_utf8_lossy(&m.stdout).to_lowercase().contains("excimer"));
+        // With Excimer it reports live instead: the agent tests and the installed app's cover that.
+        (!excimer).then(|| with_runtime("php", "--version", php_reports_at_exit));
+    }
+
+    fn php_reports_at_exit() {
         let dir = tempfile::tempdir().unwrap();
         let script = dir.path().join("a.php");
         std::fs::write(&script, "<?php $keep = str_repeat('x', 4000000); usleep(300000);").unwrap();
@@ -654,6 +662,8 @@ mod tests {
             }
             thread::sleep(Duration::from_millis(25));
         }
+        assert_eq!(s.proc(&p.id).unwrap().id, p.id);
+        assert!(s.proc("nope").is_none());
         assert_eq!(s.control("gc", &p.id, 0).unwrap(), Value::Null);
         assert!(s.control("snapshot", &p.id, 0).unwrap()["heapUsed"].as_f64().unwrap() > 0.0);
         assert_eq!(s.control("cpu", &p.id, 500).unwrap()["sampling"], "v8");

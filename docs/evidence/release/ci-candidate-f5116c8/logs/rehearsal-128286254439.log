@@ -1,0 +1,60 @@
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse
+else node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse; fi
+shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+env:
+  PEAK_SMOKE_PLATFORM: windows
+##[endgroup]
+(node:1472) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the feed announces what's expected 0.1.0
+peak_0.1.0_x64-setup.exe: 5032942 bytes, sha256 9f2d0c6fa7d5ebc59b1262d9884383625c253e9229a87c865629968d71f221fd
+ok   the older release is installed, from its public files peak 0.1.0 (Windows installer, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ui automation: Exception calling "Invoke" with "0" argument(s): "Unrecognized error."
+At line:13 char:7
++       $pattern.Invoke(); exit 0
++       ~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : ElementNotEnabledException
+ok   the production app's buttons can be pressed from outside, and it answers 
+REHEARSAL OK
+##[group]Run actions/upload-artifact@v4
+with:
+  name: upgrade-rehearsal-windows
+  path: rehearsal
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+##[endgroup]
+(node:7616) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 4 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:7616) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 5189469
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is 6127b77a9f2de8aa83fc52272b4600390cb1bf54a5f25bb95a5dae22e9bfe9cc
+Finalizing artifact upload
+Artifact upgrade-rehearsal-windows.zip successfully finalized. Artifact ID 13558741039
+Artifact upgrade-rehearsal-windows has been successfully uploaded! Final size is 5189469 bytes. Artifact ID is 13558741039
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42333866409/artifacts/13558741039
+Post job cleanup.
+(node:1272) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Post job cleanup.
+[command]"C:\Program Files\Git\bin\git.exe" version
+git version 2.56.0.windows.4
+Temporarily overriding HOME='D:\a\_temp\9f492ae4-0561-4e22-98a7-c3fcd0b8a914' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\peak\peak
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+[command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"

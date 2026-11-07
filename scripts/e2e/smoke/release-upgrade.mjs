@@ -9,7 +9,7 @@
 // With --rehearse, before vNEW exists: installs vOLD and shows the buttons can be pressed.
 import { execFileSync } from "node:child_process"
 import { DatabaseSync } from "node:sqlite"
-import { PLATFORM, cli, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, pidAlive, shot, sleep, storedRun, waitFor, workload, writeFileSync } from "./lib.mjs"
+import { IS_WINDOWS, PLATFORM, cli, closeApps, dataDir, install, join, launch, liveApps, log, mkdirSync, pidAlive, shot, sleep, storedRun, waitFor, workload, writeFileSync } from "./lib.mjs"
 import { present, press } from "./drive.mjs"
 import { runProbes } from "./probes.mjs"
 
@@ -57,7 +57,7 @@ if (rehearse) {
   await pressWhenThere("Settings", 60_000)
   await sleep(1500)
   await pressWhenThere("Check for updates", 30_000)
-  const said = await waitFor("an answer from the update check", () => present(announced.version === fromVersion ? "This is the latest version." : "Download and install") || null, 60_000).catch(() => false)
+  const said = await waitFor("an answer from the update check", () => present(announced.version === fromVersion ? (IS_WINDOWS ? "This is the latest version." : "latest version") : "Download and install") || null, 60_000).catch(() => false)
   shot(out, `${PLATFORM}-rehearsal`)
   check("the production app's buttons can be pressed from outside, and it answers", said)
   finish()

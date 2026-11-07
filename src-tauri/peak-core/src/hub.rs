@@ -203,7 +203,7 @@ pub fn agent_setup(dir: &Path) -> String {
     let agents = dir.join("agents");
     format!(
         "Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.\n\
-         Bun      automatic, on versions that read BUN_OPTIONS. Heap, timer delay, CPU, heap snapshots. No GC events: Bun doesn't publish them.\n\
+         Bun      automatic, on versions that read BUN_OPTIONS. Heap, timer delay, heap snapshots, and CPU from Bun 1.3.7. No GC events: Bun doesn't publish them.\n\
          Python   automatic. GC, interpreter delay, CPU stacks, allocation snapshots.\n\
          PHP      automatic for the CLI: figures at exit. For live heap, GC, commands and CPU, install the Excimer extension: pecl install excimer\n\
          \u{20}        No event-loop delay or heap snapshots. No Excimer build for Windows, so only figures at exit there.\n\
@@ -213,7 +213,7 @@ pub fn agent_setup(dir: &Path) -> String {
          \u{20}        Get it with `go get github.com/Noah-Wilderom/peak/sdk/go@latest`, or build against the copy for this version:\n\
          \u{20}          go mod edit -require=github.com/Noah-Wilderom/peak/sdk/go@v0.0.0 -replace=github.com/Noah-Wilderom/peak/sdk/go={}\n\
          \n\
-         Peak can't attach to a process that's already running, or look inside a program without one of these.\n\
+         Attaching to a running process gives its OS-level monitoring. An agent only gets in when Peak starts the program.\n\
          Agents are in {}",
         agents.join("go").display(),
         agents.display(),

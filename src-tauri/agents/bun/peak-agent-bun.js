@@ -9,15 +9,18 @@ const start = () => {
 
   const net = require("node:net")
   const jsc = require("bun:jsc")
+  // Older versions have the module, and throw on any use of it.
   let inspector = null
   try {
-    inspector = require("node:inspector")
+    const candidate = require("node:inspector")
+    new candidate.Session().disconnect()
+    inspector = candidate
   } catch {}
 
   const capabilities = ["heap", "lag", "snapshot", "forcegc"]
   const unavailable = { gc: "Bun doesn't publish individual garbage collections, so none are listed." }
   if (inspector) capabilities.push("cpu")
-  else unavailable.cpu = "This version of Bun has no node:inspector, which CPU profiles need."
+  else unavailable.cpu = "CPU profiles need Bun 1.3.7 or newer, for its node:inspector."
 
   const sep = addr.lastIndexOf(":")
   const sock = net.connect({ host: addr.slice(0, sep), port: Number(addr.slice(sep + 1)) })

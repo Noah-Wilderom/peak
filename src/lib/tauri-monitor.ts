@@ -204,6 +204,7 @@ export class TauriMonitor implements MonitorApi {
       await this.on<TickPayload>("peak://tick", (e) => this.onTick(e.payload))
       await this.on<Proc>("peak://proc", (e) => this.upsert(e.payload, true))
       await this.on<string>("peak://open", (e) => this.open(e.payload))
+      await this.on<Proc>("peak://results", (e) => this.refresh(e.payload))
       // Thresholds are a nicety: if they can't be read, monitoring still starts.
       this.alerts.configure(await this.call<Settings>("get_settings").catch(() => DEFAULT_SETTINGS))
       const full = await this.call<FullState>("get_state")
@@ -239,6 +240,12 @@ export class TauriMonitor implements MonitorApi {
     })
     this.commit(procs)
     events.forEach((e) => this.emit(e))
+  }
+
+  /** New results on a run, from `peak profile`. Whatever the person is looking at stays selected. */
+  private refresh(raw: Proc) {
+    const proc = normalizeProc(raw)
+    this.commit(this.current().map((p) => (p.id === proc.id ? proc : p)))
   }
 
   private upsert(raw: Proc, announce: boolean) {

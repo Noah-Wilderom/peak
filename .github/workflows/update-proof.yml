@@ -155,6 +155,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick xdotool tesseract-ocr tesseract-ocr-eng
+      - name: What reads and presses the screen on macOS, if its accessibility tree can't
+        if: startsWith(matrix.platform, 'darwin')
+        run: brew install tesseract cliclick
       - name: Install the published release, and press its buttons
         shell: bash
         env:

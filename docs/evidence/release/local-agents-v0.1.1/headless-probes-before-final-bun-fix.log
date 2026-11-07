@@ -1,0 +1,126 @@
+FAIL the installed copy says what it is peak 0.1.1 (source build, commit f5116c8a7f2214ccc3e4d3d13639f08c72a85756)
+collector: x86_64: /tmp/claude-1000/-mnt-HC-Volume-107248377-peak/f078fb62-ebe5-4799-b404-d858e24045bc/scratchpad/sm/data/peak/collectors/x86_64-dcad963a85ce7d5f/peak-collector (0.1.1 protocol 1) 
+ok   names its bundled collector x86_64: /tmp/claude-1000/-mnt-HC-Volume-107248377-peak/f078fb62-ebe5-4799-b404-d858e24045bc/scratchpad/sm/data/peak/collectors/x86_64-dcad963a85ce7d5f/peak-collector (0.1.1 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on t3-dev for dev — running without monitoring
+app pid 2327802
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place OZ1nAA
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794023809940-err
+ok   the app recorded real samples and the exit samples 9, max rss 134189056, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   node: identifies its runtime and agent node 24.22.2, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2017 ms sampled in 2002 ms, top: busyWork 1548, (idle) 395, (garbage collector) 30, post 16, processTimers 4, listOnTimeout 4: 
+ok   node: says how it sampled v8
+ok   node: heap snapshot holds what the program allocated 60 entries, top (string): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 33 of 35
+ok   node: live heap reached the samples 
+ok   node: collections are stored 961
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.13.18, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2009 ms sampled in 2009 ms, top: busy_work 1559, <module> 450, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 34 of 36
+ok   python: collections are stored 10
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: identifies its runtime and agent bun 1.4.3, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2001 ms sampled in 2007 ms, top: busyWork 2000, (anonymous) 1, (root) 0: 
+ok   bun: says how it sampled jsc
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":88903,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2334810,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 34 of 36
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.6, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-cpu, 2000 ms sampled in 2001 ms, top: busy_work 2000, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-cpu
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":598392,"unit":"bytes"},{"name":"Peak memory","value":1191056,"unit":"bytes"},{"name":"Collector runs","value":1681,"unit":"count"},{"name":"Values collected","value":16799940,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1681
+ok   php-alone: identifies its runtime and agent php 8.3.6, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":586704,"unit":"bytes"},{"name":"Peak memory","value":1163400,"unit":"bytes"},{"name":"Collector runs","value":748,"unit":"count"},{"name":"Values collected","value":7480000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.2, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1790 ms sampled in 2002 ms, top: time.runtimeNow 1660, time.Time.Before 30, time.Now 20, time.runtimeNow 10, time.Time.Before 10, time.Now 10: 
+ok   go: says how it sampled pprof
+ok   go: heap snapshot holds what the program allocated 7 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.030073446724204565,"unit":"percent"},{"name":"Live objects","value":784895,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 33 of 35
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE FAILED

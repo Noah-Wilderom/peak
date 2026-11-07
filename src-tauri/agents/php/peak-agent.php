@@ -77,7 +77,7 @@ namespace PeakAgent {
             if ($live) {
                 array_push($capabilities, 'heap', 'cpu', 'forcegc');
                 $notes['heap'] = "Memory PHP's allocator is using, of what it holds from the system. Updated between PHP operations, so not during a long blocking call.";
-                $notes['cpu'] = self::cpuEvent() === EXCIMER_CPU
+                $notes['cpu'] = self::hasCpuTimer()
                     ? 'On-CPU time sampled by Excimer. Blocking calls take no time here.'
                     : 'Wall-clock time sampled by Excimer, as this platform has no CPU timer. Blocking calls count.';
                 $notes['forcegc'] = "Runs PHP's cycle collector. Other memory is freed as soon as it's unused.";
@@ -101,9 +101,15 @@ namespace PeakAgent {
             ];
         }
 
+        /** Excimer only defines its CPU timer where the platform has one, which macOS doesn't. */
+        private static function hasCpuTimer()
+        {
+            return defined('EXCIMER_CPU') && (PHP_OS_FAMILY === 'Linux' || PHP_OS_FAMILY === 'BSD');
+        }
+
         private static function cpuEvent()
         {
-            return PHP_OS_FAMILY === 'Linux' || PHP_OS_FAMILY === 'BSD' ? EXCIMER_CPU : EXCIMER_REAL;
+            return self::hasCpuTimer() ? constant('EXCIMER_CPU') : EXCIMER_REAL;
         }
 
         private static function send($message)
@@ -233,7 +239,7 @@ namespace PeakAgent {
             }
             $p['profiler']->stop();
             $took = (microtime(true) - $p['began']) * 1000;
-            $sampling = self::cpuEvent() === EXCIMER_CPU ? 'excimer-cpu' : 'excimer-wall';
+            $sampling = self::hasCpuTimer() ? 'excimer-cpu' : 'excimer-wall';
             $root = self::tree($p['profiler']->getLog(), self::CPU_PERIOD_SECONDS * 1000);
             self::reply($p['req'], true, ['durationMs' => $took, 'sampling' => $sampling, 'root' => $root]);
         }

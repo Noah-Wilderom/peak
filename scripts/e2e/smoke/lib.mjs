@@ -121,8 +121,8 @@ export function closeApps() {
 }
 
 /** The CLI, from another process and directory. Resolves with what a terminal would show. */
-export function cli(args, { cwd = tmpdir() } = {}) {
-  const c = spawn(paths().cli, args, { cwd, stdio: ["ignore", "pipe", "pipe"] })
+export function cli(args, { cwd = tmpdir(), env = {} } = {}) {
+  const c = spawn(paths().cli, args, { cwd, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, ...env } })
   let out = ""
   let err = ""
   c.stdout.on("data", (d) => (out += d))

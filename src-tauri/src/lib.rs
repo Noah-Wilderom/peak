@@ -350,7 +350,12 @@ pub fn run() {
             let window = app.handle().clone();
             hub.set_control(Arc::new(move |action, id, ms| {
                 if action != "open" {
-                    return s.control(action, id, ms);
+                    let result = s.control(action, id, ms);
+                    // The window only hears of results by asking, and this one didn't.
+                    if let Some(proc) = s.proc(id).filter(|_| result.is_ok()) {
+                        let _ = window.emit("peak://results", proc);
+                    }
+                    return result;
                 }
                 if let Some(main) = window.get_webview_window("main") {
                     let _ = main.show();

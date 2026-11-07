@@ -83,8 +83,9 @@ is boot id + PID namespace + PID + start ticks, plus container id or pod UID.
 `Proc.status`. Unknown endings use `signal` values with `exit_code: None`: `ended while disconnected`,
 `target rebooted`, `monitoring stopped`, `stopped with the session`, `peak closed`.
 
-**CPU profiles** carry `sampling`. Neither method is strict on-CPU time, and the UI says so: `v8` shows loop waits
-as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a timer whether running or not.
+**CPU profiles** carry `sampling`, and the UI says what each means. `v8` shows loop waits as `(idle)` but charges
+synchronous blocking to the caller. `jsc` is the same idea on Bun. `stack` samples on a timer whether running or not.
+`excimer-wall` is elapsed time. `pprof` and `excimer-cpu` are on-CPU time.
 
 ## Gotchas
 
@@ -109,7 +110,7 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **`kubectl auth can-i` needs `--subresource`:** `pods/log` would ask about a pod named `log`.
 - **OpenSSH reads `~/.ssh` from the passwd entry,** not `$HOME`.
 - **V8 attribution:** code optimized on-stack before a profile starts is charged to its caller. Totals stay right.
-- **`BUN_OPTIONS` only honours quotes around a whole option.** `"--preload=/a b/x.js"` works from Bun 1.2.15. `--preload "/a b/x.js"` is silently dropped, and an unquoted path with a space makes the user's program fail. Versions before `BUN_OPTIONS` ignore it. macOS's data directory has a space, so this matters.
+- **`BUN_OPTIONS` only honours quotes around a whole option.** `"--preload=/a b/x.js"` works from Bun 1.2.15, but only at the start of the variable, so it goes before a user's own options. `--preload "/a b/x.js"` is silently dropped, and an unquoted path with a space makes the user's program fail. Versions before `BUN_OPTIONS` ignore it. macOS's data directory has a space, so this matters.
 - **`ExcimerTimer::setInterval` is the first expiry only.** `setPeriod` is what repeats. Nothing in the PHP agent can use signals: they'd cut the user's `sleep()` short.
 - **`peak run` used to replace `NODE_OPTIONS` and `PYTHONPATH`.** `with_inherited` merges. The app can't, as it doesn't have the terminal's environment, so the CLI does it.
 - **WebKitGTK hard-codes helper paths,** so the desktop window can't run from a rootless extraction. Use the container in `scripts/e2e/desktop/`.
@@ -151,7 +152,7 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 
 Go, Bun and PHP agents are in progress for `v0.1.1`: see [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md). Flutter was looked at and deferred, for the reasons there.
 
-The first packaged release for Linux, Windows and macOS is in progress: see [`RELEASING.md`](RELEASING.md) and [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md).
+`v0.1.0` is published for Linux, Windows and macOS: see [`RELEASING.md`](RELEASING.md).
 
 All eleven planned steps are implemented and pass the checks in `scripts/verify-all.sh`. The build/launch fix and the 1s
 and 10s chart windows are accepted and published as `5a1f57be524a0b7fcad2fb38838257a8f62e1419` (see

@@ -1,0 +1,4 @@
+  printf '::error::install-action: %s\n' "$*"
+##[group]Run cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+TOTAL                            20031               368    98.16%        1216                34    97.20%        8679                88    98.99%           0                 0         -

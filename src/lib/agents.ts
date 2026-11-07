@@ -72,19 +72,19 @@ export function setupFor(runtime: Runtime): AgentSetup {
       }
     case "bun":
       return {
-        body: "Peak loads an agent into Bun when it starts the process. It needs Bun 1.2.15 or newer, and a process started some other way can't be attached to.",
+        body: "Peak loads an agent into Bun when it starts the process. It needs Bun 1.2.15 or newer. Attaching to a running process only gives OS-level monitoring.",
         then: "Start it from Capture or with peak run --.",
       }
     case "php":
       return {
-        body: "Peak loads an agent into command-line PHP when it starts the process. A process started some other way can't be attached to. For more than figures at exit, install the Excimer extension.",
+        body: "Peak loads an agent into command-line PHP when it starts the process. Attaching to a running process only gives OS-level monitoring. For more than figures at exit, install the Excimer extension.",
         code: "pecl install excimer",
         then: "Start it from Capture or with peak run --.",
       }
     case "node":
     case "python":
       return {
-        body: `Peak loads an agent into ${RUNTIME_NAME[runtime]} when it starts the process, and a process started some other way can't be attached to.`,
+        body: `Peak loads an agent into ${RUNTIME_NAME[runtime]} when it starts the process. Attaching to a running process only gives OS-level monitoring.`,
         then: "Start it from Capture or with peak run --.",
       }
     default:
