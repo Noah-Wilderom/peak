@@ -41,12 +41,12 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
 | `install.sh` download route | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
-| Install from public URLs (`public-delivery.yml`) | **After publishing** | **After publishing** | **After publishing** | **After publishing** |
-| Update through the real GitHub feed (`public-update-proof.mjs`) | **After publishing**; rehearsed locally | **After publishing** | **After publishing** | **After publishing** |
+| Install from public URLs (`public-delivery.yml`) | **CI job failed on a runner with no desktop libraries; rerun pending.** Passes in clean Ubuntu 22.04 and 24.04 containers with them | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` |
+| Update through the real GitHub feed (`public-update-proof.mjs`) | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` |
 | Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
 | OS code signing and notarization | Not applicable | None, by decision | Ad-hoc only, by decision | Ad-hoc only, by decision |
 
-"CI" means a native GitHub runner on `f17d80d`. Any later commit changing the app, scripts or workflows needs them again.
+"CI" means a native GitHub runner, on `f17d80d` unless it says otherwise, and on the tag's rebuild where the release is concerned. Any later commit changing the app, scripts or workflows needs them again.
 
 Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/`, `ci-64a4d5d/` and `ci-f17d80d/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
@@ -74,6 +74,10 @@ The first release ships **without** Apple or Windows code signing, with the warn
 
 Updates installed by the app work once it's installed. If this changes later: a macOS **Developer ID** certificate needs a paid Apple account, set through the optional `APPLE_*` secrets above; a Windows certificate needs `bundle.windows.certificateThumbprint` or `signCommand`, which isn't wired in yet.
 
+## Linux runtime needs
+
+The AppImage bundles WebKit and GTK, but expects these from the host, as any desktop has: `libEGL`, `libGL`, `libX11`, `libX11-xcb`, `libdrm`, `libexpat`, `libfontconfig`, `libfreetype`, `libfribidi`, `libgbm`, `libharfbuzz`, `libwayland-client`, `libxcb`, plus `libfuse2` to mount. Without them it doesn't start, CLI included. CI's build jobs install dev packages that hide this, so only **Public delivery** tests it, with no `-dev` packages.
+
 ## Cutting a release
 
 1. Merge everything. `node scripts/release/version.mjs set X.Y.Z`, add `docs/release-notes/vX.Y.Z.md`, commit.
@@ -88,4 +92,4 @@ To roll back, publish a newer version with the fix. Unpublishing stops new updat
 
 ## Where releases live
 
-`Noah-Wilderom/peak`, which is public. The updater and `install.sh` read its release assets anonymously, with no token. **Being public doesn't make anything available:** until a release is published, `releases/latest/download/latest.json` is a 404, which installed copies treat as "couldn't check".
+`Noah-Wilderom/peak`, which is public. The updater and `install.sh` read its release assets anonymously, with no token. The first release is `v0.1.0`, published 2026-11-07.

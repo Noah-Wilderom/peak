@@ -1,0 +1,55 @@
+# Exact public v0.1.0 AppImage on clean Ubuntu containers, with only runtime libraries a desktop already has, and no dev packages. FUSE real, Xvfb, seccomp and AppArmor unconfined. Number after the OS name counts webkit and -dev packages. recorded 2026-11-07T01:50:25Z
+=========== ubuntu:22.04
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+0
+peak_0.1.0_amd64.AppImage: 86751736 bytes, sha256 3ed86462b7d1e20c86cf09d8977f53faa889ecb4b52523e431e0548ce3646779
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   names its bundled collector x86_64: /root/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on 13e42d7271be for root — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place f1uyp3
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794016252520-err
+ok   the app recorded real samples and the exit samples 9, max rss 129609728, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   the Python agent reported from inside the program lag samples 9
+SMOKE OK
+--- anonymous curl | sh, on this machine
+Installed: peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+History and settings are untouched. Run 'peak' to open the app.
+/root/.local/bin isn't on your PATH. Use /root/.local/bin/peak, or add this to your shell profile:
+  export PATH="/root/.local/bin:$PATH"
+peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+=========== ubuntu:24.04
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+0
+peak_0.1.0_amd64.AppImage: 86751736 bytes, sha256 3ed86462b7d1e20c86cf09d8977f53faa889ecb4b52523e431e0548ce3646779
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   names its bundled collector x86_64: /root/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on 895a88057284 for root — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place e8Uz2Q
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794016294402-err
+ok   the app recorded real samples and the exit samples 9, max rss 129798144, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   the Python agent reported from inside the program lag samples 9
+SMOKE OK
+--- anonymous curl | sh, on this machine
+Installed: peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+History and settings are untouched. Run 'peak' to open the app.
+/root/.local/bin isn't on your PATH. Use /root/.local/bin/peak, or add this to your shell profile:
+  export PATH="/root/.local/bin:$PATH"
+peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+=========== .deb, ubuntu:24.04, apt pulling its own dependencies
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+apt exit=0
+/usr/bin/peak
+peak 0.1.0 (deb package, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+x86_64: /root/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+peak: the app isn't running on 223c86fed0c0 for root — running without monitoring
+deb-run
+exit=4
+peak.desktop

@@ -1,0 +1,22 @@
+# tag v0.1.0 (9e60f67) Release / Build (darwin-aarch64): success. job 128248645244
+Image Release: https://github.com/actions/runner-images/releases/tag/macos-26-arm64%2F20261102.0473
+peak_0.1.0_aarch64.app.tar.gz
+peak_0.1.0_aarch64.dmg
+  node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+signature ok: timestamp:1794013785	file:peak.app.tar.gz	version:0.1.0
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+  PEAK_SMOKE_PLATFORM: darwin-aarch64
+ok   the installed copy says what it is peak 0.1.0 (macOS app, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+collector: aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-084a05ba5fbfdb01/peak-collector (for Linux targets) 
+ok   names its bundled collector aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-084a05ba5fbfdb01/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on lvl10-bj370-a850dfb9-ad96-486e-97b4-306f432ec2ff-42D6B23DB116.local for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak place TtczIj
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794013793788-err
+ok   the app recorded real samples and the exit samples 8, max rss 123142144, exit 7
+ok   the Node agent reported from inside the program lag samples 6
+ok   the Python agent reported from inside the program lag samples 8
+SMOKE OK

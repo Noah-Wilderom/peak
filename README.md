@@ -14,6 +14,8 @@ Download from the [releases page](https://github.com/Noah-Wilderom/peak/releases
 | Windows x64 | `*_x64-setup.exe` | Run it. No admin needed. It adds `peak-cli` to your PATH for new terminals |
 | macOS Apple Silicon or Intel | `*_aarch64.dmg` or `*_x64.dmg` | Drag Peak to Applications. For the command line: `ln -s /Applications/peak.app/Contents/MacOS/peak ~/.local/bin/peak` |
 
+**Linux needs a desktop system.** The AppImage carries WebKit and GTK, but uses your system's graphics and font libraries, as any desktop has. On a bare server or in a minimal container even `peak version` fails with `error while loading shared libraries`. On Debian or Ubuntu, this installs them: `sudo apt install libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1`.
+
 **Windows and macOS will warn you the first time.** This release isn't code-signed by Apple or Microsoft, so:
 
 - **Windows:** SmartScreen says it "protected your PC". Choose **More info**, then **Run anyway**. If Smart App Control is on, Windows 11 blocks it with no way to allow just this app.

@@ -1,0 +1,68 @@
+# PM publication receipt: Peak v0.1.0
+
+Published 2026-11-07T01:34:22Z under standing user authorization.
+Public release: https://github.com/Noah-Wilderom/peak/releases/tag/v0.1.0
+Source/tag/master: 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936
+Tagged Release run: 42322047772 (success; all four native builds and draft).
+
+Independent PM download audit:
+- 18 expected assets, all uploaded.
+- 17/17 entries in SHA256SUMS pass; only SHA256SUMS excludes itself.
+- Every GitHub asset digest and size matches the downloaded bytes.
+- Checksums match the tagged draft-job record.
+- Four BUILD-INFO records: version 0.1.0, commit9e60f67, run42322047772, correct platform.
+- Four format-specific feed entries: correct v0.1.0 URLs and matching .sig bytes.
+- install.sh Git blob matches v0.1.0:scripts/install-release.sh.
+- Native CI and developer independent production-key signature audits pass.
+
+BUILD-INFO-darwin-aarch64.json: OK
+BUILD-INFO-darwin-x86_64.json: OK
+BUILD-INFO-linux.json: OK
+BUILD-INFO-windows.json: OK
+install.sh: OK
+latest.json: OK
+peak_0.1.0_aarch64.app.tar.gz: OK
+peak_0.1.0_aarch64.app.tar.gz.sig: OK
+peak_0.1.0_aarch64.dmg: OK
+peak_0.1.0_amd64.AppImage: OK
+peak_0.1.0_amd64.AppImage.sig: OK
+peak_0.1.0_amd64.deb: OK
+peak_0.1.0_x64-setup.exe: OK
+peak_0.1.0_x64-setup.exe.sig: OK
+peak_0.1.0_x64.app.tar.gz: OK
+peak_0.1.0_x64.app.tar.gz.sig: OK
+peak_0.1.0_x64.dmg: OK
+
+Anonymous publication check:
+{
+  "anonymous_release_api_status": 200,
+  "url": "https://github.com/Noah-Wilderom/peak/releases/tag/v0.1.0",
+  "published_at": "2026-11-07T01:34:22Z",
+  "draft": false,
+  "tag": "v0.1.0",
+  "asset_count": 18,
+  "all_reviewed_asset_digests_unchanged": true,
+  "anonymous_latest_feed_status": 200,
+  "feed_version": "0.1.0",
+  "feed_matches_reviewed_asset": true,
+  "feed_platforms": [
+    "linux-x86_64-appimage",
+    "windows-x86_64-nsis",
+    "darwin-aarch64-app",
+    "darwin-x86_64-app"
+  ]
+}
+
+Public delivery start record (not a current polled result):
+{
+  "conclusion": "",
+  "databaseId": 42324783966,
+  "event": "release",
+  "headBranch": "v0.1.0",
+  "headSha": "9e60f67bbf1dc906ea9ab836df5f0bc3cb646936",
+  "status": "in_progress",
+  "url": "https://github.com/Noah-Wilderom/peak/actions/runs/42324783966"
+}
+
+Actual native public installation/update application proof is still open.
+No repo implementation or tests were read/run by PM. No signing-secret mutation.

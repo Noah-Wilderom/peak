@@ -1,0 +1,23 @@
+# real public install on Ubuntu 22.04 (disposable chroot), with the README's own curl | sh, then the smoke test on that install. recorded 2026-11-07T01:36:43Z
+--- the README's command, real public URL
+Installed: peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+History and settings are untouched. Run 'peak' to open the app.
+Note: AppImages need libfuse2 (on Ubuntu 24.04: sudo apt install libfuse2t64).
+Without it, set APPIMAGE_EXTRACT_AND_RUN=1 before running peak.
+exit=0
+peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+x86_64: /home/tester/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+installed file matches published SHA256SUMS
+--- smoke on that install
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   names its bundled collector x86_64: /home/tester/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on 871febdbfe49 for tester — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place wCv66d
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794015418164-err
+ok   the app recorded real samples and the exit samples 9, max rss 128675840, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   the Python agent reported from inside the program lag samples 9
+SMOKE OK

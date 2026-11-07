@@ -1,0 +1,21 @@
+# tag v0.1.0 (9e60f67) Release / Build (windows): success. job 128248644916
+Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261103.298
+peak_0.1.0_x64-setup.exe
+  node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+signature ok: timestamp:1794014048	file:peak_0.1.0_x64-setup.exe	version:0.1.0
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+  PEAK_SMOKE_PLATFORM: windows
+ok   the installed copy says what it is peak 0.1.0 (Windows installer, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+collector: x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-fdb3ac9c897f6a16\peak-collector (for Linux targets) 
+ok   names its bundled collector x86_64: C:\Users\runneradmin\AppData\Local\peak\collectors\x86_64-fdb3ac9c897f6a16\peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmm7ud1 for runneradmin — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started C:\Users\RUNNER~1\AppData\Local\Temp\peak place dNhBGs
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794014102344-err
+ok   the app recorded real samples and the exit samples 9, max rss 116883456, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   the Python agent reported from inside the program lag samples 8
+SMOKE OK

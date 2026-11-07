@@ -1,0 +1,10 @@
+# published v0.1.0, Public delivery run 42324783966 / Install from public URLs (linux): failure. job 128257436899
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs public output
+  PEAK_SMOKE_PLATFORM: linux
+peak_0.1.0_amd64.AppImage: 86751736 bytes, sha256 3ed86462b7d1e20c86cf09d8977f53faa889ecb4b52523e431e0548ce3646779
+FAIL the installed copy says what it is 
+FAIL names its bundled collector 
+FAIL with no app open, the command still runs and says why peak: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+  throw new Error(`timed out waiting for ${what}`)
+Error: timed out waiting for the app to publish itself
+##[error]Process completed with exit code 1.

@@ -50,6 +50,12 @@ Linux)
   ;;
 esac
 
+if [ "$(uname -s)" = Linux ] && "$DEST/peak" version 2>&1 | grep -q 'shared libraries'; then
+  echo "Installed $DEST/peak, but it can't run here: $("$DEST/peak" version 2>&1 | head -1)" >&2
+  echo "The AppImage uses the graphics and font libraries of a desktop system. On Debian or Ubuntu:" >&2
+  echo "  sudo apt install libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1" >&2
+  exit 1
+fi
 echo "Installed: $("$DEST/peak" version 2>/dev/null || echo "$DEST/peak")"
 echo "History and settings are untouched. Run 'peak' to open the app."
 case ":$PATH:" in
@@ -62,7 +68,7 @@ case ":$PATH:" in
   echo "  export PATH=\"$DEST:\$PATH\""
   ;;
 esac
-if [ "$(uname -s)" = Linux ] && ! ldconfig -p 2>/dev/null | grep -q libfuse.so.2; then
+if [ "$(uname -s)" = Linux ] && ! { command -v ldconfig >/dev/null && ldconfig -p || /sbin/ldconfig -p; } 2>/dev/null | grep -q libfuse.so.2; then
   echo "Note: AppImages need libfuse2 (on Ubuntu 24.04: sudo apt install libfuse2t64)."
   echo "Without it, set APPIMAGE_EXTRACT_AND_RUN=1 before running peak."
 fi

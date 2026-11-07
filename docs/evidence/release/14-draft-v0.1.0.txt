@@ -1,0 +1,50 @@
+# The real v0.1.0 draft, downloaded and checked, before publishing. Tag run 42322047772 on 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936. recorded 2026-11-07T01:30:44Z
+
+## sha256sum -c SHA256SUMS
+BUILD-INFO-darwin-aarch64.json: OK
+BUILD-INFO-darwin-x86_64.json: OK
+BUILD-INFO-linux.json: OK
+BUILD-INFO-windows.json: OK
+install.sh: OK
+latest.json: OK
+peak_0.1.0_aarch64.app.tar.gz: OK
+peak_0.1.0_aarch64.app.tar.gz.sig: OK
+peak_0.1.0_aarch64.dmg: OK
+peak_0.1.0_amd64.AppImage: OK
+peak_0.1.0_amd64.AppImage.sig: OK
+peak_0.1.0_amd64.deb: OK
+peak_0.1.0_x64-setup.exe: OK
+peak_0.1.0_x64-setup.exe.sig: OK
+peak_0.1.0_x64.app.tar.gz: OK
+peak_0.1.0_x64.app.tar.gz.sig: OK
+peak_0.1.0_x64.dmg: OK
+exit=0
+
+## Files not listed in SHA256SUMS (only itself expected)
+SHA256SUMS
+
+## Commit in each build
+linux            0.1.0 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936 ubuntu22 run 42322047772
+windows          0.1.0 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936 win25-vs2026 run 42322047772
+darwin-aarch64   0.1.0 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936 macos26 run 42322047772
+darwin-x86_64    0.1.0 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936 macos15 run 42322047772
+
+## Independent signature check, production public key
+peak_0.1.0_aarch64.app.tar.gz.sig: signature ok: timestamp:1794013785 file:peak.app.tar.gz version:0.1.0
+peak_0.1.0_amd64.AppImage.sig: signature ok: timestamp:1794014889 file:peak_0.1.0_amd64.AppImage version:0.1.0
+peak_0.1.0_x64.app.tar.gz.sig: signature ok: timestamp:1794014761 file:peak.app.tar.gz version:0.1.0
+peak_0.1.0_x64-setup.exe.sig: signature ok: timestamp:1794014048 file:peak_0.1.0_x64-setup.exe version:0.1.0
+
+## Feed
+version 0.1.0 pub_date 2026-11-07T01:29:33Z notes 444 chars
+linux-x86_64-appimage https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_amd64.AppImage
+  signature matches its .sig: true
+windows-x86_64-nsis https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_x64-setup.exe
+  signature matches its .sig: true
+darwin-aarch64-app https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_aarch64.app.tar.gz
+  signature matches its .sig: true
+darwin-x86_64-app https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_x64.app.tar.gz
+  signature matches its .sig: true
+
+## install.sh is this tag's script
+same

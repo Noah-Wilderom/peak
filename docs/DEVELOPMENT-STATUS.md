@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-07 01:00 UTC
-- **State:** **candidate confirmed: `f17d80d`.** Every required pre-publication check passes on native CI on that exact commit. **Not delivered yet:** nothing is published, and the public install and update proofs can only run after publishing.
+- **Last update:** 2026-11-07 01:53 UTC
+- **State:** **`v0.1.0` is published.** The real signed update through GitHub passes on all four targets. Public installs pass on Windows and both Macs. **The Linux install job on native CI failed** on a runner without a desktop's libraries; the same public AppImage passes on clean Ubuntu with them. A rerun with the corrected workflow is the one required check left.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,7 +12,48 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: candidate ready. Remaining: publish, then the public proofs. Not complete until those pass.**
+**Status: published at 2026-11-07T01:34:22Z, by PM. Delivery is not complete until the Linux public install job passes on native CI.**
+
+### Public results: `v0.1.0`, commit `9e60f67`
+
+**Public delivery** run 42324783966, started by the release itself, overall **failure** because of one job. Summaries in `docs/evidence/release/ci-public-v0.1.0/`.
+
+| Check, against the real public release | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Anonymous feed, downloads, checksums, signatures | **Pass**, one job covering all targets | | | |
+| Install from public URLs, app, separate CLI, samples, exit code, Node and Python agents | **Fail on CI, see below** | **Pass** | **Pass** | **Pass** |
+| 0.0.9 finds the release on the real feed, downloads, verifies the production signature, installs, relaunches | **Pass** | **Pass** | **Pass** | **Pass** |
+| Through that: history kept, `peak run` workload survives with its own exit code, new app monitors the CLI | **Pass** | **Pass** | **Pass** | **Pass** |
+
+**The Linux failure, and what it means.** `peak: error while loading shared libraries: libEGL.so.1`. That job's runner had only `libfuse2` and `xvfb`. Every earlier Linux check had WebKit dev packages installed, which pulled these libraries in and hid the dependency. The published AppImage expects 13 libraries from the host: `libEGL`, `libGL`, `libX11`, `libX11-xcb`, `libdrm`, `libexpat`, `libfontconfig`, `libfreetype`, `libfribidi`, `libgbm`, `libharfbuzz`, `libwayland-client`, `libxcb`. **The release isn't corrupt, and no containment is needed.** It does mean:
+- **On a bare server or minimal container, Peak doesn't run at all, including `peak run` and `peak version`.** The README said nothing about this, and now does. Not tested on a full desktop install, or on other distributions; the list above suggests they'd be fine, since desktops carry these libraries.
+
+**Run by me, against the real public URLs:**
+
+| Log | What ran | Result |
+|---|---|---|
+| `16-verify-published-real.log` | `verify-published.mjs`, anonymous | ALL OK, 24 checks |
+| `17-real-install-linux.log` | The README's `curl \| sh`, Ubuntu 22.04 chroot. Installed file matches `SHA256SUMS`; smoke test on it | SMOKE OK |
+| `18-clean-linux-public.log` | The public AppImage on **clean Ubuntu 22.04 and 24.04 containers**, with only those 13 libraries' packages and no dev packages: full smoke test and `curl \| sh`. Then the public `.deb` on clean 24.04, with apt pulling its own dependencies | SMOKE OK on both. The `.deb` installs and its CLI works; **its window wasn't opened** |
+| `19-real-feed-button-linux.log` | The production app from the public URL, its real "Check for updates" button, the real feed | "This is the latest version" |
+
+Those containers run with AppArmor and seccomp unconfined, so they say nothing about Ubuntu 24.04's restrictions on unprivileged sandboxes in a real desktop session. That hasn't been tested.
+
+**What the public proof covers, and doesn't.**
+- **Covers:** GitHub's redirects, TLS, the real feed, real downloads and the production signature, end to end on all four targets, ending with the exact published release running.
+- **Not a person using the production UI:** the 0.0.9 copy presses the buttons on a timer. Buttons were exercised on Linux and Windows against a localhost feed; on Linux, also the production check button against the real feed. **macOS UI evidence is timed presses and screenshots.** Windows' window flow uses a debugging port set only in test builds.
+- **Not two production releases:** the 0.0.9 copy isn't a release build. A real user's first update between production releases happens at the next release.
+- **Not clicked through by a real OS-warning path:** CI runners don't quarantine downloads, so macOS Gatekeeper and Windows SmartScreen warnings have never been seen by these tests. The README's steps come from Tauri's signing documentation and known OS behaviour, not from observing them here.
+- **Remote targets from Windows and macOS** have never run.
+- Nothing is notarized or OS-signed, by decision.
+
+**Fixed in the uncommitted tree, reaching users only at the next release, since `install.sh` is a release asset and no tag changes:** `install.sh` now says which libraries are missing and how to install them, rather than reporting success, and its libfuse2 note no longer fires falsely when `ldconfig` isn't on `PATH`. Tested on a bare 24.04 container.
+
+**Not changed:** the app, the tag and the release.
+
+### The tag: `v0.1.0` on `9e60f67`
+
+Release 42322047772 on the tag: all four native rebuilds, signatures, install, app, separate CLI, real samples and Node and Python agents pass, and the draft step succeeded on its first real run. Tests and Update proof on that commit also pass. It differs from the candidate below only in docs and evidence. Summaries: `docs/evidence/release/ci-tag-v0.1.0/`. Draft checks: `docs/evidence/release/14-draft-v0.1.0.txt`.
 
 ### The candidate: `f17d80dc1da1d56295f6cab990a65724c5379ab4`
 
@@ -531,15 +572,9 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM, in order:**
-1. Commit this tree on `release-validation/0.1.0` and push it: every changed path except your `docs/PROJECT-MANAGEMENT.md`. It's docs and evidence only. Check with `git diff --stat f17d80d HEAD -- src src-tauri scripts .github package.json bun.lock`, which must print nothing. If it prints anything, stop and tell me.
-2. Make `master` that commit: `git checkout master && git merge --ff-only release-validation/0.1.0 && git push origin master`.
-3. Tag it: `git tag v0.1.0 && git push origin v0.1.0`. **Release** rebuilds all four targets, re-checks signatures and smoke tests them, then makes a **draft**. That draft step has never run for real, so if it fails, send me the run.
-4. Check the draft: 18 assets including `latest.json`, `SHA256SUMS` and `install.sh`. Download it and run `sha256sum -c SHA256SUMS`.
-5. Publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`. **This is what reaches users.**
-6. Confirm **Public delivery** started. If not: `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak --ref master -f tag=v0.1.0`.
-7. Send me back here. Nothing of mine is running or waiting until then. I'll read that run, run `verify-published.mjs` myself, and install from the real URLs in a disposable environment.
-
-**If a public proof fails:** the release is already out, so the fix is a new version. If the feed itself is wrong, unpublish or fix the assets first, since installed copies read it.
+**PM:**
+1. Commit this tree and push it to `master`, excluding your own uncommitted files as you see fit. No tag or release changes. It changes `.github/workflows/public-delivery.yml`, `scripts/install-release.sh`, the README and docs, not the app.
+2. Rerun: `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak --ref master -f tag=v0.1.0`. It checks the published `v0.1.0` again, using that workflow.
+3. Send me back here with the run. Nothing of mine is running or waiting until then. If it passes, delivery is complete, and I'll take down my test environment.
 
 **Separately:** the updater key and its paired password still need an off-server backup.

@@ -1,0 +1,17 @@
+# published v0.1.0, Public delivery run 42324783966 / Update through the real feed (windows): success. job 128257436952
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/public-update-proof.mjs "$TAG" output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/public-update-proof.mjs "$TAG" output
+  PEAK_SMOKE_PLATFORM: windows
+ok   the feed announces the published version 0.1.0
+peak_0.0.9_x64-setup.exe
+ok   the older build is installed peak 0.0.9 (Windows installer, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   a run recorded before the update 
+waiting for 0.0.9 to update itself from https://github.com/Noah-Wilderom/peak/releases/latest/download/latest.json
+ok   the older app exited and a new one started 7116 -> 8908
+ok   this machine now runs the published version peak 0.1.0 (Windows installer, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   nothing failed on the way 
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 6
+ok   the published app monitors the CLI post-1794015956302-err
+ok   that workload finished with its own exit code exit 9
+PUBLIC UPDATE OK

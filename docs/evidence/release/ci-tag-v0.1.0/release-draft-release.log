@@ -1,0 +1,20 @@
+# tag v0.1.0 (9e60f67) Release / Draft release: success. job 128256004207
+Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261101.186
+3a11c777584bcf89525b20e2f3bfe25b3abd2f6aeff232665e0d58dcb9fd3ec1  BUILD-INFO-darwin-aarch64.json
+939614cac33015679533c1dd04b46c08913f036b8b63d8009fc1745cf0aff313  BUILD-INFO-darwin-x86_64.json
+3aaab4f40d5cd5107c4a821538ae2bc132c9b62bff9d0918d676b956af9eb2b4  BUILD-INFO-linux.json
+80da888b42b5b812f696196d8a0ec9bdcdde9fd93a440551e8c7779e71c1c51b  BUILD-INFO-windows.json
+f242295ee4b6930e31475d774be541ff5d2c02573a87d0d474ca99267716cf0b  install.sh
+72ecbb48d071934fa7b00310943296ddf86814b5862a9dd9a2d6c88c53083478  latest.json
+b0555b87d38424635bb9e9c64cb24d536159ffb5921453fcd35aa4b762855b9d  peak_0.1.0_aarch64.app.tar.gz
+f597c90893f540e763bbbf95da39745800276b5d5d21e7a104036141ff4de1ab  peak_0.1.0_aarch64.app.tar.gz.sig
+506edd71405d9594653f1f2b90ca07e589dcebfddf95de90a639ae1486f43175  peak_0.1.0_aarch64.dmg
+3ed86462b7d1e20c86cf09d8977f53faa889ecb4b52523e431e0548ce3646779  peak_0.1.0_amd64.AppImage
+8057bcffa7a3824fc03a428912cdef921a8aa3254d1aa582da082061813c7daa  peak_0.1.0_amd64.AppImage.sig
+702282435d68188b75496e4a75495c3888c9fc513d0f5190d182c1954c3e6d13  peak_0.1.0_amd64.deb
+9f2d0c6fa7d5ebc59b1262d9884383625c253e9229a87c865629968d71f221fd  peak_0.1.0_x64-setup.exe
+acd21e16b167e8f30f819c3e1cb82f3ce4910e9c3d1683ede61d7c058b9a18b4  peak_0.1.0_x64-setup.exe.sig
+f6f64514abead9c01e4c3ce6f050765b3aab994eab6b7c77508419b8e4241c67  peak_0.1.0_x64.app.tar.gz
+0577f59b064e512eb0ada8207f2291acde10467b26174208d37ff43cb764bacd  peak_0.1.0_x64.app.tar.gz.sig
+b3287f2be0a4e566cd2c0c54c7c36c13a4f213a3a4168c57459ef0407b4cdfbf  peak_0.1.0_x64.dmg
+https://github.com/Noah-Wilderom/peak/releases/tag/untagged-255a1ea01be2af065271

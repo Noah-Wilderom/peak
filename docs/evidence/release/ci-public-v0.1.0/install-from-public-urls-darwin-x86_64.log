@@ -1,0 +1,16 @@
+# published v0.1.0, Public delivery run 42324783966 / Install from public URLs (darwin-x86_64): success. job 128257436858
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs public output
+  PEAK_SMOKE_PLATFORM: darwin-x86_64
+peak_0.1.0_x64.dmg: 7414667 bytes, sha256 b3287f2be0a4e566cd2c0c54c7c36c13a4f213a3a4168c57459ef0407b4cdfbf
+ok   the installed copy says what it is peak 0.1.0 (macOS app, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   names its bundled collector x86_64: /Users/runner/Library/Application Support/peak/collectors/x86_64-22237f54aef14027/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sat12-jr311-9440f1c8-86bb-451c-a45f-4bde267a6a52-36E59101C9B9.local for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak place vez6mI
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794015297758-err
+ok   the app recorded real samples and the exit samples 7, max rss 107352064, exit 7
+ok   the Node agent reported from inside the program lag samples 5
+ok   the Python agent reported from inside the program lag samples 8
+SMOKE OK

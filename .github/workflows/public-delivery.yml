@@ -45,11 +45,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Linux runtime libraries
+      # What a desktop already has, and the AppImage expects from it. No -dev packages, so a
+      # library the image should carry but doesn't would still show up here.
+      - name: A desktop's libraries
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2 xvfb
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1
       - name: Fetch, install and use it
         shell: bash
         env:
