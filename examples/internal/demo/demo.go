@@ -14,6 +14,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	peak "github.com/Noah-Wilderom/peak/sdk/go"
 )
 
 type Options struct {
@@ -60,7 +62,7 @@ func (o Options) run(name string, work func(context.Context) error) error {
 		}()
 		fmt.Printf("pprof: http://%s/debug/pprof/\n", listener.Addr())
 	}
-	closeAgent := startAgent()
+	closeAgent := peak.Start()
 	defer closeAgent()
 	fmt.Printf("%s: pid=%d duration=%s (Ctrl-C or Peak Stop to finish)\n", name, os.Getpid(), *o.duration)
 	if err := work(ctx); err != nil {

@@ -48,15 +48,17 @@ without a nested `peak run`, when capturing inside the app.
 
 ## Peak's profiler
 
-All three demos compile in the helper in `internal/demo`. When Peak supplies
-`PEAK_AGENT_ADDR` and `PEAK_AGENT_TOKEN`, the helper connects to its existing
-runtime-agent protocol and enables:
+All three demos start [Peak's Go agent](../sdk/go), which any Go program can
+import. When Peak supplies `PEAK_AGENT_ADDR` and `PEAK_AGENT_TOKEN`, it connects
+and enables:
 
 - Live Go heap usage and capacity, sampled every 500 ms.
 - Completed GC events and pause durations. Go collections appear as major GC;
   freed bytes are an estimate over each polling interval.
 - **Take snapshot**, including sampled live allocation stacks.
 - **Collect garbage**, which calls `runtime.GC()`.
+- **CPU profiles**, from `runtime/pprof`.
+- Scheduler latency, goroutine count and time in GC.
 
 Try `task examples:memory DURATION=2m`. Select it in Peak, open **Profiler**, take
 a snapshot after a few seconds, wait another five seconds, then take another.

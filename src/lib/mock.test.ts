@@ -338,10 +338,10 @@ describe("MockMonitor", () => {
 
   it("captures, attaches and lists", async () => {
     const { m, events } = setup()
-    for (const cmd of ["bun run build", "npm test", "python etl.py", "node server.js", "node worker.js", "make", "go run .", "cargo build", "bunx x", "uv run a.py"]) {
+    for (const cmd of ["bun run build", "npm test", "python etl.py", "node server.js", "node worker.js", "make", "go run .", "cargo build", "bunx x", "uv run a.py", "php worker.php"]) {
       await m.capture(cmd, "")
     }
-    expect(events.filter((e) => e.type === "captured")).toHaveLength(10)
+    expect(events.filter((e) => e.type === "captured")).toHaveLength(11)
     const s = m.getSnapshot()
     expect(s.selectedId).toBe(s.procs[0].id)
     expect(s.procs[0].cwd).toBe("~")

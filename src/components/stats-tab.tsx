@@ -3,6 +3,7 @@ import { motion } from "motion/react"
 import { CheckIcon, CopyIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Bytes } from "@/components/bytes"
+import { freedIsReported } from "@/lib/agents"
 import { gcStats } from "@/lib/analysis"
 import type { Proc, SystemInfo } from "@/lib/types"
 import { average, maxOf, percentiles } from "@/lib/series"
@@ -121,7 +122,7 @@ export function buildStats(proc: Proc, system: SystemInfo): Group[] {
             ["Total pause", formatMs(gc.total)],
             ["Pause p50 / p99 / max", `${formatMs(gc.p50)} / ${formatMs(gc.p99)} / ${formatMs(gc.max)}`],
             ["Time paused", formatPercent(gc.overhead * 100)],
-            ["Reclaimed", formatBytes(gc.freed), gc.freed],
+            freedIsReported(proc) ? ["Reclaimed", formatBytes(gc.freed), gc.freed] : ["Reclaimed", "Not reported"],
           ]
         : [["Collector", proc.runtime === "rust" ? "None — ownership-based" : "Not observed"]],
     },

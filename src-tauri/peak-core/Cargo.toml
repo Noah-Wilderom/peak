@@ -1,6 +1,6 @@
 [package]
 name = "peak-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Process sampling, runtime agents and the collector protocol, independent of Tauri"
 edition = "2024"
 

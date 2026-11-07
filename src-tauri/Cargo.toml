@@ -3,7 +3,7 @@ members = ["peak-core", "peak-collector"]
 
 [package]
 name = "peak"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local process monitor and memory profiler"
 authors = ["Noah Wilderom"]
 edition = "2024"

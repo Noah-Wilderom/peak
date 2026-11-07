@@ -345,7 +345,19 @@ pub fn run() {
                 Db::open_in_memory()
             })?;
             let connector = Arc::new(CliConnector { tools: Tools::default() });
-            let service = Arc::new(Service::new(monitor, hub, db, connector));
+            let service = Arc::new(Service::new(monitor, hub.clone(), db, connector));
+            let s = service.clone();
+            let window = app.handle().clone();
+            hub.set_control(Arc::new(move |action, id, ms| {
+                if action != "open" {
+                    return s.control(action, id, ms);
+                }
+                if let Some(main) = window.get_webview_window("main") {
+                    let _ = main.show();
+                    let _ = main.set_focus();
+                }
+                window.emit("peak://open", id).map(|_| serde_json::Value::Null).map_err(|e| e.to_string())
+            }));
 
             let s = service.clone();
             let handle = app.handle().clone();

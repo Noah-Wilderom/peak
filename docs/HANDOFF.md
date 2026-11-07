@@ -15,8 +15,9 @@ Remote evidence and open gaps: [`REMOTE-VALIDATION.md`](REMOTE-VALIDATION.md).
   The UI never polls.
 - **Process lifecycle.** Run a command, attach to a PID, stop (SIGINT, then SIGKILL after 3s, identity-checked),
   restart, remove, clear. Processes peak spawned are terminated on app exit.
-- **Runtime agents** (`src-tauri/agents/`). Injected via `NODE_OPTIONS=--require` and `PYTHONPATH`. Heap stats,
-  GC events, snapshots, runtime lag, CPU profiles.
+- **Runtime agents** (`src-tauri/agents/`, `sdk/go/`). Injected via `NODE_OPTIONS`, `BUN_OPTIONS`, `PYTHONPATH` and
+  `PHP_INI_SCAN_DIR`; Go programs import the SDK. Heap stats, GC events, snapshots, runtime lag, CPU profiles, each as
+  far as its runtime allows. An agent says what it can do in its hello, kept as `Proc.agent`.
 - **`peak run -- <cmd>`.** Tees output to the terminal and streams it to the running app.
 - **Views.** Overview, Memory, Profiler (heap and CPU), Stats, Report, Output, Resources; History, Comparison,
   Settings, This machine, Targets; the capture page doubles as the empty state.
@@ -55,7 +56,7 @@ src-tauri/                    workspace root; package `peak` is the desktop app
     bin/peak-cli.rs           the CLI as a console program, because `peak.exe` is windowed on Windows
     lib.rs                    Tauri commands/events (thin), app setup, tick thread
   tests/live_*.rs             live validation, #[ignore]d (see REMOTE-VALIDATION.md)
-  agents/                     peak-agent.cjs, python/sitecustomize.py, tests/
+  agents/                     peak-agent.cjs, bun/, python/, php/, tests/
 src/lib/                      types, monitor-api (interface), monitor (picks backend), tauri-monitor, mock,
                               series, analysis, alerts, markers, history, compare, report, resources, machine,
                               notify, format, ramp, theme
@@ -108,7 +109,9 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **`kubectl auth can-i` needs `--subresource`:** `pods/log` would ask about a pod named `log`.
 - **OpenSSH reads `~/.ssh` from the passwd entry,** not `$HOME`.
 - **V8 attribution:** code optimized on-stack before a profile starts is charged to its caller. Totals stay right.
-- **Bun processes don't get the Node agent.** They get OS metrics only.
+- **`BUN_OPTIONS` only honours quotes around a whole option.** `"--preload=/a b/x.js"` works from Bun 1.2.15. `--preload "/a b/x.js"` is silently dropped, and an unquoted path with a space makes the user's program fail. Versions before `BUN_OPTIONS` ignore it. macOS's data directory has a space, so this matters.
+- **`ExcimerTimer::setInterval` is the first expiry only.** `setPeriod` is what repeats. Nothing in the PHP agent can use signals: they'd cut the user's `sleep()` short.
+- **`peak run` used to replace `NODE_OPTIONS` and `PYTHONPATH`.** `with_inherited` merges. The app can't, as it doesn't have the terminal's environment, so the CLI does it.
 - **WebKitGTK hard-codes helper paths,** so the desktop window can't run from a rootless extraction. Use the container in `scripts/e2e/desktop/`.
 - **k3s evicts below 5% free disk,** and this machine's Docker disk is near that. New pods then stay Pending. The disposable clusters relax the threshold.
 - **`import sitecustomize` isn't reliable in tests.** Python imports that name at startup, and Ubuntu's Python ships its own. The agent tests load it by path.
@@ -132,7 +135,7 @@ src-tauri/target/debug/peak collector   # which collector this build copies to t
 
 bun run typecheck
 bun run test:coverage        # frontend (100% enforced)
-bun run test:agents          # Node + Python agents
+bun run test:agents          # Node, Bun, PHP and Python agents
 cd src-tauri && cargo test --workspace
 cd src-tauri && cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|live_\w+)\.rs$' --fail-under-lines 99
 task test:live               # live SSH, Docker, Kubernetes against disposable environments
@@ -145,6 +148,8 @@ Here, `PEAK_TOOLS=/mnt/HC_Volume_107248377/.peak-sysroot` holds the private webk
 `tauri-driver`, Playwright and extra Node versions. Cargo commands need `. $PEAK_TOOLS/env.sh` first.
 
 ## What's next
+
+Go, Bun and PHP agents are in progress for `v0.1.1`: see [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md). Flutter was looked at and deferred, for the reasons there.
 
 The first packaged release for Linux, Windows and macOS is in progress: see [`RELEASING.md`](RELEASING.md) and [`DEVELOPMENT-STATUS.md`](DEVELOPMENT-STATUS.md).
 

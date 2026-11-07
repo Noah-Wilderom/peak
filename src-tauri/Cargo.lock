@@ -2667,7 +2667,7 @@ dependencies = [
 
 [[package]]
 name = "peak"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
  "peak-core",
@@ -2685,7 +2685,7 @@ dependencies = [
 
 [[package]]
 name = "peak-collector"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "peak-core",
  "serde_json",
@@ -2693,7 +2693,7 @@ dependencies = [
 
 [[package]]
 name = "peak-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
  "serde",

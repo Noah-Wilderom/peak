@@ -7,6 +7,8 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use serde::Serialize;
+
 use crate::model::*;
 use crate::procfs::{self, ProcFs};
 use crate::runner::{self, ExitInfo};
@@ -43,45 +45,85 @@ pub struct AgentEnv {
     pub addr: String,
     pub node_agent: Option<PathBuf>,
     pub python_dir: Option<PathBuf>,
+    pub bun_agent: Option<PathBuf>,
+    pub php_ini_dir: Option<PathBuf>,
 }
 
+const PATH_SEP: char = if cfg!(windows) { ';' } else { ':' };
+
 impl AgentEnv {
-    /// Environment that makes Node and Python load the peak agent.
-    pub fn vars(&self, token: &str, node_options: Option<&str>, python_path: Option<&str>) -> Vec<(String, String)> {
+    /// Environment that makes interpreted runtimes load their peak agent, and tells compiled
+    /// programs using the SDK where to report. See `with_inherited` for variables already set.
+    pub fn vars(&self, token: &str) -> Vec<(String, String)> {
         if self.addr.is_empty() {
             return vec![];
         }
-        let mut env =
-            vec![("PEAK_AGENT_ADDR".into(), self.addr.clone()), ("PEAK_AGENT_TOKEN".into(), token.to_string())];
+        let mut env = vec![
+            ("PEAK_AGENT_ADDR".into(), self.addr.clone()),
+            ("PEAK_AGENT_TOKEN".into(), token.to_string()),
+            ("PEAK_AGENT_VERSION".into(), env!("CARGO_PKG_VERSION").to_string()),
+        ];
+        // Both option variables treat a backslash as an escape, even inside quotes.
+        let quoted = |p: &PathBuf| p.display().to_string().replace('\\', "/");
         if let Some(p) = &self.node_agent {
-            // NODE_OPTIONS treats a backslash as an escape, even inside quotes.
-            let req = format!("--require \"{}\"", p.display().to_string().replace('\\', "/"));
-            env.push((
-                "NODE_OPTIONS".into(),
-                match node_options {
-                    Some(o) if !o.is_empty() => format!("{o} {req}"),
-                    _ => req,
-                },
-            ));
+            env.push(("NODE_OPTIONS".into(), format!("--require \"{}\"", quoted(p))));
+        }
+        if let Some(p) = &self.bun_agent {
+            // Bun quietly drops `--preload "a b"`, and only honours quotes around a whole option.
+            // Versions without BUN_OPTIONS ignore it, and those runs have no agent.
+            env.push(("BUN_OPTIONS".into(), format!("\"--preload={}\"", quoted(p))));
         }
         if let Some(p) = &self.python_dir {
-            let dir = p.display().to_string();
-            env.push((
-                "PYTHONPATH".into(),
-                match python_path {
-                    Some(o) if !o.is_empty() => format!("{dir}{}{o}", if cfg!(windows) { ';' } else { ':' }),
-                    _ => dir,
-                },
-            ));
+            env.push(("PYTHONPATH".into(), p.display().to_string()));
+        }
+        if let Some(p) = &self.php_ini_dir {
+            // A leading separator keeps PHP's own scan directory in the list.
+            env.push(("PHP_INI_SCAN_DIR".into(), format!("{PATH_SEP}{}", p.display())));
         }
         env
     }
+}
+
+/// Combine agent variables with what the program would have had anyway, so that opting in to
+/// profiling doesn't take away a user's own `NODE_OPTIONS` or `PYTHONPATH`.
+pub fn with_inherited(env: Vec<(String, String)>, inherited: &dyn Fn(&str) -> Option<String>) -> Vec<(String, String)> {
+    env.into_iter()
+        .map(|(key, ours)| {
+            let value = match inherited(&key).filter(|theirs| !theirs.is_empty()) {
+                None => ours,
+                Some(theirs) => match key.as_str() {
+                    "NODE_OPTIONS" | "BUN_OPTIONS" => format!("{theirs} {ours}"),
+                    "PYTHONPATH" => format!("{ours}{PATH_SEP}{theirs}"),
+                    // Ours starts with a separator. Theirs goes first and decides what's in the
+                    // list, including whether PHP's own directory is.
+                    "PHP_INI_SCAN_DIR" => format!("{theirs}{ours}"),
+                    _ => ours,
+                },
+            };
+            (key, value)
+        })
+        .collect()
+}
+
+/// A run as `peak ps` shows it.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunListing {
+    pub id: String,
+    pub pid: u32,
+    pub command: String,
+    pub runtime: Runtime,
+    pub status: Status,
+    pub profiling: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent: Option<AgentInfo>,
 }
 
 #[derive(Debug, Default)]
 struct AgentState {
     heap: Option<AgentHeap>,
     lag: Option<f64>,
+    info: Option<AgentInfo>,
 }
 
 #[derive(Debug)]
@@ -188,6 +230,7 @@ impl Tracked {
             ports: p.ports.clone(),
             has_gc: p.has_gc,
             profiling: p.profiling,
+            agent: p.agent.clone(),
             unavailable: p.unavailable.clone(),
             gaps: vec![],
             clock_offset_ms: None,
@@ -208,6 +251,21 @@ impl Tracked {
                 h(a.1).total_cmp(&h(b.1)).then(b.0.cmp(a.0))
             })
             .map(|(pid, _)| *pid)
+    }
+
+    /// The run speaks for its primary agent, whose facts stay after it disconnects.
+    fn sync_agent(&mut self) {
+        let primary = self.primary_agent().and_then(|pid| self.agents.get(&pid)?.info.clone());
+        let Some(info) = primary else { return };
+        if self
+            .proc
+            .agent
+            .as_ref()
+            .is_none_or(|had| had.capabilities != info.capabilities || had.runtime_version != info.runtime_version)
+        {
+            self.dirty = true;
+        }
+        self.proc.agent = Some(info);
     }
 }
 
@@ -324,6 +382,7 @@ impl Monitor {
             gc: vec![],
             has_gc: false,
             profiling: false,
+            agent: None,
             snapshots: vec![],
             logs: vec![],
             children: vec![],
@@ -581,14 +640,16 @@ impl Monitor {
     // ─── agent hooks ───
 
     /// An agent connected. Returns false for unknown tokens.
-    pub fn agent_hello(&mut self, token: &str, pid: u32, runtime: Runtime) -> bool {
+    pub fn agent_hello(&mut self, token: &str, pid: u32, runtime: Runtime, info: Option<AgentInfo>) -> bool {
         let Some(tr) = self.tracked(token) else { return false };
-        tr.agents.entry(pid).or_default();
+        tr.agents.entry(pid).or_default().info = info;
         tr.proc.profiling = true;
-        tr.proc.has_gc = true;
+        // An agent too old to say what it can do is one that reported collections.
+        tr.proc.has_gc = tr.agents.values().any(|a| a.info.as_ref().is_none_or(|i| i.can("gc")));
         if tr.proc.runtime == Runtime::Shell || tr.agents.len() == 1 {
             tr.proc.runtime = runtime;
         }
+        tr.sync_agent();
         tr.dirty = true;
         true
     }
@@ -596,6 +657,16 @@ impl Monitor {
     pub fn agent_heap(&mut self, token: &str, pid: u32, heap: AgentHeap) {
         if let Some(tr) = self.tracked(token) {
             tr.agents.entry(pid).or_default().heap = Some(heap);
+            tr.sync_agent();
+        }
+    }
+
+    pub fn agent_gauges(&mut self, token: &str, pid: u32, gauges: Vec<Gauge>) {
+        if let Some(tr) = self.tracked(token) {
+            if let Some(info) = &mut tr.agents.entry(pid).or_default().info {
+                info.gauges = gauges;
+            }
+            tr.sync_agent();
         }
     }
 
@@ -615,6 +686,7 @@ impl Monitor {
 
     pub fn agent_bye(&mut self, token: &str, pid: u32) {
         if let Some(tr) = self.tracked(token) {
+            tr.sync_agent();
             tr.agents.remove(&pid);
             if tr.agents.is_empty() {
                 tr.proc.profiling = false;
@@ -625,6 +697,36 @@ impl Monitor {
 
     pub fn primary_agent(&self, id: &str) -> Option<u32> {
         self.procs.iter().find(|t| t.proc.id == id)?.primary_agent()
+    }
+
+    /// Runs monitored in this session, newest first, without their history.
+    pub fn listing(&self) -> Vec<RunListing> {
+        let mut runs: Vec<_> = self.procs.iter().filter(|t| !t.proc.historical).map(|t| &t.proc).collect();
+        runs.sort_by_key(|p| std::cmp::Reverse(p.started_at));
+        runs.into_iter()
+            .map(|p| RunListing {
+                id: p.id.clone(),
+                pid: p.pid,
+                command: p.command.clone(),
+                runtime: p.runtime,
+                status: p.status,
+                profiling: p.profiling,
+                agent: p.agent.clone(),
+            })
+            .collect()
+    }
+
+    /// The run a user means by an id or a pid: their own process or a child with an agent. A
+    /// running match wins over an ended one, as pids get reused.
+    pub fn resolve_run(&self, target: &str) -> Option<String> {
+        if self.procs.iter().any(|t| t.proc.id == target) {
+            return Some(target.to_string());
+        }
+        let pid: u32 = target.parse().ok()?;
+        let matching = |t: &&Tracked| t.proc.pid == pid || t.agents.contains_key(&pid);
+        let found =
+            self.procs.iter().filter(matching).max_by_key(|t| (t.proc.status == Status::Running, t.proc.started_at));
+        found.map(|t| t.proc.id.clone())
     }
 }
 
@@ -719,11 +821,7 @@ fn launch(shared: &Shared, command: &str, program: runner::Program<'_>, cwd: &st
     let (id, dir, env) = {
         let mut m = shared.lock().unwrap();
         let id = m.new_id();
-        let env = m.agent_env.vars(
-            &id,
-            std::env::var("NODE_OPTIONS").ok().as_deref(),
-            std::env::var("PYTHONPATH").ok().as_deref(),
-        );
+        let env = with_inherited(m.agent_env.vars(&id), &|key| std::env::var(key).ok());
         (id, m.cwd_path(cwd), env)
     };
     let s1 = shared.clone();
@@ -886,20 +984,43 @@ mod tests {
 
     #[test]
     fn agent_env_vars() {
-        assert!(AgentEnv::default().vars("t", None, None).is_empty());
+        assert!(AgentEnv::default().vars("t").is_empty());
         let env = AgentEnv {
             addr: "127.0.0.1:9".into(),
             node_agent: Some("/a/agent.cjs".into()),
             python_dir: Some("/a/py".into()),
+            bun_agent: Some("/a b/agent.js".into()),
+            php_ini_dir: Some("/a/php".into()),
         };
-        let v: HashMap<_, _> = env.vars("tok", Some("--max-old-space-size=4096"), Some("/x")).into_iter().collect();
+        let vars = env.vars("tok");
+        let v: HashMap<_, _> = vars.iter().cloned().collect();
         assert_eq!(v["PEAK_AGENT_ADDR"], "127.0.0.1:9");
         assert_eq!(v["PEAK_AGENT_TOKEN"], "tok");
-        assert_eq!(v["NODE_OPTIONS"], "--max-old-space-size=4096 --require \"/a/agent.cjs\"");
-        assert_eq!(v["PYTHONPATH"], "/a/py:/x");
-        let v: HashMap<_, _> = env.vars("tok", Some(""), None).into_iter().collect();
+        assert_eq!(v["PEAK_AGENT_VERSION"], env!("CARGO_PKG_VERSION"));
         assert_eq!(v["NODE_OPTIONS"], "--require \"/a/agent.cjs\"");
+        assert_eq!(v["BUN_OPTIONS"], "\"--preload=/a b/agent.js\"");
         assert_eq!(v["PYTHONPATH"], "/a/py");
+        assert_eq!(v["PHP_INI_SCAN_DIR"], ":/a/php");
+
+        // Whatever the user had set stays in effect.
+        let theirs = |key: &str| match key {
+            "NODE_OPTIONS" => Some("--max-old-space-size=4096".to_string()),
+            "BUN_OPTIONS" => Some("--smol".to_string()),
+            "PYTHONPATH" => Some("/x".to_string()),
+            "PHP_INI_SCAN_DIR" => Some("/etc/php.d".to_string()),
+            "PEAK_AGENT_TOKEN" => Some("stale".to_string()),
+            _ => None,
+        };
+        let v: HashMap<_, _> = with_inherited(vars.clone(), &theirs).into_iter().collect();
+        assert_eq!(v["NODE_OPTIONS"], "--max-old-space-size=4096 --require \"/a/agent.cjs\"");
+        assert_eq!(v["BUN_OPTIONS"], "--smol \"--preload=/a b/agent.js\"");
+        assert_eq!(v["PYTHONPATH"], "/a/py:/x");
+        assert_eq!(v["PHP_INI_SCAN_DIR"], "/etc/php.d:/a/php");
+        assert_eq!(v["PEAK_AGENT_TOKEN"], "tok");
+        let empty = |_: &str| Some(String::new());
+        let v: HashMap<_, _> = with_inherited(vars, &empty).into_iter().collect();
+        assert_eq!(v["PYTHONPATH"], "/a/py");
+        assert_eq!(v["PHP_INI_SCAN_DIR"], ":/a/php");
     }
 
     #[test]
@@ -1126,9 +1247,9 @@ mod tests {
         let m = monitor();
         let p = capture(&m, "sleep 2", "/tmp").unwrap();
         let mut g = m.lock().unwrap();
-        assert!(!g.agent_hello("nope", 1, Runtime::Node));
-        assert!(g.agent_hello(&p.id, 100, Runtime::Node));
-        assert!(g.agent_hello(&p.id, 200, Runtime::Node));
+        assert!(!g.agent_hello("nope", 1, Runtime::Node, None));
+        assert!(g.agent_hello(&p.id, 100, Runtime::Node, None));
+        assert!(g.agent_hello(&p.id, 200, Runtime::Node, None));
         let pr = g.get(&p.id).unwrap();
         assert!(pr.profiling && pr.has_gc);
         assert_eq!(pr.runtime, Runtime::Node);

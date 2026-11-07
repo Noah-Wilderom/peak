@@ -52,6 +52,16 @@ jobs:
         with:
           workspaces: src-tauri
       - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      # A real PHP with its report at exit. Excimer is covered in the agents job and on each OS.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: none
       # tauri::generate_context! embeds the built frontend, so build it first.
       - uses: oven-sh/setup-bun@v2
       - name: Build frontend
@@ -74,11 +84,15 @@ jobs:
           path: src-tauri/lcov.info
 
   agents:
-    name: Runtime agents (Node + Python)
+    name: Runtime agents (Node ${{ matrix.node }}, PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        node: ["20", "22"]
+        include:
+          - { node: "20", php: "8.1", extensions: excimer }
+          - { node: "22", php: "8.3", extensions: excimer }
+          - { node: "22", php: "8.4", extensions: "" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -87,5 +101,36 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: oven-sh/setup-bun@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ matrix.extensions }}
+          coverage: none
+          tools: none
       - run: node --test src-tauri/agents/tests/*.test.mjs
       - run: python -m unittest discover -s src-tauri/agents/tests -v
+
+  go-sdk:
+    name: Go SDK and examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The oldest the module says it supports, and the newest.
+        go: ["1.21", stable]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+      - working-directory: sdk/go
+        run: |
+          test -z "$(gofmt -l .)"
+          go vet ./...
+          go test -race ./...
+      - if: matrix.go == 'stable'
+        working-directory: examples
+        run: |
+          go vet ./...
+          go build ./...

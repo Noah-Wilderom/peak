@@ -95,7 +95,17 @@ mod tests {
         let arch = embedded_arch().unwrap();
         assert_eq!(arch, std::env::consts::ARCH);
         let path = embedded_collector(arch, d.path()).unwrap().unwrap();
-        let out = std::process::Command::new(&path).arg("version").output().unwrap();
+        // Another test forking while this was being written can hold it open for a moment.
+        let run = || std::process::Command::new(&path).arg("version").output();
+        let out = (0..50)
+            .find_map(|_| match run() {
+                Err(e) if e.kind() == std::io::ErrorKind::ExecutableFileBusy => {
+                    std::thread::sleep(std::time::Duration::from_millis(20));
+                    None
+                }
+                other => Some(other.unwrap()),
+            })
+            .unwrap();
         assert!(
             String::from_utf8_lossy(&out.stdout).ends_with(&format!("protocol {}\n", peak_core::protocol::VERSION))
         );

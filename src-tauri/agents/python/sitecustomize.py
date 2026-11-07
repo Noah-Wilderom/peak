@@ -140,6 +140,7 @@ def _peak_start():
     import gc
     import json
     import socket
+    import sys
     import threading
     import time
     import tracemalloc
@@ -160,7 +161,26 @@ def _peak_start():
             except OSError:
                 pass
 
-    send({"type": "hello", "token": token, "pid": os.getpid(), "runtime": "python"})
+    send(
+        {
+            "type": "hello",
+            "token": token,
+            "pid": os.getpid(),
+            "runtime": "python",
+            "agent": {
+                "runtimeVersion": ".".join(str(n) for n in sys.version_info[:3]),
+                "agentVersion": os.environ.get("PEAK_AGENT_VERSION", "unknown"),
+                "capabilities": ["gc", "lag", "cpu", "snapshot", "forcegc"],
+                "unavailable": {"heap": "CPython has no cheap total for its heap, so memory here is the process's."},
+                "notes": {
+                    "lag": "How late a 10 ms sleep woke up, p99: time waiting for the GIL and a CPU",
+                    "cpu": "Samples the main thread's stack whether it's on-CPU or not, so blocking calls count.",
+                    "freed": "Estimated at 64 bytes per object collected.",
+                    "snapshot": "Live objects by type. Allocation stacks start with the first snapshot.",
+                },
+            },
+        }
+    )
 
     # GC callbacks run inside the collector, so only record; a thread flushes.
     queue = []

@@ -416,6 +416,12 @@ mod tests {
             gc: vec![],
             has_gc: true,
             profiling: true,
+            agent: Some(crate::model::AgentInfo {
+                runtime_version: "1.27".into(),
+                agent_version: "0.1.1".into(),
+                capabilities: vec!["cpu".into()],
+                ..Default::default()
+            }),
             snapshots: vec![],
             logs: vec![],
             children: vec![],

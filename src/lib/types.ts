@@ -7,7 +7,27 @@ export const TICK_MS = 500
 export const SYSTEM_MEMORY = 32 * 1024 ** 3
 export const MAX_SAMPLES = 7200 // 1 hour of history at 500ms
 
-export type Runtime = "node" | "bun" | "python" | "rust" | "go" | "shell"
+export type Runtime = "node" | "bun" | "python" | "php" | "rust" | "go" | "shell"
+
+export type AgentCapability = "heap" | "gc" | "lag" | "cpu" | "snapshot" | "forcegc"
+
+export interface Gauge {
+  name: string
+  value: number
+  unit: string
+}
+
+/** What a run's agent said about itself. Stays with the run after the agent has gone. */
+export interface AgentInfo {
+  runtimeVersion: string
+  agentVersion: string
+  capabilities: AgentCapability[]
+  /** Capabilities it can't offer here, and why or how to get them. */
+  unavailable?: Record<string, string>
+  /** What a capability means in this runtime. */
+  notes?: Record<string, string>
+  gauges?: Gauge[]
+}
 export type Status = "running" | "exited" | "crashed"
 
 export interface Sample {
@@ -144,6 +164,7 @@ export interface Proc {
   hasGc: boolean
   /** Whether heap snapshots / allocation sampling are available (runtime agent attached). */
   profiling: boolean
+  agent?: AgentInfo
   snapshots: HeapSnapshot[]
   logs: LogLine[]
   children: ChildProc[]
@@ -325,13 +346,14 @@ export interface KubeAccess {
 }
 
 /**
- * How a CPU profile's stacks were collected. Neither is strict on-CPU time:
+ * How a CPU profile's stacks were collected. "pprof" and "excimer-cpu" are on-CPU time; for the
+ * rest, see SAMPLING_NOTE. The two that need the most care:
  * - "v8": V8's sampler. Waiting in the event loop shows as a separate (idle)
  *   frame, but synchronous blocking is charged to the frame that made the call.
  * - "stack": the thread's stack is sampled on a timer whether or not it was
  *   running, so sleeps, I/O and lock waits all count.
  */
-export type CpuSampling = "v8" | "stack" | "unknown"
+export type CpuSampling = "v8" | "stack" | "pprof" | "jsc" | "excimer-cpu" | "excimer-wall" | "unknown"
 
 /** A sampled call tree; `self` is the milliseconds of samples landing in that frame. */
 export interface CpuProfile {
@@ -414,6 +436,8 @@ export interface SystemInfo {
 export interface State {
   procs: Proc[]
   selectedId: string | null
+  /** The latest `peak open`: bring this run's profiler up. */
+  openRequest?: { id: string; seq: number }
   paused: boolean
   system: SystemInfo
   /** False until the backend has sent its first full state. */

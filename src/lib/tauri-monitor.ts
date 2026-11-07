@@ -59,6 +59,7 @@ export interface ProcDelta {
   children: ChildProc[]
   hasGc: boolean
   profiling: boolean
+  agent?: Proc["agent"]
   childNames?: Proc["childNames"]
   ports?: Proc["ports"]
   unavailable?: string[]
@@ -126,6 +127,7 @@ export function applyDelta(p: Proc, d: ProcDelta): Proc {
     children: d.children,
     hasGc: d.hasGc,
     profiling: d.profiling,
+    agent: d.agent,
     childNames: d.childNames,
     ports: d.ports,
     unavailable: d.unavailable,
@@ -201,6 +203,7 @@ export class TauriMonitor implements MonitorApi {
     try {
       await this.on<TickPayload>("peak://tick", (e) => this.onTick(e.payload))
       await this.on<Proc>("peak://proc", (e) => this.upsert(e.payload, true))
+      await this.on<string>("peak://open", (e) => this.open(e.payload))
       // Thresholds are a nicety: if they can't be read, monitoring still starts.
       this.alerts.configure(await this.call<Settings>("get_settings").catch(() => DEFAULT_SETTINGS))
       const full = await this.call<FullState>("get_state")
@@ -249,6 +252,8 @@ export class TauriMonitor implements MonitorApi {
   // ─── actions ───
 
   select = (id: string) => this.set({ selectedId: id })
+
+  open = (id: string) => this.set({ selectedId: id, openRequest: { id, seq: (this.state.openRequest?.seq ?? 0) + 1 } })
 
   setPaused = (paused: boolean) => {
     if (!paused && this.hidden) {

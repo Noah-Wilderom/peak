@@ -33,6 +33,7 @@ import {
   type TargetSpec,
   type TargetState,
   type Status,
+  type AgentInfo,
 } from "@/lib/types"
 
 export * from "@/lib/types"
@@ -559,7 +560,30 @@ const EXE: Record<Runtime, string> = {
   python: "/home/noah/.venv/bin/python3.13",
   rust: "/home/noah/.cargo/bin/cargo",
   go: "/usr/bin/go",
+  php: "/usr/bin/php",
   shell: "/usr/bin/bash",
+}
+
+const AGENT_VERSION = "0.1.1"
+/** What each runtime's real agent says about itself, for the browser simulation. */
+const MOCK_AGENTS: Partial<Record<Runtime, AgentInfo>> = {
+  node: { runtimeVersion: "22.11.0", agentVersion: AGENT_VERSION, capabilities: ["heap", "gc", "lag", "cpu", "snapshot", "forcegc"], notes: { lag: "Event-loop delay, p99" } },
+  bun: {
+    runtimeVersion: "1.2.20",
+    agentVersion: AGENT_VERSION,
+    capabilities: ["heap", "lag", "cpu", "snapshot", "forcegc"],
+    unavailable: { gc: "Bun doesn't publish individual garbage collections, so none are listed." },
+    notes: { lag: "How late a 20 ms timer fired, p99" },
+    gauges: [{ name: "Live objects", value: 182_000, unit: "count" }],
+  },
+  python: { runtimeVersion: "3.12.3", agentVersion: AGENT_VERSION, capabilities: ["gc", "lag", "cpu", "snapshot", "forcegc"], notes: { lag: "How late a 10 ms sleep woke up, p99: time waiting for the GIL and a CPU" } },
+  php: {
+    runtimeVersion: "8.3.6",
+    agentVersion: AGENT_VERSION,
+    capabilities: ["heap", "gc", "cpu", "forcegc"],
+    unavailable: { lag: "PHP runs one request from start to end, with no event loop to delay.", snapshot: "PHP has no built-in way to list what is in memory.", gcFreed: "PHP counts the values it collects, not their bytes." },
+    gauges: [{ name: "Collector runs", value: 12, unit: "count" }],
+  },
 }
 
 function inferRuntime(command: string): Runtime {
@@ -569,6 +593,7 @@ function inferRuntime(command: string): Runtime {
   if (/^(python3?|uv|pytest|poetry)$/.test(bin)) return "python"
   if (/^(cargo|rustc)$/.test(bin)) return "rust"
   if (bin === "go") return "go"
+  if (/^php|^(composer|artisan)$/.test(bin)) return "php"
   return "shell"
 }
 
@@ -639,6 +664,7 @@ function createProc(spec: Spec, now: number): MockProc {
     gc: [],
     hasGc: runtime !== "rust" && runtime !== "shell",
     profiling: runtime !== "shell" && runtime !== "go",
+    agent: MOCK_AGENTS[runtime],
     snapshots: [],
     logs: [{ id: logId++, t: startedAt, stream: "stdout", text: `$ ${spec.command}` }],
     children: (CHILDREN[runtime] ?? []).map((name) => ({
@@ -764,7 +790,7 @@ function makeCpuProfile(p: MockProc, ms: number, t: number): CpuProfile {
   const root = build(SITES[p.sim.profile])
   const scale = ms / frameTotal(root)
   const rescale = (f: AllocFrame): AllocFrame => ({ ...f, self: f.self * scale, children: f.children.map(rescale) })
-  const sampling = p.runtime === "python" ? ("stack" as const) : ("v8" as const)
+  const sampling = ({ python: "stack", bun: "jsc", php: "excimer-cpu" } as const)[p.runtime as "python"] ?? ("v8" as const)
   return { id: `c_${t.toString(36)}_${Math.floor(r() * 1e6).toString(36)}`, t, durationMs: ms, sampling, root: rescale(root) }
 }
 
@@ -991,6 +1017,8 @@ export class MockMonitor implements MonitorApi {
   // ─── actions ───
 
   select = (id: string) => this.set({ selectedId: id })
+
+  open = (id: string) => this.set({ selectedId: id, openRequest: { id, seq: (this.state.openRequest?.seq ?? 0) + 1 } })
 
   setPaused = (paused: boolean) => {
     if (!paused && this.frozen) {

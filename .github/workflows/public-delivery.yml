@@ -28,6 +28,18 @@ jobs:
         with:
           node-version: "22"
       - run: node scripts/release/verify-published.mjs "$TAG"
+      # What `go get` gives anyone, from the module's own tag.
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: The Go SDK can be downloaded and built against
+        run: |
+          work=$(mktemp -d) && cd "$work"
+          go mod init sdk-check
+          go get "github.com/Noah-Wilderom/peak/sdk/go@$TAG"
+          printf 'package main\nimport _ "github.com/Noah-Wilderom/peak/sdk/go/auto"\nfunc main() {}\n' > main.go
+          go build -o check . && ./check
 
   install:
     name: Install from public URLs (${{ matrix.platform }})
@@ -51,11 +63,13 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick
+      - uses: ./.github/actions/runtimes
       - name: Fetch, install and use it
         shell: bash
         env:
           PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_SMOKE_REQUIRE: node,python,bun,php,go${{ matrix.platform != 'windows' && ',php-excimer' || '' }}
         run: |
           node scripts/e2e/smoke/public-install.mjs "$TAG" public
           if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs public output
@@ -110,4 +124,47 @@ jobs:
         with:
           name: public-update-${{ matrix.platform }}
           path: output
+          if-no-files-found: warn
+
+  upgrade:
+    name: The previous release updates itself (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    # Separate from the job above: an older build made for that proof is a stand-in, and this is
+    # the real previous release, untouched, with its own feed check and its own buttons.
+    if: ${{ inputs.tag != '' || github.event.release.tag_name != 'v0.1.0' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux }
+          - { os: windows-latest, platform: windows }
+          - { os: macos-latest, platform: darwin-aarch64 }
+          - { os: macos-15-intel, platform: darwin-x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: A desktop's libraries, and what reads and presses its screen
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick xdotool tesseract-ocr tesseract-ocr-eng
+      - uses: ./.github/actions/runtimes
+      - name: Install the previous release, and update it through the real feed
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_SMOKE_REQUIRE: node,python,bun,php,go${{ matrix.platform != 'windows' && ',php-excimer' || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --exclude-pre-releases --json tagName --jq "map(.tagName) | map(select(. != \"$TAG\")) | .[0]")
+          echo "from $previous to $TAG"
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs "$previous" "$TAG" upgrade-output
+          else node scripts/e2e/smoke/release-upgrade.mjs "$previous" "$TAG" upgrade-output; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-upgrade-${{ matrix.platform }}
+          path: upgrade-output
           if-no-files-found: warn

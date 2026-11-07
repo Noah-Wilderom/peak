@@ -278,6 +278,10 @@ describe("App", () => {
     expect(await screen.findByText("No collector data for this runtime.")).toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: /Profiler/ }))
     expect(await screen.findByText("Heap and CPU profiling aren't available.")).toBeInTheDocument()
+    await user.click(screen.getByRole("tab", { name: "Overview" }))
+    // `peak open` brings a run's profiler up.
+    await act(async () => monitor.open(monitor.getSnapshot().selectedId!))
+    expect(await screen.findByText("Heap and CPU profiling aren't available.")).toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: "Stats" }))
     expect(await screen.findByText("Not observed")).toBeInTheDocument()
     // A process that fails with an exit code (no signal) gets a "failed" label and toast.

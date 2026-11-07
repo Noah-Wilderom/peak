@@ -2,9 +2,9 @@
 // Installs a platform's real artifact and uses it: version, collector, the app on its own, and
 // a monitored run from a separate CLI process, checked in the terminal and in the app's database.
 //   PEAK_SMOKE_PLATFORM=<linux|windows|darwin-aarch64|darwin-x86_64> smoke.mjs <artifacts dir> <output dir>
-import { spawnSync } from "node:child_process"
 import { realpathSync } from "node:fs"
 import { PLATFORM, cli, closeApps, install, join, launch, liveApps, log, mkdirSync, mkdtempSync, shot, sleep, storedRun, storedSamples, tmpdir, waitFor, workload, writeFileSync } from "./lib.mjs"
+import { runProbes } from "./probes.mjs"
 
 const [artifacts, out] = process.argv.slice(2)
 mkdirSync(out, { recursive: true })
@@ -62,18 +62,7 @@ if (run) {
 const nodeSamples = storedSamples(id)
 check("the Node agent reported from inside the program", nodeSamples.some((s) => s.loopLag !== undefined && s.loopLag !== null), `lag samples ${nodeSamples.filter((s) => s.loopLag != null).length}`)
 
-const python = ["python3", "python"].find((p) => spawnSync(p, ["--version"], { encoding: "utf8" }).status === 0)
-if (python) {
-  const pyId = `py-${Date.now()}`
-  const script = join(mkdtempSync(join(tmpdir(), "peak-py-")), "work.py")
-  writeFileSync(script, `import time\nprint("${pyId}", flush=True)\nend = time.time() + 5\nwhile time.time() < end:\n    sum(range(200000))\n    time.sleep(0.05)\n`)
-  const py = await cli(["run", "--", python, script]).done
-  await waitFor("the Python run stored", () => storedRun(pyId)?.exit_code === 0, 30_000).catch(() => {})
-  const samples = storedSamples(pyId)
-  check("the Python agent reported from inside the program", py.code === 0 && samples.some((s) => (s.loopLag ?? 0) > 0), `lag samples ${samples.filter((s) => s.loopLag !== undefined).length}`)
-} else {
-  log("no Python on this machine: its agent wasn't checked")
-}
+await runProbes({ check, record, out })
 shot(out, `${PLATFORM}-after-run`)
 closeApps()
 writeFileSync(join(out, `smoke-${PLATFORM}.json`), JSON.stringify(record, null, 2))

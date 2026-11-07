@@ -12,6 +12,7 @@ use std::time::Duration;
 use serde_json::{Value, json};
 
 use crate::discovery::{Candidate, Here, Record, Standing, discover, start_ticks};
+use crate::monitor::with_inherited;
 use crate::runner::pump_lines;
 #[cfg(unix)]
 use std::os::unix::process::CommandExt;
@@ -19,12 +20,45 @@ use std::os::unix::process::CommandExt;
 #[derive(Debug, PartialEq, Eq)]
 pub enum Cli {
     Run(String),
+    Agents,
+    Ps { json: bool },
+    Profile(ProfileArgs),
+    Open(String),
     Collector,
     Version,
     Help,
 }
 
-pub const USAGE: &str = "usage: peak                      open the app\n       peak run [--] <command> [args…]\n       peak collector\n       peak version\n\nrun: runs <command> and streams its memory, CPU and output to the peak app.\ncollector: shows the collector this build copies to remote targets.\nversion: shows this build's version, commit and how it was installed.";
+#[derive(Debug, PartialEq, Eq)]
+pub struct ProfileArgs {
+    pub target: String,
+    pub action: &'static str,
+    pub ms: u64,
+    pub json: bool,
+}
+
+pub const USAGE: &str = "usage: peak                      open the app\n       peak run [--] <command> [args…]\n       peak ps [--json]\n       peak profile <run id or pid> [--ms N | --snapshot | --gc] [--json]\n       peak open <run id or pid>\n       peak agents\n       peak collector\n       peak version\n\nrun: runs <command> and streams its memory, CPU and output to the peak app.\nps: lists the runs in the open app, and what each one's runtime agent reports.\nprofile: records a CPU profile (5000 ms unless --ms says otherwise), takes a heap snapshot or forces a collection. Results are saved with the run.\nopen: shows a run's profiler in the open app.\nagents: shows what it takes to profile each runtime.\ncollector: shows the collector this build copies to remote targets.\nversion: shows this build's version, commit and how it was installed.";
+
+const DEFAULT_PROFILE_MS: u64 = 5000;
+
+fn parse_profile(args: &[String]) -> Option<ProfileArgs> {
+    let (target, flags) = args.split_first()?;
+    if target.starts_with('-') {
+        return None;
+    }
+    let mut parsed = ProfileArgs { target: target.clone(), action: "cpu", ms: DEFAULT_PROFILE_MS, json: false };
+    let mut flags = flags.iter();
+    while let Some(flag) = flags.next() {
+        match flag.as_str() {
+            "--ms" => parsed.ms = flags.next()?.parse().ok()?,
+            "--snapshot" => parsed.action = "snapshot",
+            "--gc" => parsed.action = "gc",
+            "--json" => parsed.json = true,
+            _ => return None,
+        }
+    }
+    Some(parsed)
+}
 
 /// `None` means "no CLI arguments — start the desktop app".
 pub fn parse_args(args: &[String]) -> Option<Cli> {
@@ -34,6 +68,10 @@ pub fn parse_args(args: &[String]) -> Option<Cli> {
             let rest = if rest.first().map(String::as_str) == Some("--") { &rest[1..] } else { rest };
             if rest.is_empty() { Some(Cli::Help) } else { Some(Cli::Run(shell_join(rest))) }
         }
+        "agents" => Some(Cli::Agents),
+        "ps" => Some(Cli::Ps { json: rest.iter().any(|a| a == "--json") }),
+        "profile" => Some(parse_profile(rest).map_or(Cli::Help, Cli::Profile)),
+        "open" => Some(rest.first().map_or(Cli::Help, |target| Cli::Open(target.clone()))),
         "collector" => Some(Cli::Collector),
         "version" | "--version" | "-V" => Some(Cli::Version),
         "help" | "--help" | "-h" => Some(Cli::Help),
@@ -218,7 +256,7 @@ where
     let mut cmd = crate::runner::shell_command(command);
     cmd.stdin(Stdio::inherit()).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some((_, env)) = &link {
-        cmd.envs(env.iter().map(|(k, v)| (k.as_str(), v.as_str())));
+        cmd.envs(with_inherited(env.clone(), &|key| std::env::var(key).ok()));
     }
     // SAFETY: reset_signals only calls async-signal-safe functions.
     #[cfg(unix)]
@@ -259,6 +297,160 @@ where
     Ok(exit_code(ended.code, ended.signal))
 }
 
+/// Ask one app to do something. The outer error says the app couldn't be asked; the inner one is
+/// its answer.
+fn ask(record: &Record, action: &str, target: &str, ms: u64, wait: Duration) -> Result<Result<Value, String>, Failure> {
+    let addr = record.addr.parse().map_err(|_| Failure::BadReply)?;
+    let stream = TcpStream::connect_timeout(&addr, ANSWER_TIMEOUT)?;
+    stream.set_read_timeout(Some(wait))?;
+    let mut w = stream.try_clone()?;
+    let request = json!({ "type": "control", "secret": record.secret, "action": action, "target": target, "ms": ms });
+    writeln!(w, "{request}")?;
+    let mut line = String::new();
+    if BufReader::new(stream).read_line(&mut line)? == 0 {
+        return Err(Failure::Rejected);
+    }
+    let reply: Value = serde_json::from_str(&line).map_err(|_| Failure::BadReply)?;
+    match reply["type"].as_str() {
+        Some("control") if reply["ok"] == true => Ok(Ok(reply["data"].clone())),
+        Some("control") => Ok(Err(reply["error"].as_str().unwrap_or("the app couldn't do that").to_string())),
+        Some("rejected") => Err(Failure::Rejected),
+        _ => Err(Failure::BadReply),
+    }
+}
+
+/// Runs in every open app.
+fn list_runs(dirs: &[PathBuf], here: &Here) -> Result<Vec<Value>, String> {
+    let found = discover(dirs, here, &start_ticks);
+    let mut runs = vec![];
+    let mut answered = false;
+    let mut failed = vec![];
+    for c in &found.candidates {
+        match ask(&c.record, "list", "", 0, ANSWER_TIMEOUT) {
+            Ok(Ok(Value::Array(list))) => {
+                answered = true;
+                runs.extend(list);
+            }
+            Ok(Ok(_)) => failed.push("the app gave a reply this version can't read".to_string()),
+            Ok(Err(why)) => failed.push(why),
+            Err(f) => failed.extend(describe(c, &f)),
+        }
+    }
+    if answered {
+        return Ok(runs);
+    }
+    failed.extend(found.obstacles);
+    Err(failed
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| format!("the app isn't running on {} for {}", here.host, here.user)))
+}
+
+/// Carry out a profile request in whichever open app has that run.
+fn profile(args: &ProfileArgs, dirs: &[PathBuf], here: &Here) -> Result<Value, String> {
+    let found = discover(dirs, here, &start_ticks);
+    let wait = Duration::from_millis(args.ms) + Duration::from_secs(150);
+    let mut failed = vec![];
+    for c in &found.candidates {
+        match ask(&c.record, args.action, &args.target, args.ms, wait) {
+            Ok(Ok(data)) => return Ok(data),
+            Ok(Err(why)) => failed.push(why),
+            Err(f) => failed.extend(describe(c, &f)),
+        }
+    }
+    failed.extend(found.obstacles);
+    Err(failed
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| format!("the app isn't running on {} for {}", here.host, here.user)))
+}
+
+/// One row per run. An agent's version and capabilities, or why there's nothing to report.
+pub fn format_runs(runs: &[Value]) -> String {
+    let mut out = format!("{:<14} {:>8} {:<8} {:<7} {:<40} COMMAND\n", "ID", "PID", "STATUS", "RUNTIME", "AGENT");
+    for run in runs {
+        let text = |key: &str| run[key].as_str().unwrap_or("").to_string();
+        let agent = match run["agent"].as_object() {
+            None => "none".to_string(),
+            Some(a) => {
+                let list =
+                    a["capabilities"].as_array().map_or(vec![], |c| c.iter().filter_map(Value::as_str).collect());
+                let got = if list.is_empty() { "figures at exit".to_string() } else { list.join(",") };
+                let state = if run["profiling"] == true { "" } else { "ended " };
+                format!("{state}{} {got}", a["runtimeVersion"].as_str().unwrap_or("?"))
+            }
+        };
+        out.push_str(&format!(
+            "{:<14} {:>8} {:<8} {:<7} {:<40} {}\n",
+            text("id"),
+            run["pid"],
+            text("status"),
+            text("runtime"),
+            agent,
+            text("command"),
+        ));
+    }
+    out
+}
+
+fn frames_by_self<'a>(frame: &'a Value, out: &mut Vec<&'a Value>) {
+    out.push(frame);
+    for child in frame["children"].as_array().into_iter().flatten() {
+        frames_by_self(child, out);
+    }
+}
+
+/// What a profile found, in units a person can read.
+pub fn format_result(action: &str, data: &Value) -> String {
+    match action {
+        "cpu" => {
+            let mut frames = vec![];
+            frames_by_self(&data["root"], &mut frames);
+            frames.sort_by(|a, b| b["self"].as_f64().unwrap_or(0.0).total_cmp(&a["self"].as_f64().unwrap_or(0.0)));
+            let mut out = format!(
+                "CPU profile: {:.0} ms by {}, saved with the run\n",
+                data["durationMs"].as_f64().unwrap_or(0.0),
+                data["sampling"].as_str().unwrap_or("?"),
+            );
+            for f in frames.iter().filter(|f| f["self"].as_f64().unwrap_or(0.0) > 0.0).take(15) {
+                out.push_str(&format!(
+                    "{:>10.1} ms  {} {}\n",
+                    f["self"].as_f64().unwrap_or(0.0),
+                    f["name"].as_str().unwrap_or("?"),
+                    f["file"].as_str().unwrap_or(""),
+                ));
+            }
+            out
+        }
+        "snapshot" => {
+            let mut out = format!(
+                "Heap snapshot: {:.1} MB in use, saved with the run\n",
+                data["heapUsed"].as_f64().unwrap_or(0.0) / 1_048_576.0,
+            );
+            for e in data["entries"].as_array().into_iter().flatten().take(15) {
+                out.push_str(&format!(
+                    "{:>10.1} KB  {:>9.0}  {}\n",
+                    e["shallow"].as_f64().unwrap_or(0.0) / 1024.0,
+                    e["count"].as_f64().unwrap_or(0.0),
+                    e["name"].as_str().unwrap_or("?"),
+                ));
+            }
+            out
+        }
+        _ => "Collection finished.\n".to_string(),
+    }
+}
+
+fn print_json(v: &Value) -> i32 {
+    println!("{v}");
+    0
+}
+
+fn fail(why: String) -> i32 {
+    eprintln!("peak: {why}");
+    1
+}
+
 /// Which collector this build copies to a target of `arch`. It's a Linux program, so it can
 /// only say its own version where this machine can run it.
 fn collector_line(arch: &str) -> Result<String, String> {
@@ -280,6 +472,33 @@ pub fn main(cli: Cli, dirs: &[PathBuf]) -> i32 {
         Cli::Version => {
             println!("{}", crate::release::InstallInfo::detect().line());
             0
+        }
+        Cli::Agents => {
+            println!("{}", crate::hub::agent_setup(&crate::hub::default_data_dir()));
+            0
+        }
+        Cli::Ps { json } => match list_runs(dirs, &Here::detect()) {
+            Ok(runs) if json => print_json(&Value::Array(runs)),
+            Ok(runs) => {
+                print!("{}", format_runs(&runs));
+                0
+            }
+            Err(why) => fail(why),
+        },
+        Cli::Profile(args) => match profile(&args, dirs, &Here::detect()) {
+            Ok(data) if args.json => print_json(&data),
+            Ok(data) => {
+                print!("{}", format_result(args.action, &data));
+                0
+            }
+            Err(why) => fail(why),
+        },
+        Cli::Open(target) => {
+            let args = ProfileArgs { target, action: "open", ms: 0, json: false };
+            match profile(&args, dirs, &Here::detect()) {
+                Ok(_) => 0,
+                Err(why) => fail(why),
+            }
         }
         Cli::Collector => match collector_line(std::env::consts::ARCH) {
             Ok(line) => {
@@ -341,6 +560,25 @@ mod tests {
         assert_eq!(parse_args(&s(&["version"])), Some(Cli::Version));
         assert_eq!(parse_args(&s(&["--version"])), Some(Cli::Version));
         assert_eq!(parse_args(&s(&["-V"])), Some(Cli::Version));
+        assert_eq!(parse_args(&s(&["agents"])), Some(Cli::Agents));
+        assert_eq!(parse_args(&s(&["ps"])), Some(Cli::Ps { json: false }));
+        assert_eq!(parse_args(&s(&["ps", "--json"])), Some(Cli::Ps { json: true }));
+        assert_eq!(parse_args(&s(&["open", "r1"])), Some(Cli::Open("r1".into())));
+        assert_eq!(parse_args(&s(&["open"])), Some(Cli::Help));
+        let profile = |action, ms, json| Some(Cli::Profile(ProfileArgs { target: "r1".into(), action, ms, json }));
+        assert_eq!(parse_args(&s(&["profile", "r1"])), profile("cpu", 5000, false));
+        assert_eq!(parse_args(&s(&["profile", "r1", "--ms", "900", "--json"])), profile("cpu", 900, true));
+        assert_eq!(parse_args(&s(&["profile", "r1", "--snapshot"])), profile("snapshot", 5000, false));
+        assert_eq!(parse_args(&s(&["profile", "r1", "--gc"])), profile("gc", 5000, false));
+        for bad in [
+            &["profile"][..],
+            &["profile", "--gc"],
+            &["profile", "r1", "--wat"],
+            &["profile", "r1", "--ms"],
+            &["profile", "r1", "--ms", "x"],
+        ] {
+            assert_eq!(parse_args(&s(bad)), Some(Cli::Help), "{bad:?}");
+        }
         assert_eq!(parse_args(&s(&["run", "--", "bun", "run", "build"])), Some(Cli::Run("bun run build".into())));
         assert_eq!(parse_args(&s(&["run", "node", "my file.js"])), Some(Cli::Run("node 'my file.js'".into())));
     }
@@ -572,6 +810,151 @@ mod tests {
         assert_eq!(run("true", &dirs, Buf::default(), err.clone()).unwrap(), 0);
         server.join().unwrap();
         assert!(err.text().contains("turned this connection away"), "{}", err.text());
+    }
+
+    /// The real hub answering the real commands, with a stand-in agent on the other end.
+    #[test]
+    fn lists_and_profiles_runs_in_the_open_app() {
+        let m = Monitor::new(ProcFs::default(), AgentEnv { addr: "x".into(), ..Default::default() }).shared();
+        let hub = Hub::start(m.clone(), "sekrit".into(), Arc::new(ignore_proc)).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "sekrit");
+        let here = Here::detect();
+        assert_eq!(list_runs(&dirs, &here).unwrap(), Vec::<Value>::new());
+        assert_eq!(main(Cli::Ps { json: true }, &dirs), 0);
+        assert_eq!(main(Cli::Ps { json: false }, &dirs), 0);
+
+        let id = {
+            let mut g = m.lock().unwrap();
+            let id = g.new_id();
+            g.insert(id.clone(), crate::monitor::Origin::External, std::process::id(), "go run .", "/tmp", 1);
+            id
+        };
+        let cpu = |target: &str, action| ProfileArgs { target: target.into(), action, ms: 500, json: true };
+        assert!(profile(&cpu(&id, "cpu"), &dirs, &here).unwrap_err().contains("no profiling agent"));
+        assert!(profile(&cpu("nope", "cpu"), &dirs, &here).unwrap_err().contains("no run in this session"));
+        assert_eq!(main(Cli::Profile(cpu("nope", "cpu")), &dirs), 1);
+        assert_eq!(main(Cli::Open("nope".into()), &dirs), 1);
+        let direct = hub.clone();
+        hub.set_control(Arc::new(
+            move |action, id, ms| {
+                if action == "open" { Ok(Value::Null) } else { direct.perform(action, id, ms) }
+            },
+        ));
+        assert_eq!(main(Cli::Open(id.clone()), &dirs), 0);
+
+        let mut agent = TcpStream::connect(hub.addr()).unwrap();
+        let hello = json!({ "type": "hello", "token": id, "pid": 4242, "runtime": "go", "agent": {
+            "runtimeVersion": "1.27", "agentVersion": "0.1.1", "capabilities": ["cpu", "forcegc"],
+            "unavailable": { "snapshot": "not on this one" }
+        }});
+        writeln!(agent, "{hello}").unwrap();
+        let runs = (0..200)
+            .find_map(|_| {
+                let runs = list_runs(&dirs, &here).unwrap();
+                if runs[0]["profiling"] == true {
+                    return Some(runs);
+                }
+                thread::sleep(Duration::from_millis(10));
+                None
+            })
+            .unwrap();
+        assert_eq!(runs[0]["runtime"], "go");
+        assert_eq!(runs[0]["agent"]["runtimeVersion"], "1.27");
+        assert!(format_runs(&runs).contains("1.27 cpu,forcegc"));
+        assert!(format_runs(&runs).contains("go run ."));
+
+        // Told what it can't do without asking the agent, which may not be able to answer.
+        let by_pid = cpu("4242", "snapshot");
+        assert_eq!(profile(&by_pid, &dirs, &here).unwrap_err(), "not on this one");
+
+        let answers = BufReader::new(agent.try_clone().unwrap());
+        let responder = thread::spawn(move || {
+            for line in answers.lines().map_while(Result::ok).take(2) {
+                let req: Value = serde_json::from_str(&line).unwrap();
+                let data = json!({ "durationMs": 500, "sampling": "pprof", "root": {
+                    "name": "(root)", "self": 0, "children": [{ "name": "main.work", "file": "a.go:3", "self": 400, "children": [] }]
+                }});
+                let reply = json!({ "type": "reply", "reqId": req["reqId"], "ok": true, "data": data });
+                writeln!(agent, "{reply}").unwrap();
+            }
+        });
+        let data = profile(&cpu(&id, "cpu"), &dirs, &here).unwrap();
+        assert_eq!(data["sampling"], "pprof");
+        assert_eq!(m.lock().unwrap().get(&id).unwrap().cpu_profiles.len(), 1);
+        let readable = ProfileArgs { json: false, ..cpu(&id, "cpu") };
+        assert_eq!(main(Cli::Profile(readable), &dirs), 0);
+        responder.join().unwrap();
+        // The agent has gone. What it said stays with the run, but it's no longer live.
+        let ended = (0..200)
+            .find_map(|_| {
+                let runs = list_runs(&dirs, &here).unwrap();
+                if runs[0]["profiling"] != true {
+                    return Some(runs);
+                }
+                thread::sleep(Duration::from_millis(10));
+                None
+            })
+            .unwrap();
+        assert!(format_runs(&ended).contains("ended 1.27"));
+    }
+
+    #[test]
+    fn control_says_why_it_cant_get_an_answer() {
+        let dir = tempfile::tempdir().unwrap();
+        let here = Here::detect();
+        let cpu = ProfileArgs { target: "r".into(), action: "cpu", ms: 500, json: false };
+        assert!(list_runs(&[dir.path().to_path_buf()], &here).unwrap_err().contains("isn't running"));
+        assert!(profile(&cpu, &[dir.path().to_path_buf()], &here).unwrap_err().contains("isn't running"));
+
+        let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
+        let hub = Hub::start(m, "right".into(), Arc::new(ignore_proc)).unwrap();
+        let dirs = publish(dir.path(), hub.addr().to_string(), "wrong");
+        assert!(list_runs(&dirs, &here).unwrap_err().contains("turned this connection away"));
+        assert!(profile(&cpu, &dirs, &here).unwrap_err().contains("turned this connection away"));
+        assert_eq!(main(Cli::Ps { json: false }, &dirs), 1);
+
+        // Something answering, but not like Peak, or in a shape this doesn't expect.
+        for (reply, expected) in [
+            ("hello there", "doesn't answer"),
+            ("{\"type\":\"other\"}", "can't read"),
+            ("{\"type\":\"control\",\"ok\":true,\"data\":5}", "can't read"),
+            ("{\"type\":\"control\",\"ok\":false}", "couldn't do that"),
+            ("{\"type\":\"rejected\"}", "turned this connection away"),
+        ] {
+            let dir = tempfile::tempdir().unwrap();
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+            let dirs = publish(dir.path(), listener.local_addr().unwrap().to_string(), "s");
+            let reply = reply.to_string();
+            thread::spawn(move || {
+                let (mut c, _) = listener.accept().unwrap();
+                let mut line = String::new();
+                BufReader::new(c.try_clone().unwrap()).read_line(&mut line).unwrap();
+                writeln!(c, "{reply}").unwrap();
+            });
+            let why = list_runs(&dirs, &here).unwrap_err();
+            assert!(why.contains(expected) || why.contains("gave a reply"), "{why}");
+        }
+    }
+
+    #[test]
+    fn formats_results_for_people() {
+        let cpu = json!({ "durationMs": 1000.4, "sampling": "pprof", "root": { "name": "(root)", "self": 0, "children": [
+            { "name": "main.hot", "file": "a.go:1", "self": 900, "children": [{ "name": "leaf", "self": 50, "children": [] }] }
+        ]}});
+        let text = format_result("cpu", &cpu);
+        assert!(text.starts_with("CPU profile: 1000 ms by pprof"));
+        assert!(text.find("main.hot").unwrap() < text.find("leaf").unwrap());
+        assert!(!text.contains("(root)"), "a frame with no time of its own isn't listed");
+        let snap = json!({ "heapUsed": 2_097_152, "entries": [{ "name": "Thing", "count": 3, "shallow": 2048, "retained": 2048 }] });
+        let text = format_result("snapshot", &snap);
+        assert!(text.contains("2.0 MB") && text.contains("2.0 KB") && text.contains("Thing"));
+        assert_eq!(format_result("gc", &Value::Null), "Collection finished.\n");
+        let no_exit_figures = json!({ "id": "r", "pid": 1, "status": "running", "runtime": "php", "profiling": true, "command": "php a", "agent": { "runtimeVersion": "8.3", "capabilities": [] } });
+        assert!(format_runs(&[no_exit_figures]).contains("8.3 figures at exit"));
+        let none = json!({ "id": "r", "pid": 1, "status": "running", "runtime": "shell", "command": "sleep" });
+        assert!(format_runs(&[none]).contains("none"));
+        assert_eq!(main(Cli::Agents, &[]), 0);
     }
 
     #[test]

@@ -1,9 +1,9 @@
 //! Local JSON-lines socket shared by two kinds of clients:
 //!
-//! * **runtime agents** injected into Node/Python processes — they stream heap
-//!   stats and GC events and answer snapshot / GC requests;
-//! * the **`peak run` CLI** — it registers a command started in a terminal and
-//!   forwards its output and exit status.
+//! * **runtime agents**, injected into Node, Bun, Python and PHP or linked into Go programs —
+//!   they stream heap stats and GC events and answer snapshot, profile and GC requests;
+//! * the **`peak` CLI** — `peak run` registers a command started in a terminal and forwards its
+//!   output and exit status, `peak ps` and `peak profile` read and act on monitored runs.
 
 use std::collections::HashMap;
 use std::fs;
@@ -26,6 +26,17 @@ use crate::sampler::AgentHeap;
 
 pub const NODE_AGENT: &str = include_str!("../../agents/peak-agent.cjs");
 pub const PYTHON_AGENT: &str = include_str!("../../agents/python/sitecustomize.py");
+pub const BUN_AGENT: &str = include_str!("../../agents/bun/peak-agent-bun.js");
+pub const PHP_AGENT: &str = include_str!("../../agents/php/peak-agent.php");
+/// A compiled Go program can't be injected into, so it imports this. A copy goes with the app,
+/// so programs can build against the matching version without downloading anything.
+pub const GO_SDK: [(&str, &str); 5] = [
+    ("go.mod", include_str!("../../../sdk/go/go.mod")),
+    ("README.md", include_str!("../../../sdk/go/README.md")),
+    ("peak.go", include_str!("../../../sdk/go/peak.go")),
+    ("pprof.go", include_str!("../../../sdk/go/pprof.go")),
+    ("auto/auto.go", include_str!("../../../sdk/go/auto/auto.go")),
+];
 
 /// Inbound messages (agents and CLI).
 #[derive(Debug, Deserialize, PartialEq)]
@@ -35,6 +46,8 @@ pub enum Inbound {
         token: String,
         pid: u32,
         runtime: Runtime,
+        #[serde(default)]
+        agent: Option<AgentInfo>,
     },
     #[serde(rename_all = "camelCase")]
     Heap {
@@ -48,6 +61,9 @@ pub enum Inbound {
     #[serde(rename_all = "camelCase")]
     Lag {
         loop_lag: f64,
+    },
+    Gauges {
+        values: Vec<Gauge>,
     },
     #[serde(rename_all = "camelCase")]
     Gc {
@@ -67,6 +83,15 @@ pub enum Inbound {
         secret: String,
         command: String,
         cwd: String,
+    },
+    /// From `peak ps` and `peak profile`: one request and one answer on a connection.
+    Control {
+        secret: String,
+        action: String,
+        #[serde(default)]
+        target: String,
+        #[serde(default)]
+        ms: u64,
     },
     Started {
         pid: u32,
@@ -134,15 +159,65 @@ pub fn random_hex_from(source: &Path, bytes: usize) -> String {
     buf.iter().map(|b| format!("{b:02x}")).collect()
 }
 
-/// Write the agent scripts to `dir` and return the environment that loads them.
+/// How a PHP process finds its agent. Goes in a file because PHP has no option variable.
+fn php_ini(agent: &Path) -> String {
+    format!(
+        "; Written by Peak. Only read by programs Peak started.\nauto_prepend_file=\"{}\"\n",
+        agent.display().to_string().replace('\\', "/")
+    )
+}
+
+/// Write the agents to `dir` and return the environment that loads them.
 pub fn install_agents(dir: &Path, addr: &str) -> io::Result<AgentEnv> {
     let agents = dir.join("agents");
     let py = agents.join("python");
+    let bun = agents.join("bun");
+    let php = agents.join("php");
     fs::create_dir_all(&py)?;
+    fs::create_dir_all(&bun)?;
+    fs::create_dir_all(php.join("ini"))?;
     let node = agents.join("peak-agent.cjs");
     fs::write(&node, NODE_AGENT)?;
     fs::write(py.join("sitecustomize.py"), PYTHON_AGENT)?;
-    Ok(AgentEnv { addr: addr.to_string(), node_agent: Some(node), python_dir: Some(py) })
+    let bun_agent = bun.join("peak-agent-bun.js");
+    fs::write(&bun_agent, BUN_AGENT)?;
+    let php_agent = php.join("peak-agent.php");
+    fs::write(&php_agent, PHP_AGENT)?;
+    fs::write(php.join("ini").join("peak.ini"), php_ini(&php_agent))?;
+    for (name, text) in GO_SDK {
+        let path = agents.join("go").join(name);
+        fs::create_dir_all(path.parent().expect("the SDK's files are in a directory"))?;
+        fs::write(path, text)?;
+    }
+    Ok(AgentEnv {
+        addr: addr.to_string(),
+        node_agent: Some(node),
+        python_dir: Some(py),
+        bun_agent: Some(bun_agent),
+        php_ini_dir: Some(php.join("ini")),
+    })
+}
+
+/// What it takes to profile each runtime, as `peak agents` prints it.
+pub fn agent_setup(dir: &Path) -> String {
+    let agents = dir.join("agents");
+    format!(
+        "Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.\n\
+         Bun      automatic, on versions that read BUN_OPTIONS. Heap, timer delay, CPU, heap snapshots. No GC events: Bun doesn't publish them.\n\
+         Python   automatic. GC, interpreter delay, CPU stacks, allocation snapshots.\n\
+         PHP      automatic for the CLI: figures at exit. For live heap, GC, commands and CPU, install the Excimer extension: pecl install excimer\n\
+         \u{20}        No event-loop delay or heap snapshots. No Excimer build for Windows, so only figures at exit there.\n\
+         Go       needs one import, as a compiled program can't be injected into:\n\
+         \u{20}          import _ \"github.com/Noah-Wilderom/peak/sdk/go/auto\"\n\
+         \u{20}        Then run it with `peak run -- ./yourprogram`. Heap, GC, scheduler latency, CPU, allocation profiles.\n\
+         \u{20}        Get it with `go get github.com/Noah-Wilderom/peak/sdk/go@latest`, or build against the copy for this version:\n\
+         \u{20}          go mod edit -require=github.com/Noah-Wilderom/peak/sdk/go@v0.0.0 -replace=github.com/Noah-Wilderom/peak/sdk/go={}\n\
+         \n\
+         Peak can't attach to a process that's already running, or look inside a program without one of these.\n\
+         Agents are in {}",
+        agents.join("go").display(),
+        agents.display(),
+    )
 }
 
 /// How long an agent's hello waits for its run to be registered.
@@ -150,6 +225,8 @@ const HELLO_PATIENCE: Duration = Duration::from_secs(3);
 
 type Pending = Arc<Mutex<HashMap<u64, mpsc::Sender<Result<Value, String>>>>>;
 type Notify = Arc<dyn Fn(Proc) + Send + Sync>;
+/// Carries out a `peak profile` action: (action, run id, milliseconds).
+pub type ControlFn = Arc<dyn Fn(&str, &str, u64) -> Result<Value, String> + Send + Sync>;
 
 pub struct Hub {
     addr: SocketAddr,
@@ -159,6 +236,7 @@ pub struct Hub {
     pending: Pending,
     next_req: AtomicU64,
     on_proc: Notify,
+    control: Mutex<Option<ControlFn>>,
 }
 
 impl Hub {
@@ -173,6 +251,7 @@ impl Hub {
             pending: Arc::new(Mutex::new(HashMap::new())),
             next_req: AtomicU64::new(1),
             on_proc,
+            control: Mutex::new(None),
         });
         let h = hub.clone();
         thread::spawn(move || {
@@ -188,13 +267,44 @@ impl Hub {
         self.addr
     }
 
+    /// Route `peak profile` through whatever keeps the results, rather than straight to the agent.
+    pub fn set_control(&self, control: ControlFn) {
+        *self.control.lock().unwrap() = Some(control);
+    }
+
+    fn control(&self, action: &str, target: &str, ms: u64) -> Result<Value, String> {
+        if action == "list" {
+            return serde_json::to_value(self.monitor.lock().unwrap().listing()).map_err(|e| e.to_string());
+        }
+        let id = self.monitor.lock().unwrap().resolve_run(target);
+        let id = id.ok_or_else(|| format!("no run in this session matches `{target}`"))?;
+        let control = self.control.lock().unwrap().clone();
+        match control {
+            Some(control) => control(action, &id, ms),
+            None => self.perform(action, &id, ms),
+        }
+    }
+
+    /// Carry out a control action on a run's agent.
+    pub fn perform(&self, action: &str, id: &str, ms: u64) -> Result<Value, String> {
+        fn value(v: impl serde::Serialize) -> Result<Value, String> {
+            serde_json::to_value(v).map_err(|e| e.to_string())
+        }
+        match action {
+            "gc" => self.force_gc(id, Duration::from_secs(30)).map(|()| Value::Null),
+            "snapshot" => value(self.take_snapshot(id, Duration::from_secs(120))?),
+            "cpu" => value(self.cpu_profile(id, ms.clamp(500, 60_000))?),
+            other => Err(format!("unknown action `{other}`")),
+        }
+    }
+
     fn serve(self: Arc<Self>, stream: TcpStream) {
         let Ok(write) = stream.try_clone() else { return };
         let mut lines = BufReader::new(stream).lines();
         let Some(Ok(first)) = lines.next() else { return };
         match serde_json::from_str::<Inbound>(&first) {
-            Ok(Inbound::Hello { token, pid, runtime }) => {
-                if !self.greet(&token, pid, runtime) {
+            Ok(Inbound::Hello { token, pid, runtime, agent }) => {
+                if !self.greet(&token, pid, runtime, agent) {
                     return;
                 }
                 self.agents.lock().unwrap().insert((token.clone(), pid), write);
@@ -209,8 +319,16 @@ impl Hub {
             Ok(Inbound::Register { secret, command, cwd }) if secret == self.secret => {
                 self.serve_cli(write, lines, command, cwd);
             }
+            Ok(Inbound::Control { secret, action, target, ms }) if secret == self.secret => {
+                let reply = match self.control(&action, &target, ms) {
+                    Ok(data) => json!({ "type": "control", "ok": true, "data": data }),
+                    Err(error) => json!({ "type": "control", "ok": false, "error": error }),
+                };
+                let mut write = write;
+                let _ = writeln!(write, "{reply}");
+            }
             // Lets the CLI say it was turned away, rather than that there's no app.
-            Ok(Inbound::Register { .. }) => {
+            Ok(Inbound::Register { .. } | Inbound::Control { .. }) => {
                 let mut write = write;
                 let _ = writeln!(write, "{}", json!({ "type": "rejected" }));
             }
@@ -221,10 +339,10 @@ impl Hub {
     /// A run from `peak run` only becomes known once the CLI's `started` message is handled, and
     /// a runtime that starts quickly can get here first. Turning it away would lose the agent for
     /// the whole run, so a token gets a moment to appear.
-    fn greet(&self, token: &str, pid: u32, runtime: Runtime) -> bool {
+    fn greet(&self, token: &str, pid: u32, runtime: Runtime, agent: Option<AgentInfo>) -> bool {
         let deadline = Instant::now() + HELLO_PATIENCE;
         loop {
-            if self.monitor.lock().unwrap().agent_hello(token, pid, runtime) {
+            if self.monitor.lock().unwrap().agent_hello(token, pid, runtime, agent.clone()) {
                 return true;
             }
             if Instant::now() >= deadline {
@@ -241,6 +359,7 @@ impl Hub {
                 self.monitor.lock().unwrap().agent_heap(token, pid, heap);
             }
             Inbound::Lag { loop_lag } => self.monitor.lock().unwrap().agent_lag(token, pid, loop_lag),
+            Inbound::Gauges { values } => self.monitor.lock().unwrap().agent_gauges(token, pid, values),
             Inbound::Gc { kind, pause_ms, freed, t } => {
                 let ev = GcEvent { t: t.unwrap_or_else(now_ms), kind, pause_ms, freed };
                 self.monitor.lock().unwrap().agent_gc(token, ev);
@@ -262,7 +381,7 @@ impl Hub {
         let (id, env) = {
             let mut m = self.monitor.lock().unwrap();
             let id = m.new_id();
-            let env = m.agent_env.vars(&id, None, None);
+            let env = m.agent_env.vars(&id);
             (id, env)
         };
         // A failed write surfaces as EOF on the read loop below.
@@ -329,16 +448,23 @@ impl Hub {
         result
     }
 
-    fn primary(&self, id: &str) -> Result<u32, String> {
-        self.monitor
-            .lock()
-            .unwrap()
-            .primary_agent(id)
-            .ok_or_else(|| "no profiling agent is attached to this process".into())
+    /// The agent to ask for `capability`, or why it can't be asked: one that can't do it may
+    /// not be able to answer at all, so it's told here rather than by a timeout.
+    fn primary(&self, id: &str, capability: &str) -> Result<u32, String> {
+        let m = self.monitor.lock().unwrap();
+        let pid = m.primary_agent(id).ok_or("no profiling agent is attached to this process")?;
+        if let Some(info) = m.get(id).and_then(|p| p.agent.as_ref()).filter(|i| !i.can(capability)) {
+            return Err(info
+                .unavailable
+                .get(capability)
+                .cloned()
+                .unwrap_or_else(|| format!("this agent doesn't support {}", capability_name(capability))));
+        }
+        Ok(pid)
     }
 
     pub fn take_snapshot(&self, id: &str, timeout: Duration) -> Result<HeapSnapshot, String> {
-        let pid = self.primary(id)?;
+        let pid = self.primary(id, "snapshot")?;
         let data = self.request(id, pid, "snapshot", timeout)?;
         let snap = snapshot_from_agent(data, now_ms())?;
         self.monitor.lock().unwrap().add_snapshot(id, snap.clone());
@@ -346,17 +472,25 @@ impl Hub {
     }
 
     pub fn force_gc(&self, id: &str, timeout: Duration) -> Result<(), String> {
-        let pid = self.primary(id)?;
+        let pid = self.primary(id, "forcegc")?;
         self.request(id, pid, "gc", timeout).map(|_| ())
     }
 
     /// Sample the primary agent's CPU for `ms` milliseconds.
     pub fn cpu_profile(&self, id: &str, ms: u64) -> Result<CpuProfile, String> {
-        let pid = self.primary(id)?;
+        let pid = self.primary(id, "cpu")?;
         let data = self.request_with(id, pid, "cpuprofile", json!({ "ms": ms }), Duration::from_millis(ms + 15_000))?;
         let profile = cpu_profile_from_agent(data, now_ms())?;
         self.monitor.lock().unwrap().add_cpu_profile(id, profile.clone());
         Ok(profile)
+    }
+}
+
+fn capability_name(capability: &str) -> &str {
+    match capability {
+        "cpu" => "CPU profiles",
+        "snapshot" => "heap snapshots",
+        _ => "forcing a collection",
     }
 }
 
@@ -453,6 +587,17 @@ mod tests {
         let env = install_agents(dir.path(), "127.0.0.1:1").unwrap();
         assert!(fs::read_to_string(env.node_agent.unwrap()).unwrap().contains("PEAK_AGENT_ADDR"));
         assert!(env.python_dir.unwrap().join("sitecustomize.py").exists());
+        assert!(fs::read_to_string(env.bun_agent.unwrap()).unwrap().contains("BUN_OPTIONS"));
+        let ini = fs::read_to_string(env.php_ini_dir.unwrap().join("peak.ini")).unwrap();
+        assert!(ini.contains("auto_prepend_file=") && ini.contains("peak-agent.php"), "{ini}");
+        assert!(dir.path().join("agents/php/peak-agent.php").exists());
+        for (name, _) in GO_SDK {
+            assert!(dir.path().join("agents/go").join(name).exists(), "{name}");
+        }
+        let setup = agent_setup(dir.path());
+        assert!(setup.contains("sdk/go/auto") && setup.contains("pecl install excimer"));
+        assert!(setup.contains(&dir.path().join("agents/go").display().to_string()));
+        assert_eq!(php_ini(Path::new("C:\\a b\\p.php")).lines().nth(1), Some("auto_prepend_file=\"C:/a b/p.php\""));
         assert_eq!(random_hex(4).len(), 8);
         assert_eq!(random_hex_from(Path::new("/definitely/missing"), 6).len(), 12);
         assert_ne!(random_hex(8), random_hex(8));
@@ -548,6 +693,88 @@ mod tests {
         writeln!(a, r#"{{"type":"lag","loopLag":7.0}}"#).unwrap();
         // Still connected: the hub took that as coming from a known agent.
         eventually(|| hub.agents.lock().unwrap().contains_key(&(id.clone(), 4242)));
+    }
+
+    #[test]
+    fn agents_say_what_they_can_do_and_it_stays_with_the_run() {
+        let (m, hub, _) = setup();
+        let id = {
+            let mut g = m.lock().unwrap();
+            let id = g.new_id();
+            g.insert(id.clone(), Origin::External, std::process::id(), "./server", "/tmp", now_ms());
+            id
+        };
+        let (mut a, a_r) = connect(&hub);
+        let hello = json!({ "type": "hello", "token": id, "pid": 7, "runtime": "php", "agent": {
+            "runtimeVersion": "8.3.6", "agentVersion": "0.1.1", "capabilities": [],
+            "unavailable": { "cpu": "Install Excimer" }
+        }});
+        writeln!(a, "{hello}").unwrap();
+        eventually(|| m.lock().unwrap().get(&id).unwrap().profiling);
+        {
+            let g = m.lock().unwrap();
+            let p = g.get(&id).unwrap();
+            assert_eq!(p.runtime, Runtime::Php);
+            assert!(!p.has_gc, "an agent without GC data doesn't get a GC view");
+            assert_eq!(p.agent.as_ref().unwrap().runtime_version, "8.3.6");
+        }
+        assert_eq!(hub.cpu_profile(&id, 500).unwrap_err(), "Install Excimer");
+        // With no reason given, it's still not left to time out.
+        assert_eq!(
+            hub.take_snapshot(&id, Duration::from_secs(9)).unwrap_err(),
+            "this agent doesn't support heap snapshots"
+        );
+        assert_eq!(
+            hub.force_gc(&id, Duration::from_secs(9)).unwrap_err(),
+            "this agent doesn't support forcing a collection"
+        );
+
+        writeln!(a, r#"{{"type":"gauges","values":[{{"name":"Peak memory","value":5,"unit":"bytes"}}]}}"#).unwrap();
+        eventually(|| !m.lock().unwrap().get(&id).unwrap().agent.as_ref().unwrap().gauges.is_empty());
+        drop(a);
+        drop(a_r);
+        eventually(|| !m.lock().unwrap().get(&id).unwrap().profiling);
+        let g = m.lock().unwrap();
+        let info = g.get(&id).unwrap().agent.clone().unwrap();
+        assert_eq!(info.gauges[0].name, "Peak memory");
+        assert_eq!(info.unavailable["cpu"], "Install Excimer");
+        assert_eq!(g.listing()[0].id, id);
+        assert_eq!(g.resolve_run("7"), None, "an agent that's gone doesn't identify a run");
+        assert_eq!(g.resolve_run(&std::process::id().to_string()), Some(id.clone()));
+        assert_eq!(g.resolve_run(&id), Some(id.clone()));
+        assert_eq!(g.resolve_run("not a pid"), None);
+    }
+
+    #[test]
+    fn control_actions() {
+        let (m, hub, _) = setup();
+        let run = |action: &str, target: &str| {
+            let (mut c, mut r) = connect(&hub);
+            let req = json!({ "type": "control", "secret": "sekrit", "action": action, "target": target, "ms": 500 });
+            writeln!(c, "{req}").unwrap();
+            serde_json::from_str::<Value>(&r.next().unwrap().unwrap()).unwrap()
+        };
+        assert_eq!(run("list", "")["data"], json!([]));
+        assert!(run("cpu", "nope")["error"].as_str().unwrap().contains("no run in this session"));
+        let id = {
+            let mut g = m.lock().unwrap();
+            let id = g.new_id();
+            g.insert(id.clone(), Origin::External, std::process::id(), "./server", "/tmp", now_ms());
+            id
+        };
+        // Straight to the agent when nothing else wants to keep the results.
+        for action in ["cpu", "snapshot", "gc"] {
+            assert!(run(action, &id)["error"].as_str().unwrap().contains("no profiling agent"), "{action}");
+        }
+        assert!(run("wat", &id)["error"].as_str().unwrap().contains("unknown action"));
+        // Otherwise through whatever does.
+        hub.set_control(Arc::new(|action, id, ms| Ok(json!([action, id, ms]))));
+        assert_eq!(run("cpu", &id)["data"], json!(["cpu", id, 500]));
+        // The wrong secret gets nothing.
+        let (mut c, mut r) = connect(&hub);
+        writeln!(c, "{}", json!({ "type": "control", "secret": "x", "action": "list" })).unwrap();
+        let reply: Value = serde_json::from_str(&r.next().unwrap().unwrap()).unwrap();
+        assert_eq!(reply["type"], "rejected");
     }
 
     #[test]

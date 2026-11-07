@@ -21,6 +21,8 @@ export const dataDir = () => {
 
 /** Where each format installs, and its GUI and CLI. */
 export function paths() {
+  // A local build, for trying this out without packaging one.
+  if (process.env.PEAK_SMOKE_EXE) return { gui: process.env.PEAK_SMOKE_EXE, cli: process.env.PEAK_SMOKE_EXE }
   if (IS_WINDOWS) {
     const dir = join(process.env.LOCALAPPDATA, "peak")
     return { gui: join(dir, "peak.exe"), cli: join(dir, "peak-cli.exe") }
@@ -41,6 +43,7 @@ const artifact = (dir, re) => {
 
 /** Install from the release artifacts in `dir`, replacing any earlier copy. */
 export function install(dir) {
+  if (process.env.PEAK_SMOKE_EXE) return
   if (IS_WINDOWS) {
     const r = spawnSync(artifact(dir, /-setup\.exe$/), ["/S"], { stdio: "inherit" })
     if (r.status !== 0) throw new Error(`installer exited ${r.status}`)
@@ -59,6 +62,12 @@ export function install(dir) {
 /** Start the installed app, independently of this process. */
 export function launch(env = {}) {
   const { gui } = paths()
+  // The app without its window, on a machine with no desktop libraries. See tests/live_headless_app.rs.
+  if (process.env.PEAK_SMOKE_APP) {
+    const app = spawn(process.env.PEAK_SMOKE_APP, ["--ignored", "--nocapture"], { detached: true, stdio: "ignore" })
+    app.unref()
+    return app
+  }
   // The display has to outlive this app, because an update relaunches it: run this script under xvfb-run.
   if (PLATFORM === "linux" && !process.env.DISPLAY) throw new Error("no display: run under xvfb-run")
   const app = spawn(gui, [], { detached: true, stdio: "ignore", env: { ...process.env, WEBKIT_DISABLE_COMPOSITING_MODE: "1", WEBKIT_DISABLE_DMABUF_RENDERER: "1", ...env } })
@@ -149,6 +158,21 @@ export function storedRun(id) {
   }
 }
 
+/** A run by its id, with what it reported and how many profiles are kept with it. */
+export function storedRunById(id) {
+  const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })
+  try {
+    const run = db.prepare("SELECT * FROM runs WHERE id = ?").get(id)
+    if (!run) return null
+    const count = (table) => db.prepare(`SELECT COUNT(*) n FROM ${table} WHERE run_id = ?`).get(id).n
+    const kinds = db.prepare("SELECT kind, COUNT(*) n FROM artifacts WHERE run_id = ? GROUP BY kind").all(id)
+    const of = (kind) => kinds.find((k) => k.kind === kind)?.n ?? 0
+    return { ...run, meta: JSON.parse(run.meta), gc: count("gc"), snapshots: of("snapshot"), cpuProfiles: of("cpu") }
+  } finally {
+    db.close()
+  }
+}
+
 /** Every sample of a run, as the app stored them. */
 export function storedSamples(id) {
   const db = new DatabaseSync(join(dataDir(), "peak.db"), { readOnly: true })
@@ -176,6 +200,7 @@ export function shot(out, name) {
   mkdirSync(out, { recursive: true })
   const file = join(out, `${name}.png`)
   if (IS_MAC) spawnSync("screencapture", ["-x", file])
+  else if (!IS_WINDOWS) spawnSync("import", ["-window", "root", file])
   else if (IS_WINDOWS) {
     spawnSync("powershell", ["-NoProfile", "-Command", `Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $i=New-Object System.Drawing.Bitmap $b.Width,$b.Height; $g=[System.Drawing.Graphics]::FromImage($i); $g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size); $i.Save('${file}')`])
   }

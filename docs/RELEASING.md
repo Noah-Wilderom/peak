@@ -35,7 +35,9 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Package builds and signs | CI | CI | CI | CI |
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
-| Runtime agents report from inside the program (`smoke.mjs`) | CI | CI | CI | CI |
+| Runtime agents report from inside the program (`smoke.mjs`), for 0.1.0: Node, Python | CI | CI | CI | CI |
+| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), for 0.1.1 | Not yet run | Not yet run | Not yet run | Not yet run |
+| The previous release's own update to this one (`release-upgrade.mjs`) | Not yet run | Not yet run | Not yet run | Not yet run |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
 | Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
@@ -82,7 +84,7 @@ The AppImage bundles WebKit and GTK, but expects these from the host, as any des
 
 1. Merge everything. `node scripts/release/version.mjs set X.Y.Z`, add `docs/release-notes/vX.Y.Z.md`, commit.
 2. Push `release-validation/X.Y.Z` first and wait for **Update proof** and **Tests**.
-3. Tag `vX.Y.Z` and push it. **Release** builds everything and makes the draft.
+3. Tag `vX.Y.Z` and `sdk/go/vX.Y.Z` on the same commit and push them, so that `go get` finds the Go SDK. **Release** builds everything and makes the draft.
 4. Check the draft's assets against `SHA256SUMS`.
 5. Publish: `gh release edit vX.Y.Z --draft=false --latest`. Installed copies see it within 6 hours, or on next start.
 6. Straight after: `node scripts/release/verify-published.mjs vX.Y.Z`. It uses anonymous requests only, and checks the feed, every download, checksums and signatures.

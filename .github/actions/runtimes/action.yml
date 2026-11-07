@@ -1,0 +1,25 @@
+name: Runtimes
+description: The runtimes Peak profiles, for proving its agents against real programs.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: stable
+        cache: false
+    - uses: oven-sh/setup-bun@v2
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    # Excimer has no Windows build, which is why PHP there reports only at exit.
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: "8.3"
+        extensions: ${{ runner.os != 'Windows' && 'excimer' || '' }}
+        coverage: none
+        tools: none
+    - name: What's here
+      shell: bash
+      run: |
+        go version; bun --version; python --version; php --version | head -1
+        php -m | grep -i excimer || echo "no Excimer"

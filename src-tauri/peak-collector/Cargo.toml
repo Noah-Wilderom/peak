@@ -1,6 +1,6 @@
 [package]
 name = "peak-collector"
-version = "0.1.0"
+version = "0.1.1"
 description = "Headless peak collector: runs beside a remote workload and speaks the versioned protocol over stdio"
 edition = "2024"
 

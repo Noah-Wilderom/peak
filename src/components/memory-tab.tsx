@@ -15,6 +15,7 @@ import { Tween } from "@/components/tween"
 import { Bytes } from "@/components/bytes"
 import type { Proc, Sample } from "@/lib/types"
 import { analyzeTrend, composition, COMPOSITION_KEYS, gcStats } from "@/lib/analysis"
+import { freedIsReported, noCollectorText, whyNot } from "@/lib/agents"
 import { formatBytes, formatDuration, formatMs } from "@/lib/format"
 import { MIN_TREND_SAMPLES, percentiles, visibleSamples, type View } from "@/lib/series"
 
@@ -85,12 +86,17 @@ export function MemoryTab({ totalMemory }: { totalMemory: number }) {
               <Stat label={`collections (${gc.major} major)`} value={gc.count} format={(v) => Math.round(v).toLocaleString()} />
               <Stat label="time paused" value={gc.overhead * 100} format={(v) => `${v.toFixed(2)}%`} />
               <Stat label="p99 pause" value={gc.p99} format={formatMs} />
-              <Stat label="reclaimed" value={gc.freed} format={formatBytes} bytes />
+              {freedIsReported(proc) ? (
+                <Stat label="reclaimed" value={gc.freed} format={formatBytes} bytes />
+              ) : (
+                <div title={whyNot(proc, "gcFreed")}>
+                  <dt className="text-xs text-muted-foreground">reclaimed</dt>
+                  <dd className="mt-0.5 text-sm text-muted-foreground">Not reported</dd>
+                </div>
+              )}
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">
-              {proc.runtime === "rust" ? "Rust frees memory deterministically — there is no collector to observe." : "No collector data for this runtime."}
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{noCollectorText(proc)}</p>
           )}
         </div>
       </div>
@@ -111,7 +117,7 @@ export function MemoryTab({ totalMemory }: { totalMemory: number }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="GC pauses." subtitle="Each collection, by how long it stopped the world.">
-          {proc.hasGc ? <GcChart /> : <Empty>No garbage collector.</Empty>}
+          {proc.hasGc ? <GcChart /> : <Empty>{whyNot(proc, "gc") ?? "No garbage collector."}</Empty>}
         </Card>
         <Card title="Distribution." subtitle="How much of the window was spent at each memory level.">
           <DistributionChart samples={samples} />

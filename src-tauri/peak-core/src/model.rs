@@ -18,6 +18,7 @@ pub enum Runtime {
     Python,
     Rust,
     Go,
+    Php,
     Shell,
 }
 
@@ -25,19 +26,59 @@ impl Runtime {
     /// Best guess from a command line or executable name.
     pub fn infer(command: &str) -> Runtime {
         let bin = command.split_whitespace().next().unwrap_or("");
-        let bin = bin.rsplit('/').next().unwrap_or(bin);
+        let bin = bin.rsplit(['/', '\\']).next().unwrap_or(bin);
+        let bin = bin.strip_suffix(".exe").unwrap_or(bin);
         match bin {
             "bun" | "bunx" => Runtime::Bun,
             "node" | "npm" | "npx" | "pnpm" | "yarn" | "tsx" | "vite" | "deno" => Runtime::Node,
             "cargo" | "rustc" => Runtime::Rust,
             "go" => Runtime::Go,
+            "composer" | "artisan" | "phpunit" => Runtime::Php,
+            b if b.starts_with("php") => Runtime::Php,
             b if b.starts_with("python") || matches!(b, "uv" | "pytest" | "poetry" | "pip") => Runtime::Python,
             _ => Runtime::Shell,
         }
     }
 
     pub fn has_gc(self) -> bool {
-        matches!(self, Runtime::Node | Runtime::Bun | Runtime::Python | Runtime::Go)
+        matches!(self, Runtime::Node | Runtime::Bun | Runtime::Python | Runtime::Go | Runtime::Php)
+    }
+}
+
+/// One runtime-specific reading from an agent, such as a goroutine count.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Gauge {
+    pub name: String,
+    pub value: f64,
+    /// "count", "percent", "bytes" or "ms".
+    pub unit: String,
+}
+
+/// What a connected agent says about itself. Kept with the run, so history shows what was
+/// actually measured and by what, after the agent has gone.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AgentInfo {
+    #[serde(default)]
+    pub runtime_version: String,
+    #[serde(default)]
+    pub agent_version: String,
+    /// Of "heap", "gc", "lag", "cpu", "snapshot" and "forcegc".
+    #[serde(default)]
+    pub capabilities: Vec<String>,
+    /// Capabilities it can't offer here, and why or how to get them.
+    #[serde(default)]
+    pub unavailable: BTreeMap<String, String>,
+    /// What a capability means in this runtime.
+    #[serde(default)]
+    pub notes: BTreeMap<String, String>,
+    #[serde(default)]
+    pub gauges: Vec<Gauge>,
+}
+
+impl AgentInfo {
+    pub fn can(&self, capability: &str) -> bool {
+        self.capabilities.iter().any(|c| c == capability)
     }
 }
 
@@ -356,6 +397,9 @@ pub struct Proc {
     pub gc: Vec<GcEvent>,
     pub has_gc: bool,
     pub profiling: bool,
+    /// The agent that reported this run, if there was one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent: Option<AgentInfo>,
     pub snapshots: Vec<HeapSnapshot>,
     pub logs: Vec<LogLine>,
     pub children: Vec<ChildProc>,
@@ -511,6 +555,7 @@ pub fn merge_delta(p: &mut Proc, d: &ProcDelta) {
     p.ports = d.ports.clone();
     p.has_gc = d.has_gc;
     p.profiling = d.profiling;
+    p.agent = d.agent.clone();
     p.unavailable = d.unavailable.clone();
 }
 
@@ -548,6 +593,8 @@ pub struct ProcDelta {
     pub ports: Vec<Port>,
     pub has_gc: bool,
     pub profiling: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent: Option<AgentInfo>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub unavailable: Vec<String>,
     /// Remote runs: every stretch with no data so far. Set by the desktop, not the collector.
@@ -616,6 +663,12 @@ mod tests {
 
     #[test]
     fn gc_runtimes() {
+        assert_eq!(Runtime::infer("php artisan serve"), Runtime::Php);
+        assert_eq!(Runtime::infer("/usr/bin/php8.3 a.php"), Runtime::Php);
+        assert_eq!(Runtime::infer("composer install"), Runtime::Php);
+        assert_eq!(Runtime::infer("C:\\tools\\php.exe a.php"), Runtime::Php);
+        assert_eq!(Runtime::infer("go.exe run ."), Runtime::Go);
+        assert!(Runtime::Php.has_gc());
         assert!(Runtime::Node.has_gc());
         assert!(Runtime::Python.has_gc());
         assert!(!Runtime::Rust.has_gc());
@@ -673,6 +726,7 @@ mod tests {
             gc: vec![GcEvent { t: 5, kind: GcKind::Minor, pause_ms: 0.0, freed: 0.0 }],
             has_gc: false,
             profiling: false,
+            agent: None,
             snapshots: vec![],
             logs: vec![LogLine { id: 5, t: 5, stream: Stream::Stdout, text: "old".into() }],
             children: vec![],
@@ -723,6 +777,7 @@ mod tests {
             ports: vec![],
             has_gc: true,
             profiling: true,
+            agent: Some(AgentInfo { agent_version: "1".into(), ..Default::default() }),
             unavailable: vec!["io".into()],
             gaps: vec![],
             clock_offset_ms: None,

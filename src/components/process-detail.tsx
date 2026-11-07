@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useMonitor } from "@/hooks/use-monitor"
 import { AnimatePresence, motion } from "motion/react"
 import { PauseIcon, PlayIcon, RotateCwIcon, SquareIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -41,6 +42,11 @@ export function ProcessDetail({ proc, paused, system: local, targets }: { proc: 
   const [axis, setAxis] = useState<AxisMode>("elapsed")
   const [tab, setTab] = useState("overview")
   const [jump, setJump] = useState<LogJump | null>(null)
+  const { openRequest } = useMonitor()
+  const opened = openRequest?.id === proc.id ? openRequest.seq : 0
+  useEffect(() => {
+    if (opened) setTab("profiler")
+  }, [opened])
   const jumpToOutput = (t: number) => {
     setJump((j) => ({ t, seq: (j?.seq ?? 0) + 1 }))
     setTab("logs")

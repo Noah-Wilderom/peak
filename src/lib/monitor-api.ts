@@ -27,6 +27,8 @@ export interface MonitorApi {
   onEvent(listener: (e: MonitorEvent) => void): () => void
 
   select(id: string): void
+  /** Bring a run's profiler up, as `peak open` asks. */
+  open(id: string): void
   setPaused(paused: boolean): void
   capture(command: string, cwd: string): Promise<void>
   attach(pid: number): Promise<void>

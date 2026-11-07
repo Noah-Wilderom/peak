@@ -3,12 +3,77 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-07 02:17 UTC
-- **State:** **`v0.1.0` is published and its public delivery checks pass on all four targets,** at `9e60f67`. Next scope, not started: Go, Bun and PHP profiling agents.
+- **Last update:** 2026-11-07 UTC
+- **State:** **Go, Bun and PHP agents built and locally validated; `v0.1.1` candidate awaiting its first native CI run.** Nothing about them is proven on Windows or macOS yet, and the real desktop window hasn't shown them. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
-## Current scope: packaged releases and automatic updates on Linux, Windows and macOS
+## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
+
+**Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### What exists now
+
+| | Bun | PHP with Excimer | PHP alone | Go |
+|---|---|---|---|---|
+| How it gets in | Preload through `BUN_OPTIONS` | `auto_prepend_file`, from an ini Peak adds through `PHP_INI_SCAN_DIR` | The same | `sdk/go`, one import, standard library only |
+| Live heap | `process.memoryUsage` | `memory_get_usage` | No | `MemStats` |
+| Collections | **No:** Bun publishes none, and none are invented | Pause from `gc_status` on 8.3+. Freed bytes marked not reported, never zero | Counts, once, at exit | Pause. Freed is estimated, and says so |
+| Delay | Timer drift | **No:** no loop | No | `/sched/latencies` |
+| CPU | JavaScriptCore, by inspector | Excimer: on-CPU on Linux, elapsed elsewhere | **No**, with `pecl install excimer` shown | `runtime/pprof` |
+| Snapshot | By type. No allocation stacks | **No:** nothing can list PHP's memory | No | Allocation sites by function, scaled |
+
+Shared by all of them:
+
+- Each agent names its runtime version, its own version, what it can do, what it can't and why, and what its figures mean. That's on `Proc.agent`, kept in history after the agent goes. Node and Python now do it too.
+- The hub refuses what an agent says it can't do, with its reason. PHP alone can't read a request at all, so a timeout was the alternative.
+- `peak ps`, `peak profile`, `peak open` and `peak agents`. `peak profile` goes through the same `Service` paths as the buttons, so results are stored the same way.
+- The Profiler shows which agent, what it measures and what's missing. Buttons are disabled with the reason. Each runtime without an agent gets its own setup, including that nothing can attach to a running process.
+- Agents go in the normal packages. The Go SDK's source is embedded too and unpacked to `agents/go`, so a program can build against the matching copy with no download.
+
+**A bug found on the way, fixed:** `peak run` replaced a user's own `NODE_OPTIONS` and `PYTHONPATH`, as the hub sent values and the CLI overwrote the environment. `with_inherited` merges them.
+
+### Local evidence, on this Linux machine
+
+Real programs, from a separate CLI process to a headless copy of the app (`src-tauri/tests/live_headless_app.rs`, as there are no WebKit helpers here), checked in its database. Node 24, Python 3.13.16, Bun 1.4.3, PHP 8.3.6 with Excimer 1.2.6, Go 1.27.2:
+
+| Runtime | CPU profile, 2 s | Snapshot | Stored |
+|---|---|---|---|
+| Bun | `jsc`, 2003 ms sampled in 2009 ms, holds `busyWork` | Holds `SmokeThing`. No sites claimed | Profile, snapshot, identity, delay on 34 of 36 samples, 0 collections |
+| PHP with Excimer | `excimer-cpu`, 2000 ms in 2000 ms, holds `busy_work` | Refused, with the reason | Profile, identity, 1685 collections, no delay claimed |
+| Go, a compiled binary against the installed SDK | `pprof`, 1750 ms in 2002 ms, holds `main.busyWork` | Holds `main.smokeAlloc` | Profile, snapshot, identity, delay on 33 of 35 samples, 10 collections |
+| Go without the import | Refused: "no profiling agent" | | No agent recorded |
+
+Node and Python pass the same checks. PHP alone, against real PHP in `service.rs` and `php-agent.test.mjs`: nothing live is claimed, figures from the exit reach history, the program's exit code is its own, and a user's own `auto_prepend_file` still runs.
+
+The one failure in that run is expected: "the installed copy says what it is", since this was a source build.
+
+Gates: frontend 312 tests, 100% lines and functions and the statements and branches gate passes. Backend 99.05% lines, clippy clean. Agents: 9 Node tests with 1 skipped (the Excimer one, unless pointed at a build), 8 Python. Go SDK: passes under `-race`, 90.9% of statements.
+
+**Not shown yet by anything:** Windows and macOS for all of this, including whether `BUN_OPTIONS` and `PHP_INI_SCAN_DIR` work with their paths; whether Excimer installs on macOS on CI; PHP 8.1 and 8.4; the real window showing these agents; pressing v0.1.0's buttons from outside.
+
+### Flutter: deferred
+
+A bounded look, with Flutter 3.47.1 and Dart 3.13.1 here. Not attempted, for these reasons:
+
+- A release-mode Flutter app has no Dart VM service at all, so only debug and profile builds could be profiled.
+- It would need a VM service client in Peak, and a way to find the URI each run prints.
+- Flutter's real targets are phones and desktops reached through `flutter run`'s own port forwarding, which is a different model from a local child process.
+- A `dart run` script would be simpler, but that isn't what "Flutter" means to someone asking for it.
+
+That's a project of its own. Nothing in this release claims it, and the README says so.
+
+### `v0.1.0` to `v0.1.1`
+
+`public-delivery.yml` gets a new job, `upgrade`, and `scripts/e2e/smoke/release-upgrade.mjs`: the real `v0.1.0` from its public URLs, unmodified, with its own feed check and its own buttons, on all four targets. Then history, settings, the running workload and all the new agents are checked. A release has no debug port, so `drive.mjs` presses buttons with UI Automation on Windows, the accessibility API on macOS and by reading the screen on Linux. **Whether the macOS runner allows that isn't known.** `upgrade-rehearsal` in `update-proof.yml` finds out before publishing, by pressing Settings and Check for updates in `v0.1.0`.
+
+The existing 0.0.9 proof stays, for the candidate. It doesn't count for the release-to-release claim.
+
+**One logistics point:** `go get ...@v0.1.1` needs a second tag on the same commit, `sdk/go/v0.1.1`. `Public delivery` checks it.
+
+---
+
+## Previous scope: packaged releases and automatic updates on Linux, Windows and macOS
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
@@ -49,7 +114,7 @@ Those containers run with AppArmor and seccomp unconfined, so they say nothing a
 - **Remote targets from Windows and macOS** have never run.
 - Nothing is notarized or OS-signed, by decision.
 
-**Fixed in the uncommitted tree, reaching users only at the next release, since `install.sh` is a release asset and no tag changes:** `install.sh` now says which libraries are missing and how to install them, rather than reporting success, and its libfuse2 note no longer fires falsely when `ldconfig` isn't on `PATH`. Tested on a bare 24.04 container.
+**Fixed in `8d95ca7`, committed after the tag, so it reaches users in `v0.1.1`, as `install.sh` is a release asset of each tag and `v0.1.0` doesn't change:** `install.sh` now says which libraries are missing and how to install them, rather than reporting success, and its libfuse2 note no longer fires falsely when `ldconfig` isn't on `PATH`. Tested on a bare 24.04 container.
 
 **Not changed:** the app, the tag and the release.
 
@@ -574,8 +639,8 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** accept public delivery. Commit `docs/evidence/release/ci-public-rerun-v0.1.0/` and this file when convenient; nothing depends on it.
+**PM:** commit and push the paths in my latest handoff to `release-validation/0.1.1`. It runs Update proof, with the rehearsal, Release and Tests.
 
-**Then, on PM's word:** start the Go, Bun and PHP profiling agents, with Flutter as a bounded feasibility look. Not started. Nothing of mine is running.
+**Then:** I read native results and fix what they find. Once they pass: PM tags `v0.1.1` and `sdk/go/v0.1.1`, reviews the draft and publishes. Then I verify from the public side, including the real `v0.1.0` to `v0.1.1` update on all four targets.
 
 **Separately:** the updater key and its paired password still need an off-server backup.

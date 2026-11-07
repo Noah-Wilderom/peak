@@ -1,3 +1,4 @@
+import { freedIsReported } from "@/lib/agents"
 import { useMemo } from "react"
 import {
   Area,
@@ -198,10 +199,12 @@ export function GcChart() {
                       <span className="text-muted-foreground">Pause</span>
                       <span className="font-mono tabular-nums">{formatMs(g.pauseMs)}</span>
                     </span>
-                    <span className="flex justify-between gap-6">
-                      <span className="text-muted-foreground">Freed</span>
-                      <span className="font-mono tabular-nums">{formatBytes(g.freed)}</span>
-                    </span>
+                    {freedIsReported(proc) && (
+                      <span className="flex justify-between gap-6">
+                        <span className="text-muted-foreground">Freed</span>
+                        <span className="font-mono tabular-nums">{formatBytes(g.freed)}</span>
+                      </span>
+                    )}
                   </div>
                 )
               }}

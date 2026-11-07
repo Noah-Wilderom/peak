@@ -95,7 +95,7 @@ export function buildReport(p: Proc): RunReport {
   const gc = stats.count
     ? { collections: stats.count, major: stats.major, totalPauseMs: stats.total, sharePercent: stats.overhead * 100 }
     : null
-  const gcNote = gc ? "" : p.runtime === "rust" ? "No collector: ownership-based memory." : "No collections observed; a runtime agent reports these."
+  const gcNote = gc ? "" : p.runtime === "rust" ? "No collector: ownership-based memory." : (p.agent?.unavailable?.gc ?? "No collections observed; a runtime agent reports these.")
 
   const snap = p.snapshots.at(-1)
   return {

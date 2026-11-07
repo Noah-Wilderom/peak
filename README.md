@@ -43,7 +43,7 @@ Use it the same way everywhere: open the app, then run `peak run -- <command>` i
 |---|---|---|---|
 | Capture a command, memory, CPU, disk rate, output, exit | Yes | Yes | Yes |
 | `peak run` to the open app | Yes | Yes, as `peak-cli` | Yes |
-| Node and Python runtime agents | Yes | Yes | Yes |
+| Runtime agents: see [Profiling each runtime](#profiling-each-runtime) | Yes | Yes | Yes |
 | CPU split into user and system, threads, page faults | Yes | Yes | Yes |
 | Memory composition (anonymous, file, shared), swap per process | Yes | No | No |
 | File and socket handle counts, listening ports | Yes | No: shown as not tracked | No: shown as not tracked |
@@ -124,6 +124,37 @@ tasks.
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
+## Profiling each runtime
+
+Run a program from the Capture page or with `peak run --` and Peak reads it from inside, through a small agent. `peak agents` prints this for your install. Peak can't attach an agent to a process that's already running, or look inside a program without one. Those runs still get memory, CPU and I/O from the OS, and Peak doesn't present those figures as the runtime's own.
+
+| | Node.js | Bun | Python | PHP with Excimer | PHP alone | Go |
+|---|---|---|---|---|---|---|
+| **What it takes** | Nothing | Bun 1.2.15 or newer | Nothing | `pecl install excimer` | Command-line PHP | One import, then rebuild |
+| Live heap | Yes | Yes | No: the process's memory | Yes, between PHP operations | No | Yes |
+| Garbage collections | Pause and estimated size | No: Bun doesn't publish them | Pause and estimated size | Pause on PHP 8.3+, values counted but not bytes | No | Pause and estimated size |
+| Runtime delay | Event loop | How late a timer fires | How late a sleep wakes | No: there's no loop to delay | No | Scheduler wait |
+| CPU profile | V8 sampler, main thread | JavaScriptCore sampler | Main thread stacks, including blocking | On-CPU on Linux, elapsed on macOS | No | On-CPU, all goroutines |
+| Heap snapshot | By type, with allocation stacks | By type | By type, with allocation stacks | No | No | Allocation sites, by function, estimated |
+| Force a collection | Yes | Yes | Yes | Yes, the cycle collector | No | Yes |
+| Other readings | | Live objects, extra memory | | Memory, peak memory, collector runs | The same, once, at exit | Goroutines, time in GC, live objects |
+
+**Go** programs add `import _ "github.com/Noah-Wilderom/peak/sdk/go/auto"`. See [the SDK](sdk/go/README.md). It does nothing outside Peak.
+
+**PHP** reports through timers that run between PHP operations, so nothing updates during a long `sleep()` or database call. Excimer has no Windows build, so on Windows PHP reports only at exit. A web server's requests (`php -S`) each report only as they end, and PHP-FPM workers Peak didn't start aren't seen.
+
+**From the command line:**
+
+```sh
+peak ps                     # runs in the open app, and what each agent reports
+peak profile <id or pid>    # a 5 second CPU profile. --ms N, --snapshot, --gc, --json
+peak open <id or pid>       # show its profiler in the app
+```
+
+Results are saved with the run, like those from the app's buttons.
+
+Flutter and Dart aren't supported. See [the status notes](docs/DEVELOPMENT-STATUS.md) for why.
+
 ## Remote targets
 
 The collector is embedded for the architecture Peak was built on: `x86_64-unknown-linux-musl` on a typical machine.
@@ -145,7 +176,8 @@ Installers carry the collector inside the app binary, so they need no extra file
 |---|---|---|
 | Frontend | `bun run test:coverage` | Vitest + Testing Library over all of `src/` (100% enforced) |
 | Backend | `cd src-tauri && cargo llvm-cov --workspace --ignore-filename-regex '(lib\|main\|live_\w+)\.rs$'` | `/proc` parsing, sampling, runner, monitor, hub, CLI, collector, targets (≥99% enforced) |
-| Agents | `bun run test:agents` | The injected Node and Python profiling agents, end to end |
+| Agents | `bun run test:agents` | The Node, Python, Bun and PHP agents, end to end, against each real runtime that's installed |
+| Go SDK | `cd sdk/go && go test -race ./...` | The Go agent, including its CPU profile reader |
 | Live remote | `task test:live` | Real SSH, Docker and Kubernetes against disposable local environments (not in CI) |
 | Clean start | `scripts/verify-clean-start.sh <dir> <log>` | `task dev` from an exported copy with nothing prepared (not in CI) |
 | Real UI | `scripts/e2e/` | Real browser against the mock; the real desktop binary in a disposable container |

@@ -11,6 +11,8 @@ const write = (p, s) => writeFileSync(new URL(p, ROOT), s)
 const CARGO = ["src-tauri/Cargo.toml", "src-tauri/peak-core/Cargo.toml", "src-tauri/peak-collector/Cargo.toml"]
 const LOCKED = ["peak", "peak-core", "peak-collector"]
 const JSONS = ["package.json", "src-tauri/tauri.conf.json"]
+const GO_SDK = "sdk/go/peak.go"
+const goVersion = /^const Version = "([^"]+)"/m
 const cargoVersion = /^version = "([^"]+)"/m
 const lockEntry = (name) => new RegExp(`(name = "${name}"\\r?\\nversion = ")([^"]+)(")`)
 
@@ -18,6 +20,7 @@ function versions() {
   const found = {}
   for (const p of JSONS) found[p] = JSON.parse(read(p)).version
   for (const p of CARGO) found[p] = cargoVersion.exec(read(p))[1]
+  found[GO_SDK] = goVersion.exec(read(GO_SDK))[1]
   const lock = read("src-tauri/Cargo.lock")
   for (const n of LOCKED) found[`Cargo.lock:${n}`] = lockEntry(n).exec(lock)[2]
   return found
@@ -35,6 +38,7 @@ if (cmd === "check") {
   console.log([...all][0])
 } else if (cmd === "set" && /^\d+\.\d+\.\d+$/.test(arg ?? "")) {
   for (const p of JSONS) write(p, read(p).replace(/("version":\s*")[^"]+(")/, `$1${arg}$2`))
+  write(GO_SDK, read(GO_SDK).replace(goVersion, `const Version = "${arg}"`))
   for (const p of CARGO) write(p, read(p).replace(cargoVersion, `version = "${arg}"`))
   let lock = read("src-tauri/Cargo.lock")
   for (const n of LOCKED) lock = lock.replace(lockEntry(n), `$1${arg}$3`)

@@ -40,7 +40,7 @@ export function notify(e: MonitorEvent) {
 type Page = NavPage | "capture" | { compare: [string, string] }
 
 export default function App() {
-  const { procs, selectedId, paused, system, ready, error, machine, targets } = useMonitor()
+  const { procs, selectedId, paused, system, ready, error, machine, targets, openRequest } = useMonitor()
   const [page, setPage] = useState<Page | null>(null)
   const selected = procs.find((p) => p.id === selectedId) ?? null
   // With nothing selected, the capture page doubles as the empty state.
@@ -50,6 +50,11 @@ export default function App() {
   // A newly captured process takes over from the capture page. Other pages stay
   // put: pruning history can move the selection while Settings is open.
   useEffect(() => setPage((p) => (p === "capture" ? null : p)), [selectedId])
+
+  // `peak open` asks to see a run, whatever page is up.
+  useEffect(() => {
+    if (openRequest) setPage(null)
+  }, [openRequest])
 
   useMonitorEvents(notify)
 

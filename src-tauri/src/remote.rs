@@ -822,6 +822,7 @@ fn delta_of(p: &Proc) -> ProcDelta {
         ports: p.ports.clone(),
         has_gc: p.has_gc,
         profiling: p.profiling,
+        agent: p.agent.clone(),
         unavailable: p.unavailable.clone(),
         gaps: vec![],
         clock_offset_ms: None,

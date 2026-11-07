@@ -110,6 +110,17 @@ describe("TauriMonitor", () => {
     expect(m.getSnapshot()).toMatchObject({ ready: true, error: "Error: boom", selectedId: null })
   })
 
+  it("selects a run that `peak open` asks for", async () => {
+    const { m, emit } = setup([makeProc({ id: "a" }), makeProc({ id: "b" })])
+    await m.start()
+    await flush()
+    emit("peak://open", "b")
+    expect(m.getSnapshot().selectedId).toBe("b")
+    expect(m.getSnapshot().openRequest).toEqual({ id: "b", seq: 1 })
+    emit("peak://open", "b")
+    expect(m.getSnapshot().openRequest).toEqual({ id: "b", seq: 2 })
+  })
+
   it("applies ticks and announces endings", async () => {
     const a = makeProc({ id: "a" })
     const b = makeProc({ id: "b" })

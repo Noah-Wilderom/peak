@@ -92,7 +92,12 @@ class PythonAgentTest(unittest.TestCase):
         child = run({"PEAK_AGENT_ADDR": hub.addr, "PEAK_AGENT_TOKEN": "tok"})
         try:
             hello = hub.wait_for(lambda m: m["type"] == "hello")
+            info = hello.pop("agent")
             self.assertEqual(hello, {"type": "hello", "token": "tok", "pid": child.pid, "runtime": "python"})
+            self.assertRegex(info["runtimeVersion"], r"^3\.\d+\.\d+$")
+            self.assertEqual(info["capabilities"], ["gc", "lag", "cpu", "snapshot", "forcegc"])
+            self.assertIn("heap", info["unavailable"])
+            self.assertIn("64 bytes", info["notes"]["freed"])
             gc_ev = hub.wait_for(lambda m: m["type"] == "gc")
             self.assertIn(gc_ev["kind"], ("minor", "major"))
             self.assertGreaterEqual(gc_ev["pauseMs"], 0)

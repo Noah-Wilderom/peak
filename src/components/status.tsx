@@ -49,6 +49,7 @@ const RUNTIME_GLYPH: Record<Proc["runtime"], string> = {
   node: "Js",
   bun: "Bn",
   python: "Py",
+  php: "Ph",
   rust: "Rs",
   go: "Go",
   shell: "Sh",

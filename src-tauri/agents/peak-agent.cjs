@@ -24,7 +24,35 @@
   const send = (msg) => {
     if (!sock.destroyed) sock.write(JSON.stringify(msg) + "\n")
   }
-  send({ type: "hello", token, pid: process.pid, runtime: process.versions.bun ? "bun" : "node" })
+  const canInspect = (() => {
+    if (!inspector) return false
+    try {
+      const probe = new inspector.Session()
+      probe.connect()
+      probe.disconnect()
+      return true
+    } catch {
+      return false
+    }
+  })()
+  const noInspector = "This Node.js build has no usable inspector, which this needs."
+  send({
+    type: "hello",
+    token,
+    pid: process.pid,
+    runtime: process.versions.bun ? "bun" : "node",
+    agent: {
+      runtimeVersion: process.versions.bun || process.versions.node,
+      agentVersion: process.env.PEAK_AGENT_VERSION || "unknown",
+      capabilities: ["heap", "gc", "lag", ...(canInspect ? ["cpu", "snapshot", "forcegc"] : [])],
+      unavailable: canInspect ? {} : { cpu: noInspector, snapshot: noInspector, forcegc: noInspector },
+      notes: {
+        lag: "Event-loop delay, p99",
+        cpu: "V8's sampling profiler. Time waiting on the event loop shows as (idle).",
+        freed: "Change in used heap across the collection.",
+      },
+    },
+  })
 
   // ─── heap stats ───
   let lastUsed = 0

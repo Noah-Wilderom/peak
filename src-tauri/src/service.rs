@@ -5,6 +5,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+use serde_json::Value;
+
 use crate::db::Db;
 use crate::hub::Hub;
 use crate::model::*;
@@ -208,6 +210,17 @@ impl Service {
         self.monitor.lock().unwrap().add_alert(id, alert.clone());
         self.remote.add_alert(id, alert);
         self.db.lock().unwrap().add_alert(id, alert)
+    }
+
+    /// `peak profile`, through the same paths as the buttons, so results are kept the same way.
+    pub fn control(&self, action: &str, id: &str, ms: u64) -> Result<Value, String> {
+        let value = |v: Result<Value, serde_json::Error>| v.map_err(|e| e.to_string());
+        match action {
+            "gc" => self.force_gc(id).map(|()| Value::Null),
+            "snapshot" => value(serde_json::to_value(self.take_snapshot(id)?)),
+            "cpu" => value(serde_json::to_value(self.cpu_profile(id, ms)?)),
+            other => Err(format!("unknown action `{other}`")),
+        }
     }
 
     pub fn take_snapshot(&self, id: &str) -> Result<HeapSnapshot, String> {
@@ -491,7 +504,23 @@ mod tests {
     /// The real agents, launched by the monitor and served by the hub: lag reaches
     /// samples and a CPU profile lands on the run and in the database.
     fn profiles_a_real_runtime(command: &str, expect_frame: &str) {
+        profiles_a_real_program(command, expect_frame, |_| {});
+    }
+
+    fn installed(program: &str, arg: &str) -> bool {
+        std::process::Command::new(program).arg(arg).output().is_ok_and(|o| o.status.success())
+    }
+
+    fn real_service(dir: &std::path::Path) -> Service {
+        let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
+        let hub = Hub::start(m.clone(), "s".into(), Arc::new(|_| {})).unwrap();
+        m.lock().unwrap().agent_env = crate::hub::install_agents(dir, &hub.addr().to_string()).unwrap();
+        Service::new(m, hub, Db::open_in_memory().unwrap(), Arc::new(NoConnector))
+    }
+
+    fn profiles_a_real_program(command: &str, expect_frame: &str, prepare: impl Fn(&std::path::Path)) -> Proc {
         let dir = tempfile::tempdir().unwrap();
+        prepare(dir.path());
         let m = Monitor::new(ProcFs::default(), AgentEnv::default()).shared();
         let hub = Hub::start(m.clone(), "s".into(), Arc::new(|_| {})).unwrap();
         let env = crate::hub::install_agents(dir.path(), &hub.addr().to_string()).unwrap();
@@ -499,8 +528,9 @@ mod tests {
         let s = Service::new(m, hub, Db::open_in_memory().unwrap(), Arc::new(NoConnector));
         let p = monitor::capture(&s.monitor, command, dir.path().to_str().unwrap()).unwrap();
 
+        // Long enough for `go run` to build.
         let mut lag = None;
-        for _ in 0..200 {
+        for _ in 0..2400 {
             s.tick(now_ms());
             let proc = s.monitor.lock().unwrap().get(&p.id).unwrap().clone();
             assert_eq!(proc.status, Status::Running, "{:?}", proc.logs);
@@ -529,6 +559,108 @@ mod tests {
         let stored = s.db.lock().unwrap().load_run(&p.id).unwrap().unwrap();
         assert_eq!(stored.cpu_profiles[0].root, profile.root);
         assert!(stored.samples.iter().any(|x| x.loop_lag.is_some()), "lag is persisted");
+        assert!(stored.agent.is_some(), "and so is what the agent said about itself");
+        stored
+    }
+
+    #[test]
+    fn profiles_real_bun_processes() {
+        if !installed("bun", "--version") {
+            return;
+        }
+        let stored = profiles_a_real_program(
+            "bun -e 'function busyWork(){const e=Date.now()+50;while(Date.now()<e);} setInterval(busyWork,60)'",
+            "busyWork",
+            |_| {},
+        );
+        assert_eq!(stored.runtime, Runtime::Bun);
+        assert!(!stored.has_gc, "Bun publishes no collections, so none are implied");
+        assert_eq!(stored.agent.unwrap().agent_version, env!("CARGO_PKG_VERSION"));
+    }
+
+    #[test]
+    fn profiles_real_go_programs_through_the_bundled_sdk() {
+        if !installed("go", "version") {
+            return;
+        }
+        let stored = profiles_a_real_program("go run .", "main.busyWork", |dir| {
+            // The copy that's installed with the agents, as a user would build against it.
+            crate::hub::install_agents(dir, "unused").unwrap();
+            let mod_file = format!(
+                "module demo\n\ngo 1.21\n\nrequire github.com/Noah-Wilderom/peak/sdk/go v0.0.0\n\nreplace github.com/Noah-Wilderom/peak/sdk/go => {}\n",
+                dir.join("agents/go").display()
+            );
+            std::fs::write(dir.join("go.mod"), mod_file).unwrap();
+            let main = "package main\nimport (\n\t\"time\"\n\t_ \"github.com/Noah-Wilderom/peak/sdk/go/auto\"\n)\n//go:noinline\nfunc busyWork() int { x := 0; e := time.Now().Add(50 * time.Millisecond); for time.Now().Before(e) { x++ }; return x }\nfunc main() { for { busyWork(); time.Sleep(5 * time.Millisecond) } }\n";
+            std::fs::write(dir.join("main.go"), main).unwrap();
+        });
+        assert_eq!(stored.runtime, Runtime::Go);
+        let agent = stored.agent.unwrap();
+        assert!(agent.runtime_version.starts_with("1."), "{}", agent.runtime_version);
+        assert!(agent.gauges.iter().any(|g| g.name == "Goroutines"), "{:?}", agent.gauges);
+        assert_eq!(stored.cpu_profiles[0].sampling, "pprof");
+    }
+
+    /// Without any extension, PHP can only report as it ends. That has to reach history anyway.
+    #[test]
+    fn keeps_what_real_php_reports_at_exit() {
+        if !installed("php", "--version") {
+            return;
+        }
+        let modules = std::process::Command::new("php").arg("-m").output().unwrap().stdout;
+        if String::from_utf8_lossy(&modules).to_lowercase().contains("excimer") {
+            eprintln!("Excimer is installed here, so PHP's report at exit isn't what's tested");
+            return;
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let script = dir.path().join("a.php");
+        std::fs::write(&script, "<?php $keep = str_repeat('x', 4000000); usleep(300000);").unwrap();
+        let s = real_service(dir.path());
+        let command = format!("php {}", script.display());
+        let p = monitor::capture(&s.monitor, &command, dir.path().to_str().unwrap()).unwrap();
+        wait_ended(&s, &p.id);
+        for _ in 0..40 {
+            s.tick(now_ms());
+            thread::sleep(Duration::from_millis(25));
+        }
+        let stored = s.db.lock().unwrap().load_run(&p.id).unwrap().unwrap();
+        assert_eq!(stored.exit_code, Some(0), "{:?}", stored.logs);
+        assert_eq!(stored.runtime, Runtime::Php);
+        let agent = stored.agent.expect("the agent's report is in history");
+        assert!(agent.capabilities.is_empty(), "{:?}", agent.capabilities);
+        assert!(agent.unavailable["cpu"].contains("pecl install excimer"));
+        let peak = agent.gauges.iter().find(|g| g.name == "Peak memory").expect("figures from the end of the run");
+        assert!(peak.value >= 4_000_000.0, "{}", peak.value);
+    }
+
+    #[test]
+    fn control_goes_the_way_of_the_buttons() {
+        let dir = tempfile::tempdir().unwrap();
+        let s = real_service(dir.path());
+        assert!(s.control("wat", "r", 1).unwrap_err().contains("unknown action"));
+        for action in ["gc", "snapshot", "cpu"] {
+            assert!(s.control(action, "r", 1).is_err(), "{action}");
+        }
+        let p = monitor::capture(
+            &s.monitor,
+            "node -e 'const keep=[];setInterval(()=>keep.push({}),50)'",
+            dir.path().to_str().unwrap(),
+        )
+        .unwrap();
+        for _ in 0..200 {
+            s.tick(now_ms());
+            if s.monitor.lock().unwrap().get(&p.id).unwrap().profiling {
+                break;
+            }
+            thread::sleep(Duration::from_millis(25));
+        }
+        assert_eq!(s.control("gc", &p.id, 0).unwrap(), Value::Null);
+        assert!(s.control("snapshot", &p.id, 0).unwrap()["heapUsed"].as_f64().unwrap() > 0.0);
+        assert_eq!(s.control("cpu", &p.id, 500).unwrap()["sampling"], "v8");
+        monitor::stop(&s.monitor, &p.id, Duration::from_millis(200)).unwrap();
+        wait_ended(&s, &p.id);
+        let stored = s.db.lock().unwrap().load_run(&p.id).unwrap().unwrap();
+        assert_eq!((stored.snapshots.len(), stored.cpu_profiles.len()), (1, 1), "kept like any other");
     }
 
     #[test]

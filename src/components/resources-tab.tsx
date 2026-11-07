@@ -7,6 +7,7 @@ import { Card } from "@/components/card"
 import { ChildrenTable } from "@/components/children-table"
 import { useTimelineChart } from "@/components/charts/timeline"
 import { childMemorySeries, reported } from "@/lib/resources"
+import { whyNot } from "@/lib/agents"
 import { formatBytes, formatMs } from "@/lib/format"
 
 const SHADES = ["var(--comp-1)", "var(--comp-2)", "var(--comp-3)", "var(--comp-4)", "var(--comp-5)", "var(--chart-5)", "var(--warning)", "var(--success)"]
@@ -106,7 +107,7 @@ export function ResourcesTab() {
           )}
         </Card>
 
-        <Card title="Runtime lag." subtitle="How long the event loop or interpreter kept work waiting (p99).">
+        <Card title="Runtime lag." subtitle={proc.agent?.notes?.lag ? `${proc.agent.notes.lag}.` : "How long the event loop or interpreter kept work waiting (p99)."}>
           {reported(data, "loopLag") ? (
             <ChartContainer config={lagConfig} className="aspect-auto h-[200px] w-full">
               <LineChart data={data} margin={{ top: 8, right: 20, left: 8, bottom: 0 }} {...chart}>
@@ -134,7 +135,7 @@ export function ResourcesTab() {
             </ChartContainer>
           ) : (
             <Unavailable>
-              {proc.profiling ? "Waiting for the runtime agent's first reading." : "Not measured: lag needs a runtime agent (Node or Python launched through peak)."}
+              {whyNot(proc, "lag") ?? (proc.profiling ? "Waiting for the runtime agent's first reading." : "Not measured: lag needs a runtime agent, from starting the process through peak.")}
             </Unavailable>
           )}
         </Card>

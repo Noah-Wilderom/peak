@@ -90,13 +90,18 @@ jobs:
             checked=$((checked + 1))
           done
           [ "$checked" -gt 0 ]
+      - uses: ./.github/actions/runtimes
+      - name: A screen capture tool for Linux
+        if: matrix.platform == 'linux'
+        run: sudo apt-get install -y --no-install-recommends imagemagick
       - name: Smoke test the packaged app
         shell: bash
         env:
           PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_SMOKE_REQUIRE: node,python,bun,php,go${{ matrix.platform != 'windows' && ',php-excimer' || '' }}
           DEBIAN_FRONTEND: noninteractive
         run: |
-          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
           else node scripts/e2e/smoke/smoke.mjs artifacts smoke-output; fi
       - uses: actions/upload-artifact@v4
         if: always()

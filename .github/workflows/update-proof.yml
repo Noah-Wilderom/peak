@@ -131,3 +131,40 @@ jobs:
       - run: cargo test --workspace --no-fail-fast
         env:
           PEAK_REQUIRE_COLLECTOR: "1"
+
+  # Before a release can update from it, shows the published previous release's own buttons can be
+  # pressed from outside on each OS, so the real run in public-delivery.yml doesn't find out first.
+  upgrade-rehearsal:
+    name: Rehearse the release-to-release update (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux }
+          - { os: windows-latest, platform: windows }
+          - { os: macos-latest, platform: darwin-aarch64 }
+          - { os: macos-15-intel, platform: darwin-x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: A desktop's libraries, and what reads and presses its screen
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb libegl1 libgl1 libx11-xcb1 libx11-6 libdrm2 libexpat1 libfontconfig1 libfreetype6 libfribidi0 libgbm1 libharfbuzz0b libwayland-client0 libxcb1 imagemagick xdotool tesseract-ocr tesseract-ocr-eng
+      - name: Install the published release, and press its buttons
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+        run: |
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse
+          else node scripts/e2e/smoke/release-upgrade.mjs v0.1.0 v0.1.1 rehearsal --rehearse; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-rehearsal-${{ matrix.platform }}
+          path: rehearsal
+          if-no-files-found: warn

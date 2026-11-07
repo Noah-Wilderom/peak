@@ -86,7 +86,7 @@ export function CapturePage({ onClose }: { onClose?: () => void }) {
               <p className="mt-1 text-sm text-muted-foreground">
                 {target
                   ? `Runs on ${target.spec.label}, output captured. It stops if the connection is lost, because its output pipes end with the session.`
-                  : "Node and Python get a profiling agent for heap snapshots and GC data."}
+                  : "Node.js, Bun, Python and PHP get a profiling agent automatically. Go programs opt in with one import."}
               </p>
               <form
                 className="mt-5 flex flex-col gap-3"
