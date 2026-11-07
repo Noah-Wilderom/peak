@@ -4,13 +4,31 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `bdd2b42`: everything passes except macOS's window proof, which now fails on 30 and 31 checks: Capture, History search and reopening, and one wording check. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `908cca1`: everything passes except macOS's window proof, at 31 and 30 failing checks, mostly reopening after the first run. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Seventh native run: `908cca1`
+
+**Update proof 42369521474, including the `v0.1.0` rehearsal on all four, and Tests 42369521475 passed**, with the backend at 99.16% on CI. Release 42369521473 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-908cca1/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `908cca1` | **153 / 0 / 0** | **132 / 0 / 0** | 129 / 31 / 0 | 130 / 30 / 0 |
+
+**Newly observed on macOS:** the Edit-menu paste works. A run started from the window's Capture page connected with agent 0.1.1. History opened after a restart, the search found Node's run, and it reopened with its identity and "Agent has disconnected".
+
+**Still failing on macOS, from the logs and captures:**
+
+- **Every reopen after the first:** the History button wasn't pressed. On the reopened run's page, "From history" heads the run list, and reading the screen lowercases what it compares, so "history" in that label ranked level with the button and came first, being higher up. The case as written now counts for more.
+- **Node's profiles after reopening:** both are on screen in the capture, "Profile 2" and "Profile 1", but "Profile 1" didn't read. The check also accepts the selected profile's "CPU profile. … recorded".
+- **Go's "Objects, estimated":** not read on either attempt. The check now allows any punctuation between the two words. **Not shown to be the cause.**
+- **The captured run's own exit:** it runs for 150 seconds on macOS, and the check waited 60. Now it waits for the run's length plus 90 seconds.
+- **macOS x64:** reading a 1920 by 1080 screen is slow enough that runs ended before the steps that needed them. It now reads only the peak window where macOS says where that is, otherwise the whole screen as before, and logs which it did. Programs run 7 minutes there.
 
 ### Sixth native run: `bdd2b42`
 

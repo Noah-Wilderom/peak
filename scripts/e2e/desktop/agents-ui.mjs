@@ -117,7 +117,7 @@ await shot("window")
 
 // ─── each runtime, while it runs ────────────────────────────────────────────
 // Reading the screen takes far longer than asking WebDriver or UI Automation.
-const SECONDS = IS_MAC ? 300 : 70
+const SECONDS = IS_MAC ? 420 : 70
 const kept = []
 
 async function runtimeInWindow({ name, label, versionShape, program, cpu, snapshot, gc, missing }) {
@@ -153,7 +153,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("Take snapshot can be pressed"), await pressMatching(/^Take snapshot$/))
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
-    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/Objects, estimated/, 8000) && !/\d+ types/.test((await look()).text))
+    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/Objects\W+estimated/, 8000) && !/\d+ types/.test((await look()).text))
     await shot(`${name}-heap`)
   } else {
     await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
@@ -218,7 +218,7 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
     const stored = await waitFor("the captured run stored", () => {
       const r = storedRunById(run.id)
       return r && r.exit_code !== null ? r : null
-    }, 60_000).catch(() => null)
+    }, (IS_MAC ? 150 : 20) * 1000 + 90_000).catch(() => null)
     check("capture: ended on its own, with its own exit code", stored?.exit_code === 0, stored?.exit_code)
     kept.push({ name: "capture-bun", label: "Bun", marker, cpu: false, snapshot: false })
   }
@@ -289,7 +289,8 @@ for (const run of kept) {
   check(t("as what it reported, not as live"), await see(/Agent has disconnected/, 5000))
   if (run.cpu) {
     await pressMatching(/^CPU$/, 5000)
-    check(t("the CPU profile is there"), await see(/Profile\s+1/, 15_000))
+    // A profile listed, or the one selected: which of the two is on screen depends on the scroll.
+    check(t("the CPU profile is there"), await see(/Profile\s+1|CPU profile\.\s+\S+\s+recorded/, 15_000))
   }
   await shot(`${run.name}-reopened`)
 }

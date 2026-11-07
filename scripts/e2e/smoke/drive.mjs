@@ -71,6 +71,19 @@ end run`
   return r.stdout.trim() === "found"
 }
 
+let frameLogged = false
+/** The window's position and size in points, or null to read the whole screen. */
+function windowFrame() {
+  const r = run("osascript", ["-e", 'tell application "System Events" to tell process "peak" to get {position, size} of window 1'])
+  const n = (r.stdout ?? "").split(",").map((v) => Number(v.trim()))
+  const ok = n.length === 4 && n.every(Number.isFinite) && n[2] > 200 && n[3] > 200
+  if (!frameLogged) {
+    log(`window frame: ${ok ? n.join(",") : `not available (${(r.stderr ?? "").trim() || r.stdout?.trim()}), reading the whole screen`}`)
+    frameLogged = true
+  }
+  return ok ? n : null
+}
+
 const magick = () => (run("magick", ["-version"]).status === 0 ? "magick" : "convert")
 
 /**
@@ -82,7 +95,10 @@ function readScreen() {
   const dir = mkdtempSync(join(tmpdir(), "peak-ocr-"))
   const shot = join(dir, "screen.png")
   const page = join(dir, "page.png")
-  run("screencapture", ["-x", shot])
+  // Only the window, where macOS will say where it is: a 1920 by 1080 screen is mostly desktop,
+  // and reading it all took long enough for programs to end first.
+  const frame = windowFrame()
+  run("screencapture", frame ? ["-x", "-R", frame.join(","), shot] : ["-x", shot])
   const pixels = Number(run("sips", ["-g", "pixelWidth", shot]).stdout.match(/pixelWidth: (\d+)/)?.[1])
   const points = Number(run("osascript", ["-e", 'tell application "Finder" to get item 3 of (bounds of window of desktop)']).stdout.trim())
   const toPoints = (points || pixels) / pixels
@@ -95,8 +111,8 @@ function readScreen() {
     word: c[11].trim(),
     plain: clean(c[11].trim()),
     line: `${c[2]}/${c[3]}/${c[4]}`,
-    x: (Number(c[6]) / ENLARGE) * toPoints,
-    y: (Number(c[7]) / ENLARGE) * toPoints,
+    x: (Number(c[6]) / ENLARGE) * toPoints + (frame?.[0] ?? 0),
+    y: (Number(c[7]) / ENLARGE) * toPoints + (frame?.[1] ?? 0),
     w: (Number(c[8]) / ENLARGE) * toPoints,
     h: (Number(c[9]) / ENLARGE) * toPoints,
   }))
@@ -114,7 +130,7 @@ function readScreen() {
     const text = run("tesseract", [crop, "stdout", "--psm", "7"]).stdout.trim().replace(/^\W+\s*/, "")
     // An icon inside a button reads as stray symbols.
     for (const word of text.split(/\s+/).map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}.]+$/gu, "")).filter(Boolean)) {
-      words.push({ word, plain: clean(word), line: `shape-${n}`, x: x * toPoints, y: y * toPoints, w: w * toPoints, h: h * toPoints })
+      words.push({ word, plain: clean(word), line: `shape-${n}`, x: x * toPoints + (frame?.[0] ?? 0), y: y * toPoints + (frame?.[1] ?? 0), w: w * toPoints, h: h * toPoints })
     }
   }
   return words
@@ -142,7 +158,9 @@ function locateAll(name) {
     if (wanted.every((w, j) => nearly(words[i + j].plain, w))) {
       const last = words[i + wanted.length - 1]
       const exact = wanted.every((w, j) => words[i + j].plain === w)
-      hits.push({ rank: (exact ? 4 : 0) + (sizes.get(words[i].line) === wanted.length ? 2 : wanted.length > 1 && sizes.get(words[i].line) === wanted.length + 1 ? 1 : 0), x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
+      // The case as written counts too: the History button, not "From history" above the runs.
+      const cased = name.split(/\s+/).every((w, j) => words[i + j].word.replace(/[.,:]$/, "") === w)
+      hits.push({ rank: (exact ? 8 : 0) + (cased ? 4 : 0) + (sizes.get(words[i].line) === wanted.length ? 2 : wanted.length > 1 && sizes.get(words[i].line) === wanted.length + 1 ? 1 : 0), x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
     }
   }
   return hits.sort((a, b) => b.rank - a.rank || a.y - b.y)
