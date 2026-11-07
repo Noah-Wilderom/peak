@@ -1,0 +1,40 @@
+# Candidate f17d80dc1da1d56295f6cab990a65724c5379ab4. Artifacts from Release run 42319358434, signed with the production updater key on native runners. recorded 2026-11-07T00:59:43Z.
+# The tag's own Release run rebuilds these, so their hashes will differ. This records what was validated, and shows the shape of the release.
+
+## Commit in each build
+linux            0.1.0 f17d80dc1da1d56295f6cab990a65724c5379ab4 rustc 1.99.1 (58cf8f9c3 2026-10-13)
+windows          0.1.0 f17d80dc1da1d56295f6cab990a65724c5379ab4 rustc 1.99.1 (58cf8f9c3 2026-10-13)
+darwin-aarch64   0.1.0 f17d80dc1da1d56295f6cab990a65724c5379ab4 rustc 1.99.1 (58cf8f9c3 2026-10-13)
+darwin-x86_64    0.1.0 f17d80dc1da1d56295f6cab990a65724c5379ab4 rustc 1.99.1 (58cf8f9c3 2026-10-13)
+
+## Independent signature check, production public key
+signature ok: timestamp:1794012256 file:peak.app.tar.gz version:0.1.0
+signature ok: timestamp:1794012111 file:peak_0.1.0_amd64.AppImage version:0.1.0
+signature ok: timestamp:1794012497 file:peak.app.tar.gz version:0.1.0
+signature ok: timestamp:1794012270 file:peak_0.1.0_x64-setup.exe version:0.1.0
+
+## SHA256SUMS
+d3d4963fb27c361121651c90e97308c84974793449eaf4c9e8896dae763ee67d  BUILD-INFO-darwin-aarch64.json
+f4c6428fd502bda241206647debd1737150e751371554b4a443f55d87cee1db7  BUILD-INFO-darwin-x86_64.json
+410bed5eaaa1e6ab41f0c20555cba17611518f91d9b42822f44befeed9f932a2  BUILD-INFO-linux.json
+39ec557cbdcc98da3c1f73e66a6fbf00f5d4a6b4134f51a9e087ee03587facf7  BUILD-INFO-windows.json
+f242295ee4b6930e31475d774be541ff5d2c02573a87d0d474ca99267716cf0b  install.sh
+51c5e67b33f908271c8c5efa37143744b99533d4405444b5da8460f5c634d407  latest.json
+38657eb3ec60d434587706f1d47b8ca3f7e7b97662c0869d5ba8566b3b25c9ee  peak_0.1.0_aarch64.app.tar.gz
+d7d098874d7f9d676441854187f49a8a195b1a1985475ba26a9b1e299f88bdd1  peak_0.1.0_aarch64.app.tar.gz.sig
+694a8b178a71b2eba5546f84737af0ba7b83c143f48cb52ccb736f16293bea85  peak_0.1.0_aarch64.dmg
+0ced984734a27fa2cd1804cda7c5e86a1fd55802ed3c02623ec144c412c7bbb5  peak_0.1.0_amd64.AppImage
+5ff3cb4c757f34f28cd15f2c85dc7dd44f92fd951ca0bcdd6354a204023d7915  peak_0.1.0_amd64.AppImage.sig
+238387177e3f1bc3a0f1300dafa009b1ff2fc98fc3e655dc47f4daf3c5ee2a0d  peak_0.1.0_amd64.deb
+a8dfbca9434969cdaa45381c73a3063975aeae63db2ea281e2fcf5705256be33  peak_0.1.0_x64-setup.exe
+43b5a1887d08ffcb8a21643f23e240ed085ffbbef42bb17dc8061810d2a1bf7b  peak_0.1.0_x64-setup.exe.sig
+6f7c3c75e278f14e124775274f172970302c3523df1992c408a9a1e80f5cd3d4  peak_0.1.0_x64.app.tar.gz
+9343c696d8746fc3e16a9382da34e22585174d5ff38fedfb6192ff1b830d2ffb  peak_0.1.0_x64.app.tar.gz.sig
+6bd5baec03f41d938356e207fc01e723e34e77de1a227b001ba963b8f4783974  peak_0.1.0_x64.dmg
+
+## latest.json
+version 0.1.0 pub_date 2026-11-07T00:59:42Z
+linux-x86_64-appimage https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_amd64.AppImage
+windows-x86_64-nsis https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_x64-setup.exe
+darwin-aarch64-app https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_aarch64.app.tar.gz
+darwin-x86_64-app https://github.com/Noah-Wilderom/peak/releases/download/v0.1.0/peak_0.1.0_x64.app.tar.gz

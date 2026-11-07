@@ -32,22 +32,23 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
-| Package builds and signs | CI | CI | CI | Earlier runs; last run's DMG step hit a runner fault |
-| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | Earlier runs |
+| Package builds and signs | CI | CI | CI | CI |
+| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
+| Runtime agents report from inside the program (`smoke.mjs`) | CI | CI | CI | CI |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | Earlier runs; last run hit a test race | Earlier runs; last run hit a test race | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
-| Runtime agents report from inside the program (`smoke.mjs`) | CI | CI | CI | **Not yet on the stricter check** |
-| `install.sh` download route, publish verifier on all artifacts | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
-| Real update through GitHub (`public-update-proof.mjs`) | **After publishing** | **After publishing** | **After publishing** | **After publishing** |
+| Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
+| `install.sh` download route | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
+| Install from public URLs (`public-delivery.yml`) | **After publishing** | **After publishing** | **After publishing** | **After publishing** |
+| Update through the real GitHub feed (`public-update-proof.mjs`) | **After publishing**; rehearsed locally | **After publishing** | **After publishing** | **After publishing** |
 | Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
 | OS code signing and notarization | Not applicable | None, by decision | Ad-hoc only, by decision | Ad-hoc only, by decision |
 
-"CI" means a native GitHub runner on `64a4d5d`, and "earlier runs" means `110e1c4`. Every later commit needs them again.
+"CI" means a native GitHub runner on `f17d80d`. Any later commit changing the app, scripts or workflows needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/` and `ci-64a4d5d/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/`, `ci-64a4d5d/` and `ci-f17d80d/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
 ## Secrets
 

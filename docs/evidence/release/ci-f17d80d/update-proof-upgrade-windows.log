@@ -1,0 +1,24 @@
+# commit f17d80d Update proof / Upgrade (windows): success. job 128239903536
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/update-proof.mjs proof-output
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+ok   the base version is installed peak 9.0.0 (Windows installer, commit f17d80dc1da1d56295f6cab990a65724c5379ab4)
+ok   a run recorded before the update history-1794012605877-err
+ok   offline: the app keeps running 
+ok   no-update: nothing installed, app alive feed 3, artifact 0
+ok   error500: nothing installed, app alive feed 3, artifact 0
+ok   malformed: nothing installed, app alive feed 3, artifact 0
+ok   missing-artifact: nothing installed, app alive feed 7, artifact 6
+ok   truncated: nothing installed, app alive feed 6, artifact 5
+ok   tampered: nothing installed, app alive feed 7, artifact 5
+ok   wrong-key: nothing installed, app alive feed 7, artifact 6
+ok   downloaded from the feed feed 1, artifact 1
+ok   the old app exited and a new one started 4800 -> 1200
+ok   the installed copy is the new version peak 9.0.1 (Windows installer, commit f17d80dc1da1d56295f6cab990a65724c5379ab4)
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 7
+ok   the new app monitors the CLI post-1794012736400-err
+ok   that workload finished with its own exit code exit 9
+installed files: peak-cli.exe peak-cli.old.1123875 peak.db peak.db-shm peak.db-wal peak.exe
+PROOF OK

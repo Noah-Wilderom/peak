@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-07 00:34 UTC
-- **State:** first packaged release **in final validation**. On `64a4d5d` the product passed everything it reached, but three jobs failed for test or runner reasons, which are fixed in the uncommitted tree. That tree needs a clean CI run before tagging. Nothing is published yet.
+- **Last update:** 2026-11-07 01:00 UTC
+- **State:** **candidate confirmed: `f17d80d`.** Every required pre-publication check passes on native CI on that exact commit. **Not delivered yet:** nothing is published, and the public install and update proofs can only run after publishing.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,30 +12,37 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: not complete. Remaining: a clean CI run on the final tree, publishing, then the public checks.**
+**Status: candidate ready. Remaining: publish, then the public proofs. Not complete until those pass.**
 
-### Where it stands: `64a4d5d`
+### The candidate: `f17d80dc1da1d56295f6cab990a65724c5379ab4`
 
-Update proof 42316136032, Release 42316136210, Tests 42316136119. Summaries in `docs/evidence/release/ci-64a4d5d/`. This is the first run with the agent fix and the stricter agent check.
+Update proof 42319370930, Release 42319358434, Tests 42319358452, all on that exact commit, all success. Summaries in `docs/evidence/release/ci-f17d80d/`. Artifact identities, build commits, signature checks, `SHA256SUMS` and feed shape in `docs/evidence/release/13-candidate-f17d80d.txt`.
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
-| Production package, updater signature checked independently | **Pass** | **Pass** | **Pass** | **Fail: DMG step** |
-| Install, app, separate CLI, real samples, exit code | **Pass** | **Pass** | **Pass** | Not reached |
-| Node and Python agents, by loop lag, which only an agent sends | **Pass** | **Pass** | **Pass** | Not reached |
+| Production package, updater signature checked independently | **Pass** | **Pass** | **Pass** | **Pass** |
+| Install, app, separate CLI, real samples, exit code, right directory, clean environment | **Pass** | **Pass** | **Pass** | **Pass** |
+| Node and Python agents, by loop lag, which only an agent sends | **Pass** | **Pass** | **Pass** | **Pass** |
 | Real signed upgrade and relaunch; history kept; CLI workload survives | **Pass** | **Pass** | **Pass** | **Pass** |
 | Offline, no update, HTTP 500, malformed feed, missing, truncated, tampered, wrong key | **Pass** | **Pass** | **Pass** | **Pass** |
-| Real window flow | **Fail: test** | **Fail: test** | Not possible | Not possible |
+| Real window: found by itself, nothing downloads until asked, progress, signature-failure message, restart names what it stops and can be declined, settings and history kept | **Pass** | **Pass** | Not possible | Not possible |
 | Native core tests | Covered by **Tests** | **Pass** | **Pass** | **Pass** |
 
-**Tests** passes: backend gate at **99.12% lines** on CI (7957 lines, 70 uncovered, gate unchanged at 99), frontend at 100%, both agent versions.
+**Tests** passes: backend gate at **99.16% lines** on CI (7957 lines, 67 uncovered, gate unchanged at 99), frontend at 100%, both agent versions. It includes the early-agent regression test and the artifact-selection controls.
 
-**The three failures, none yet confirmed fixed on CI:**
-- **macOS x64 package:** `hdiutil: couldn't eject "disk2" - Resource busy` while making the DMG. It's the runner, not the app, and the same step passed on four earlier runs. `scripts/release/tauri-build.sh` now retries it on macOS only.
-- **Linux window flow:** "never saw /Settings saved/", and then "settings lost". The harness clicked "Alerts off" once, without waiting for the controls to appear. Most likely the click found nothing, so there was nothing to save, and the second failure follows from that. The screenshot doesn't show that part of the page, so this is a reading, not an observation. It now retries and checks the change registered. Passed locally on the final harness, log 2.
-- **Windows window flow:** every step passed up to the restart; then "Cannot read properties of null (reading 'innerText')" when reopening, because the page had no body yet. The harness now allows for that. Settings and history after a Windows restart **aren't proven on this commit**; they were on `110e1c4`.
+Local on this tree: the manifest and verifier passed 24 of 24 checks on this run's artifacts (log 11), served locally, not by GitHub.
 
-The agent race regression test is in the backend suite, and that suite passes.
+**What this doesn't show.**
+- **The `hdiutil` failure:** that run didn't need the retry, so the retry itself is untested, and the fault may recur.
+- **The Linux window failure on `64a4d5d`:** still an inference that the click found nothing. The harness change came with a pass, which fits, but it doesn't show the cause.
+- **macOS:** its upgrade is driven by a proof build pressing buttons on a timer, because it has no WebDriver. No check has clicked through the macOS update UI.
+- **The Windows window flow** uses a debugging port set only in that job's test builds.
+- **Remote targets from Windows and macOS** have never run.
+
+**Earlier causes, as established.**
+- **Established:** the Windows upgrade failure was the stale-installer selection in `collect.mjs`. The early-agent race is real, with a test that fails without the fix.
+- **Unknown, probably the same:** the `187f415` timeout, whose error wasn't captured.
+- **Not established:** that a running `peak-cli.exe` would block the installer. The hook moves it, as the logs show, but no run has gone without the hook.
 
 ### The real GitHub feed: how it gets proven
 
@@ -524,11 +531,15 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-64a4d5d/`, `.github/workflows/public-delivery.yml` and `scripts/release/tauri-build.sh`.
-2. Send me back here. Nothing of mine is running or waiting until then. I'll read **Update proof**, **Release** and **Tests** on that commit, then either fix what they find or confirm it's the candidate.
+**PM, in order:**
+1. Commit this tree on `release-validation/0.1.0` and push it: every changed path except your `docs/PROJECT-MANAGEMENT.md`. It's docs and evidence only. Check with `git diff --stat f17d80d HEAD -- src src-tauri scripts .github package.json bun.lock`, which must print nothing. If it prints anything, stop and tell me.
+2. Make `master` that commit: `git checkout master && git merge --ff-only release-validation/0.1.0 && git push origin master`.
+3. Tag it: `git tag v0.1.0 && git push origin v0.1.0`. **Release** rebuilds all four targets, re-checks signatures and smoke tests them, then makes a **draft**. That draft step has never run for real, so if it fails, send me the run.
+4. Check the draft: 18 assets including `latest.json`, `SHA256SUMS` and `install.sh`. Download it and run `sha256sum -c SHA256SUMS`.
+5. Publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`. **This is what reaches users.**
+6. Confirm **Public delivery** started. If not: `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak --ref master -f tag=v0.1.0`.
+7. Send me back here. Nothing of mine is running or waiting until then. I'll read that run, run `verify-published.mjs` myself, and install from the real URLs in a disposable environment.
 
-**Then, once I've confirmed it:**
-3. Merge to `master`, then tag `v0.1.0` and push the tag. **Release** rebuilds, re-checks and makes a draft.
-4. Compare the draft's assets to `SHA256SUMS`, then publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`. That fires **Public delivery** by itself. A release published with `GITHUB_TOKEN` wouldn't, but `gh` with your own login does; if it doesn't appear, run it by hand with `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak -f tag=v0.1.0`.
-5. Send me back here. I'll read that run, run `verify-published.mjs` myself, and install from the real URLs in a disposable environment.
+**If a public proof fails:** the release is already out, so the fix is a new version. If the feed itself is wrong, unpublish or fix the assets first, since installed copies read it.
+
+**Separately:** the updater key and its paired password still need an off-server backup.
