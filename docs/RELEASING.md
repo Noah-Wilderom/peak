@@ -36,15 +36,17 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Updater signature checked independently | CI | CI | CI | CI |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | CI | **Not yet: fix awaiting a run** | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
-| Runtime agents report from inside the program (`smoke.mjs`) | Local | **Not yet** | **Not yet** | **Not yet** |
+| Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
+| Runtime agents report from inside the program (`smoke.mjs`) | CI, weak check for Node; local with the stronger one | CI | CI | CI |
+| `install.sh` download route, publish verifier on all artifacts | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
+| Real update through GitHub | **Needs a second release** | **Needs a second release** | **Needs a second release** | **Needs a second release** |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
 | Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
-| OS code signing and notarization | Not applicable | **None configured** | **Ad-hoc only** | **Ad-hoc only** |
+| OS code signing and notarization | Not applicable | None, by decision | Ad-hoc only, by decision | Ad-hoc only, by decision |
 
-"CI" means a native GitHub runner on `ea3ebc1`. Every later commit needs them again.
+"CI" means a native GitHub runner on `110e1c4`. Every later commit needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/` and `ci-ea3ebc1/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/` and `ci-110e1c4/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
 ## Secrets
 
@@ -54,17 +56,21 @@ Set these on the repository, for the tag's workflow:
 |---|---|---|
 | `TAURI_SIGNING_PRIVATE_KEY` | **Yes** | Contents of the updater private key |
 | `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | **Yes** | Its password |
-| `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` | For macOS trust | Base64 `.p12` of a **Developer ID Application** certificate, its password, its identity name |
-| `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | For macOS trust | Apple account, app-specific password, team, for notarization |
+| `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` | Not used for this release | Base64 `.p12` of a **Developer ID Application** certificate, its password, its identity name |
+| `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | Not used for this release | Apple account, app-specific password, team, for notarization |
 
 The updater key signs what installed copies accept, so **lose it and existing installs can't be updated; leak it and someone can sign updates for them.** Keep a backup somewhere other than this server.
 
-### What's different without the optional ones
+### OS warnings: the user's decision for this release
 
-| Without | Effect |
-|---|---|
-| Apple Developer ID and notarization | The app is ad-hoc signed. It runs on Apple Silicon, but a copy downloaded through a browser is blocked by Gatekeeper until the user allows it in System Settings > Privacy & Security, or runs `xattr -dr com.apple.quarantine /Applications/peak.app`. Updates work once it's installed. Needs a paid Apple Developer account; only its Account Holder can create the certificate |
-| A Windows code-signing certificate | The installer runs, but SmartScreen warns on download, and Windows 11's Smart App Control can block it outright. No certificate is wired in yet. With one, set `bundle.windows.certificateThumbprint` and import the `.pfx` in the workflow, or use `signCommand` for a cloud-held key |
+The first release ships **without** Apple or Windows code signing, with the warnings documented in the README. No certificate or Apple account is involved, and nothing is notarized. Updater signatures are separate and always required.
+
+| Platform | What users see | How to get past it |
+|---|---|---|
+| macOS | The app is ad-hoc signed. A copy downloaded through a browser is blocked by Gatekeeper | Open it once, then System Settings > Privacy & Security > Open Anyway, or `xattr -dr com.apple.quarantine /Applications/peak.app` |
+| Windows | SmartScreen warns on download. Windows 11's Smart App Control can block it, and only turning that feature off gets past it | "More info" > "Run anyway" |
+
+Updates installed by the app work once it's installed. If this changes later: a macOS **Developer ID** certificate needs a paid Apple account, set through the optional `APPLE_*` secrets above; a Windows certificate needs `bundle.windows.certificateThumbprint` or `signCommand`, which isn't wired in yet.
 
 ## Cutting a release
 
@@ -73,14 +79,10 @@ The updater key signs what installed copies accept, so **lose it and existing in
 3. Tag `vX.Y.Z` and push it. **Release** builds everything and makes the draft.
 4. Check the draft's assets against `SHA256SUMS`.
 5. Publish: `gh release edit vX.Y.Z --draft=false --latest`. Installed copies see it within 6 hours, or on next start.
+6. Straight after: `node scripts/release/verify-published.mjs vX.Y.Z`. It uses anonymous requests only, and checks the feed, every download, checksums and signatures.
 
 To roll back, publish a newer version with the fix. Unpublishing stops new updates, but copies that already updated stay put, and the updater won't move to a lower version.
 
-## The repository is private
+## Where releases live
 
-**This blocks real delivery.** Anonymous requests can't read release assets of a private repository, and installed copies are anonymous: the feed and `install.sh` get 404s, so updates would fail for everyone and only people with repository access could download. Embedding a token in the app isn't an option. The choices:
-
-1. Make this repository public.
-2. Publish releases to a separate public repository (say `Noah-Wilderom/peak-releases`), which keeps the source private. It needs `plugins.updater.endpoints`, `PEAK_RELEASE_REPO`, the README links and the workflow's `gh release create --repo` to change, with a token that can write there.
-
-The endpoint is compiled in, so this has to be settled before the first release.
+`Noah-Wilderom/peak`, which is public. The updater and `install.sh` read its release assets anonymously, with no token. **Being public doesn't make anything available:** until a release is published, `releases/latest/download/latest.json` is a 404, which installed copies treat as "couldn't check".

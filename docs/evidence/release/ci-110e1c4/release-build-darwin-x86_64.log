@@ -1,0 +1,19 @@
+# commit 110e1c4 Release / Build (darwin-x86_64): success. job 128212551614
+  node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+signature ok: timestamp:1794008323	file:peak.app.tar.gz	version:0.1.0
+##[group]Run if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a node scripts/e2e/smoke/smoke.mjs artifacts smoke-output
+  PEAK_SMOKE_PLATFORM: darwin-x86_64
+ok   the installed copy says what it is peak 0.1.0 (macOS app, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+collector: x86_64: /Users/runner/Library/Application Support/peak/collectors/x86_64-480032c4c1e09106/peak-collector (for Linux targets) 
+ok   names its bundled collector x86_64: /Users/runner/Library/Application Support/peak/collectors/x86_64-480032c4c1e09106/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sjc20-cw761-2db6951c-0cb3-423d-af23-a233afc34498-864E570DE383.local for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/peak place k1za9Z
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794008343807-err
+ok   the app recorded real samples and the exit samples 8, max rss 116277248, exit 7
+ok   the Node agent reported from inside the program max heap 4619000
+ok   the Python agent reported from inside the program lag samples 5
+SMOKE OK

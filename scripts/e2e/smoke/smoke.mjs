@@ -57,9 +57,10 @@ const run = await waitFor("the run in the app's database", () => {
 if (run) {
   check("the app recorded real samples and the exit", run.exit_code === 7 && run.maxRss > 0 && run.samples > 2, `samples ${run.samples}, max rss ${run.maxRss}, exit ${run.exit_code}`)
 }
-// The runtime agents load inside the user's program, so these are real heap and lag figures.
+// The runtime agents load inside the user's program. Only an agent reports loop lag: heap alone
+// won't do, because without an agent Linux estimates it from anonymous memory.
 const nodeSamples = storedSamples(id)
-check("the Node agent reported from inside the program", nodeSamples.some((s) => s.heap > 0), `max heap ${Math.max(0, ...nodeSamples.map((s) => s.heap ?? 0))}`)
+check("the Node agent reported from inside the program", nodeSamples.some((s) => s.loopLag !== undefined && s.loopLag !== null), `lag samples ${nodeSamples.filter((s) => s.loopLag != null).length}`)
 
 const python = ["python3", "python"].find((p) => spawnSync(p, ["--version"], { encoding: "utf8" }).status === 0)
 if (python) {

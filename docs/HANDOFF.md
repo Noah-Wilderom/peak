@@ -99,6 +99,9 @@ as `(idle)` but charges synchronous blocking to the caller; `stack` samples on a
 - **Finding the app.** Each open app writes `instances/<pid>-<start ticks>.json` to the data directory named by the environment and to the one named by the OS account, and restores them every 10s if they vanish. `control.json` is only for an older `peak` on the PATH. A record's process is checked before its port gets the secret. An app started with a temporary `XDG_DATA_HOME` is therefore still visible to that user's other shells, though a CLI prefers the app sharing its data directory.
 - **An AppImage's launcher moves into its own mount.** The bundled WebKit needs that directory, so only the command line goes back to `OWD` (`release::restore_launch_dir`). Everything started for the user goes through `runner::host_command`, which removes what the image added to the environment. Skip it and the user's tools load the image's libraries.
 - **`createUpdaterArtifacts` makes `tauri build` need a signing key.** `--no-bundle` (`task peak:build`) doesn't bundle, so it doesn't.
+- **An agent can reach the hub before its run exists.** `peak run` announces a run after starting it, so `Hub::greet` waits briefly. Heap can't show an agent is there, because Linux estimates it without one. Loop lag can.
+- **Windows installs at the restart, not at the download.** Its installer ends the running app, so `Updates` downloads and verifies first, and `prepare_restart` stops what a restart stops.
+- **A bundle folder keeps old versions.** `collect.mjs` only takes this version's file, and `collect-check.mjs` guards that.
 - **Don't add a pre-release feed by accident.** Apps read `releases/latest`, which skips drafts. Publishing is what reaches users.
 - **Hub tokens are run ids**, so the hub stays localhost-only, on whichever machine it runs.
 - **Serde and internally tagged enums:** integer map keys fail through them (`ServerFrame`), so `child_names` uses strings.

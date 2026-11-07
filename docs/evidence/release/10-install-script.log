@@ -1,0 +1,38 @@
+# install.sh's download route, and the hardened smoke, against the real production-key Linux artifact from CI run 42311128833 (commit 110e1c4), from a local server. Ubunt
+--- first install, by download
+Installed: peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+History and settings are untouched. Run 'peak' to open the app.
+/home/tester/.local/bin isn't on your PATH. Use /home/tester/.local/bin/peak, or add this to your shell profile:
+  export PATH="/home/tester/.local/bin:$PATH"
+exit=0
+peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+peak.desktop
+--- over an earlier source build
+Replacing /home/tester/.local/bin/peak: peak source build
+Installed: peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+/home/tester/.local/bin isn't on your PATH. Use /home/tester/.local/bin/peak, or add this to your shell profile:
+  export PATH="/home/tester/.local/bin:$PATH"
+peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+--- a corrupted download
+Checksum mismatch for peak_0.1.0_amd64.AppImage: nothing installed.
+exit=1
+install unchanged
+0
+--- smoke, real CI artifact
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+ok   names its bundled collector x86_64: /home/tester/.local/share/peak/collectors/x86_64-57c0bed234884cd7/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on 871febdbfe49 for tester — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place cV67gC
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794009009366-err
+ok   the app recorded real samples and the exit samples 8, max rss 124387328, exit 7
+FAIL the Node agent reported from inside the program lag samples 0
+FAIL the Python agent reported from inside the program lag samples 0
+SMOKE FAILED
+
+# The two agent failures above are real, on commit 110e1c4's artifact: the agent's hello could beat the CLI's 'started' message and be dropped for the whole run. Fixed in peak-core/src/hub.rs, with a test that fails without it. After the fix, on a local production-key build of the fixed tree, smoke.mjs three times running, same chroot, recorded 2026-11-07T00:02:10Z:
+run 1: Node agent ok (lag samples 7), Python agent ok (lag samples 8-9), SMOKE OK
+run 2: Node agent ok (lag samples 7), Python agent ok (lag samples 8-9), SMOKE OK
+run 3: Node agent ok (lag samples 7), Python agent ok (lag samples 8-9), SMOKE OK

@@ -1,17 +1,17 @@
-# recorded 2026-11-06T22:08:29Z, PEAK_REQUIRE_COLLECTOR=1
+# recorded 2026-11-06T23:58:10Z, PEAK_REQUIRE_COLLECTOR=1
 fmt exit=0
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.66s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 21.13s
 clippy exit=0
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.06s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.40s
 collector exit=0
-test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.82s
+test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.83s
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
 test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
 test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.06s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-test result: ok. 81 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.24s
-TOTAL                            18195               313    98.28%        1123                28    97.51%        7933                63    99.21%           0            
+test result: ok. 82 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.24s
+TOTAL                            18249               312    98.29%        1127                28    97.52%        7957                67    99.16%           0            
 coverage exit=0

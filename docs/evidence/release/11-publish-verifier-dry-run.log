@@ -1,0 +1,26 @@
+# verify-published.mjs dry run: real signed artifacts of all four targets from CI run 42311128833, manifest.mjs output, served locally. The real public check comes after publishing. recorded 2026-11-06T23:48:56Z
+ok   the feed announces this version 0.1.0
+ok   it has release notes and a date 
+ok   it has every platform, and no bare key a .deb could match linux-x86_64-appimage windows-x86_64-nsis darwin-aarch64-
+ok   linux-x86_64-appimage: downloads anonymously peak_0.1.0_amd64.AppImage, 86751736 bytes
+ok   linux-x86_64-appimage: matches SHA256SUMS 
+ok   linux-x86_64-appimage: signed by the updater key, for this version timestamp:1794008699 file:peak_0.1.0_amd64.AppIm
+ok   linux-x86_64-appimage: the published .sig is the same signature 
+ok   windows-x86_64-nsis: downloads anonymously peak_0.1.0_x64-setup.exe, 5033218 bytes
+ok   windows-x86_64-nsis: matches SHA256SUMS 
+ok   windows-x86_64-nsis: signed by the updater key, for this version timestamp:1794007530 file:peak_0.1.0_x64-setup.exe
+ok   windows-x86_64-nsis: the published .sig is the same signature 
+ok   darwin-aarch64-app: downloads anonymously peak_0.1.0_aarch64.app.tar.gz, 7010100 bytes
+ok   darwin-aarch64-app: matches SHA256SUMS 
+ok   darwin-aarch64-app: signed by the updater key, for this version timestamp:1794007356 file:peak.app.tar.gz version:0
+ok   darwin-aarch64-app: the published .sig is the same signature 
+ok   darwin-x86_64-app: downloads anonymously peak_0.1.0_x64.app.tar.gz, 7538540 bytes
+ok   darwin-x86_64-app: matches SHA256SUMS 
+ok   darwin-x86_64-app: signed by the updater key, for this version timestamp:1794008323 file:peak.app.tar.gz version:0.
+ok   darwin-x86_64-app: the published .sig is the same signature 
+ok   peak_0.1.0_amd64.deb: downloads anonymously and matches SHA256SUMS 8722906 bytes
+ok   peak_0.1.0_aarch64.dmg: downloads anonymously and matches SHA256SUMS 6846940 bytes
+ok   peak_0.1.0_x64.dmg: downloads anonymously and matches SHA256SUMS 7414030 bytes
+ok   install.sh: downloads anonymously and matches SHA256SUMS 3099 bytes
+ok   latest.json matches SHA256SUMS 
+ALL OK

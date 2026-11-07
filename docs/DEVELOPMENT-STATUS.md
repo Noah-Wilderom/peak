@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-06 23:17 UTC
-- **State:** first packaged release **in progress**. On `ea3ebc1`, everything required passes on native CI except one thing: the Windows real-button upgrade. A fix for it is uncommitted. No public destination exists yet. No background work is running.
+- **Last update:** 2026-11-07 00:02 UTC
+- **State:** first packaged release **in final validation**. On `110e1c4` every required native check passed. Validation then found one more real bug, fixed in the uncommitted tree, so a final CI run on that tree is needed before tagging. Nothing is published yet.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,43 +12,51 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: not complete. Two things remain: the Windows real-button upgrade, and a public destination.**
+**Status: not complete. Remaining: one more CI run on the final tree, then publishing and checking the public release.**
 
-### Where it stands: `ea3ebc1`
+### Where it stands: `110e1c4`
 
-Update proof 42307541013, Release 42307541017, Tests 42307541018. Summaries in `docs/evidence/release/ci-ea3ebc1/`.
+Update proof 42311128624, Release 42311128833, Tests 42311128677. Summaries in `docs/evidence/release/ci-110e1c4/`, Windows screens in `screens/`.
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
 | Production package, updater signature checked independently | **Pass** | **Pass** | **Pass** | **Pass** |
 | Install, app, separate CLI, real samples, exit code | **Pass** | **Pass** | **Pass** | **Pass** |
+| Node and Python agents, as checked on this commit (see below) | **Pass, weak for Node** | **Pass** | **Pass** | **Pass** |
 | Real signed upgrade and relaunch; history kept; CLI workload survives | **Pass** | **Pass** | **Pass** | **Pass** |
 | Offline, no update, HTTP 500, malformed feed, missing, truncated, tampered, wrong key | **Pass** | **Pass** | **Pass** | **Pass** |
-| Real buttons: consent, progress, failure message, settings kept | **Pass** | **Fail, fix waiting** | Not possible | Not possible |
+| Real window: found by itself, nothing downloads until asked, progress, failure message, restart names what it stops and can be declined, settings and history kept | **Pass** | **Pass** | Not possible | Not possible |
 | Native core tests | Covered by **Tests** | **Pass** | **Pass** | **Pass** |
 
-**Tests** passes: backend gate at **99.14% lines** on CI (7933 lines, 68 uncovered, gate unchanged at 99), frontend at 100%, both agent versions.
+**Tests** passes: backend gate at **99.17% lines** on CI (7933 lines, 66 uncovered, gate unchanged at 99), frontend at 100%, both agent versions.
+
+macOS has no WebDriver, so its upgrade is driven by a proof build that presses the buttons on a timer, and its UI evidence is screenshots. The Windows window is driven through WebView2's debugging port, set only in that job's test builds.
+
+**Found after that run, fixed, needs the final CI run: agents could silently miss a whole run.** With `peak run`, a run only becomes known once the CLI's "started" message is handled. A fast-starting runtime's agent could say hello first, be dropped, and never retry, so that run had no heap, GC or lag data and nothing said so. This was intermittent and timing-dependent. It failed every time in the slower chroot on the `110e1c4` artifact, and passed on CI runners. The check that found it came from a suspicious number: on Linux the old check accepted a heap figure that's an estimate when no agent reports. It now requires loop lag, which only an agent sends. **So `110e1c4`'s Linux Node result was weak**, and its other agent passes show the race doesn't always strike, not that it can't. `hub.rs` now gives an agent 3 seconds for its run to appear. A test fails without the wait and passes with it, and the smoke test passed three runs out of three where it had failed every time (`docs/evidence/release/10-install-script.log`).
 
 **What each Windows story turned out to be.**
-- **Established:** the upgrade failed because `collect.mjs` shipped a 9.0.0 installer under the 9.0.1 name, and the updater refused it. With the fix, the upgrade passes. The controls are in `scripts/release/collect-check.mjs`, now in **Tests**, with results in `docs/evidence/release/9-artifact-selection.log`.
-- **Unknown:** the first timeout on `187f415`. Its error wasn't captured. It has the same symptom, so it was probably the same cause.
-- **Not established:** that a running `peak-cli.exe` blocks the installer. The upgrade passed with a CLI workload running, but the rename hook was in place, so that run can't say what would happen without it. The next run logs whether the hook moved the file. It stays either way, as it does no harm.
+- **Established:** the upgrade failed because `collect.mjs` shipped a 9.0.0 installer under the 9.0.1 name, and the updater refused it. With the fix it passes. Controls: `scripts/release/collect-check.mjs`, in **Tests**, results in `9-artifact-selection.log`.
+- **Unknown:** the first timeout on `187f415`. Its error wasn't captured. Same symptom, so probably the same cause.
+- **Not established:** that a running `peak-cli.exe` would block the installer. `110e1c4`'s log shows the hook did move it (`peak-cli.old.1093140`), and the upgrade passed with the workload running, but no run has gone without the hook.
+- **Established:** the Windows debugging port works when set in the build's config. It didn't when asked through the environment. Why isn't established; my reading, that Tauri's own browser arguments replace the variable, is untested.
 
-**Windows buttons: not proven, and that's the only failing job.** `msedgedriver` couldn't attach, and then the debugging port never opened when asked through the environment. Both depend on the same environment variable, so my reading is that Tauri's own browser arguments replace it. That's an inference. This job's builds now set the port in their config instead, and the job logs ports and processes if it still fails. Until this passes, the following are proven on Windows only by the timed proof build, or not at all: restart consent naming the commands, the failure message on screen, and settings surviving.
+**Also run, locally, on real artifacts from `110e1c4`:**
+- `install.sh`'s download route for the first time: fresh install with a menu entry, replacing a source-built copy, and a corrupted download refused with the install unchanged (log 10). Local server, so not GitHub.
+- `manifest.mjs` on all four targets' artifacts, then the new `scripts/release/verify-published.mjs`: 24 checks, all ok, including downloads, checksums and signatures (log 11). Also local.
 
-**Added since `ea3ebc1`, uncommitted, not yet run on CI:**
-- The Windows button fix above.
-- `smoke.mjs` now checks that the Node and Python runtime agents really report from inside the program. Passed locally on Linux. Until it runs natively, the README's "Yes" for agents on Windows and macOS only rests on Node programs running normally with the agent loaded.
-- `collect-check.mjs` in **Tests**.
+**Local gates on the final tree:** backend 99.16% lines, frontend 100% with 295 tests, fmt and clippy clean. Logs 4 and 6.
 
-The app itself hasn't changed since `676efdc`: only scripts, workflows and docs.
+**User decisions, settled.** Publish from `Noah-Wilderom/peak`, now public (PM changed it at 23:02 UTC and verified it anonymously). Ship with documented OS warnings: nothing is notarized or code-signed by an OS vendor, and the README says what users see and how to get past it. Updater signatures stay mandatory. No certificates or Apple account are needed.
 
-**Blockers to delivery.**
+**Limits that will still be true at release.**
+- **Delivery isn't proven until it happens.** The feed is a 404 until a release is published, and `verify-published.mjs` must run against the real URLs right after.
+- **A real update through GitHub can't be proven with one release.** Proofs use a localhost feed, and `v0.1.0` has nothing to update to. The first real test of GitHub's redirects and TLS in the updater comes with the next release, or a small `v0.1.1`. Until then installed copies should just report the latest version, which is worth checking once by hand after publishing.
+- **Remote targets from Windows and macOS** are built in but have never run: they need a real machine with a Linux target.
+- **Capabilities differ by platform.** The README's table is the reference. Handles, ports, memory composition and PSI are Linux-only, and shown as such.
+- **Stopping a windowless program on Windows** gives it no chance to clean up.
+- **Evidence on commits:** logs for a commit can only land in a later one, and the tag's own workflow rebuilds and smoke tests everything again.
 
-1. **The repository is private, so nothing can reach users.** Anonymous clients can't read a private repository's release assets, so the updater and `install.sh` would get 404s. The user has been asked: public source, or a public releases-only repository. The endpoint is compiled in, so this comes before the first tag. Details: `docs/RELEASING.md`.
-2. **The Windows button job.** See "Next action".
-
-**Not a blocker, but the user's call:** OS trust. Nothing is notarized or code-signed by an OS vendor. Without Apple Developer ID, a macOS download through a browser is blocked until the user allows it. Without a Windows certificate, SmartScreen warns and Smart App Control can block. Updater signatures are separate and always on.
+**Open for PM: an off-server backup of the updater key.** Losing it strands every installed copy.
 
 ### How it got here
 
@@ -483,9 +491,10 @@ checkout; nothing was lost. No further limit since.
 ## Next action
 
 **PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-ea3ebc1/`, `docs/evidence/release/9-artifact-selection.log` and `scripts/release/collect-check.mjs`.
-2. Send me back here. Nothing of mine is running or waiting until then.
+1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-110e1c4/` and `scripts/release/verify-published.mjs`.
+2. Send me back here. Nothing of mine is running or waiting until then. I'll read **Update proof**, **Release** and **Tests** on that commit, and either fix what they find or confirm it's the candidate.
 
-**Still needed from the user, without blocking CI:** where to publish (public source or a public releases-only repository; the update URL is compiled in, so before the first tag), and whether to buy OS trust.
-
-**Then, once all platforms pass:** tag `v0.1.0`, check the draft, publish with `gh release edit v0.1.0 --draft=false --latest`, and verify `releases/latest/download/latest.json` anonymously straight after.
+**Then, once I've confirmed it:**
+3. Merge to `master`, then tag `v0.1.0` and push the tag. **Release** rebuilds, re-checks and makes a draft.
+4. Compare the draft's assets to `SHA256SUMS`, then publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`.
+5. Straight after: `node scripts/release/verify-published.mjs v0.1.0`. I can then install from the real URLs in a disposable environment.

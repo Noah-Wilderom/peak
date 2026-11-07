@@ -14,7 +14,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -145,6 +145,9 @@ pub fn install_agents(dir: &Path, addr: &str) -> io::Result<AgentEnv> {
     Ok(AgentEnv { addr: addr.to_string(), node_agent: Some(node), python_dir: Some(py) })
 }
 
+/// How long an agent's hello waits for its run to be registered.
+const HELLO_PATIENCE: Duration = Duration::from_secs(3);
+
 type Pending = Arc<Mutex<HashMap<u64, mpsc::Sender<Result<Value, String>>>>>;
 type Notify = Arc<dyn Fn(Proc) + Send + Sync>;
 
@@ -191,7 +194,7 @@ impl Hub {
         let Some(Ok(first)) = lines.next() else { return };
         match serde_json::from_str::<Inbound>(&first) {
             Ok(Inbound::Hello { token, pid, runtime }) => {
-                if !self.monitor.lock().unwrap().agent_hello(&token, pid, runtime) {
+                if !self.greet(&token, pid, runtime) {
                     return;
                 }
                 self.agents.lock().unwrap().insert((token.clone(), pid), write);
@@ -212,6 +215,22 @@ impl Hub {
                 let _ = writeln!(write, "{}", json!({ "type": "rejected" }));
             }
             _ => {}
+        }
+    }
+
+    /// A run from `peak run` only becomes known once the CLI's `started` message is handled, and
+    /// a runtime that starts quickly can get here first. Turning it away would lose the agent for
+    /// the whole run, so a token gets a moment to appear.
+    fn greet(&self, token: &str, pid: u32, runtime: Runtime) -> bool {
+        let deadline = Instant::now() + HELLO_PATIENCE;
+        loop {
+            if self.monitor.lock().unwrap().agent_hello(token, pid, runtime) {
+                return true;
+            }
+            if Instant::now() >= deadline {
+                return false;
+            }
+            thread::sleep(Duration::from_millis(20));
         }
     }
 
@@ -513,6 +532,22 @@ mod tests {
 
         drop(a);
         eventually(|| !m.lock().unwrap().get(&id).unwrap().profiling);
+    }
+
+    /// `peak run` announces a run after starting it, so a fast runtime's agent can arrive first.
+    #[test]
+    fn an_agent_that_arrives_before_its_run_is_kept() {
+        let (m, hub, _) = setup();
+        let id = m.lock().unwrap().new_id();
+        let (mut a, _a_r) = connect(&hub);
+        writeln!(a, r#"{{"type":"hello","token":"{id}","pid":4242,"runtime":"node"}}"#).unwrap();
+        thread::sleep(Duration::from_millis(150));
+        m.lock().unwrap().insert(id.clone(), Origin::External, std::process::id(), "node app.js", "/tmp", now_ms());
+        eventually(|| m.lock().unwrap().get(&id).is_some_and(|p| p.profiling));
+        assert_eq!(m.lock().unwrap().get(&id).unwrap().runtime, Runtime::Node);
+        writeln!(a, r#"{{"type":"lag","loopLag":7.0}}"#).unwrap();
+        // Still connected: the hub took that as coming from a known agent.
+        eventually(|| hub.agents.lock().unwrap().contains_key(&(id.clone(), 4242)));
     }
 
     #[test]

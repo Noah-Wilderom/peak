@@ -1,4 +1,4 @@
-# recorded 2026-11-06T22:09:26Z
+# recorded 2026-11-07T00:00:45Z
 $ tsc --noEmit
 typecheck exit=0
  Test Files  32 passed (32)
@@ -8,5 +8,5 @@ Branches     : 100% ( 1864/1864 )
 Functions    : 100% ( 869/869 )
 Lines        : 100% ( 2068/2068 )
 coverage exit=0
-✓ built in 1.24s
+✓ built in 1.42s
 build exit=0

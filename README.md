@@ -14,6 +14,13 @@ Download from the [releases page](https://github.com/Noah-Wilderom/peak/releases
 | Windows x64 | `*_x64-setup.exe` | Run it. No admin needed. It adds `peak-cli` to your PATH for new terminals |
 | macOS Apple Silicon or Intel | `*_aarch64.dmg` or `*_x64.dmg` | Drag Peak to Applications. For the command line: `ln -s /Applications/peak.app/Contents/MacOS/peak ~/.local/bin/peak` |
 
+**Windows and macOS will warn you the first time.** This release isn't code-signed by Apple or Microsoft, so:
+
+- **Windows:** SmartScreen says it "protected your PC". Choose **More info**, then **Run anyway**. If Smart App Control is on, Windows 11 blocks it with no way to allow just this app.
+- **macOS:** it's reported as unverified, or as damaged. Try opening it once, then go to **System Settings > Privacy & Security** and choose **Open Anyway**. Or run `xattr -dr com.apple.quarantine /Applications/peak.app`.
+
+Updates are separately signed, and Peak refuses any update that doesn't match its key.
+
 Use it the same way everywhere: open the app, then run `peak run -- <command>` in a terminal (`peak-cli run -- <command>` on Windows). `peak version` says which version and format you have.
 
 **Updates.** Peak looks for a new release on start and every 6 hours, and offers it. It only downloads when you say so, checks the signature, and only restarts when you say so. A restart stops commands the app itself started, and it names them first. Commands from `peak run` and attached processes keep running, and your history and settings stay.

@@ -25,7 +25,7 @@ Linux)
   if [ -n "$FILE" ]; then
     cp "$FILE" "$TMP"
   else
-    BASE=https://github.com/$REPO/releases/latest/download
+    BASE=${PEAK_RELEASE_BASE:-https://github.com/$REPO/releases/latest/download}
     VERSION=$(curl -fsSL "$BASE/latest.json" | sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' | head -1)
     [ -n "$VERSION" ] || { echo "Couldn't read the latest version from $BASE/latest.json" >&2; exit 1; }
     NAME="peak_${VERSION}_amd64.AppImage"
