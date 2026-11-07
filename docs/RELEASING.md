@@ -41,14 +41,14 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
 | `install.sh` download route | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
-| Install from public URLs (`public-delivery.yml`) | **CI job failed on a runner with no desktop libraries; rerun pending.** Passes in clean Ubuntu 22.04 and 24.04 containers with them | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` |
+| Install from public URLs (`public-delivery.yml`) | CI, published `v0.1.0`, plus clean Ubuntu 22.04 and 24.04 containers | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` |
 | Update through the real GitHub feed (`public-update-proof.mjs`) | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` | CI, published `v0.1.0` |
 | Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
 | OS code signing and notarization | Not applicable | None, by decision | Ad-hoc only, by decision | Ad-hoc only, by decision |
 
 "CI" means a native GitHub runner, on `f17d80d` unless it says otherwise, and on the tag's rebuild where the release is concerned. Any later commit changing the app, scripts or workflows needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/`, `ci-64a4d5d/` and `ci-f17d80d/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/`, `ci-64a4d5d/`, `ci-f17d80d/`, `ci-tag-v0.1.0/`, `ci-public-v0.1.0/` and `ci-public-rerun-v0.1.0/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
 ## Secrets
 

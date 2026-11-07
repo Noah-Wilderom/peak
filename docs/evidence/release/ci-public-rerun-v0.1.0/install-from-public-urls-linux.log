@@ -1,0 +1,16 @@
+# published v0.1.0, Public delivery rerun 42326884105 on workflow 8d95ca7 / Install from public URLs (linux): success. job 128264131732
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs public output
+  PEAK_SMOKE_PLATFORM: linux
+peak_0.1.0_amd64.AppImage: 86751736 bytes, sha256 3ed86462b7d1e20c86cf09d8977f53faa889ecb4b52523e431e0548ce3646779
+ok   the installed copy says what it is peak 0.1.0 (AppImage, commit 9e60f67bbf1dc906ea9ab836df5f0bc3cb646936)
+ok   names its bundled collector x86_64: /home/runner/.local/share/peak/collectors/x86_64-a812ce09d1dc0c39/peak-collector (0.1.0 protocol 1)
+ok   with no app open, the command still runs and says why peak: the app isn't running on runnervmlby3q for runner — running without monitoring
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /tmp/peak place VUpUGx
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794016798875-err
+ok   the app recorded real samples and the exit samples 9, max rss 134729728, exit 7
+ok   the Node agent reported from inside the program lag samples 7
+ok   the Python agent reported from inside the program lag samples 8
+SMOKE OK

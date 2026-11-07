@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-07 01:53 UTC
-- **State:** **`v0.1.0` is published.** The real signed update through GitHub passes on all four targets. Public installs pass on Windows and both Macs. **The Linux install job on native CI failed** on a runner without a desktop's libraries; the same public AppImage passes on clean Ubuntu with them. A rerun with the corrected workflow is the one required check left.
+- **Last update:** 2026-11-07 02:17 UTC
+- **State:** **`v0.1.0` is published and its public delivery checks pass on all four targets,** at `9e60f67`. Next scope, not started: Go, Bun and PHP profiling agents.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,20 +12,22 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: published at 2026-11-07T01:34:22Z, by PM. Delivery is not complete until the Linux public install job passes on native CI.**
+**Status: published at 2026-11-07T01:34:22Z, by PM. Required public checks pass.**
 
 ### Public results: `v0.1.0`, commit `9e60f67`
 
-**Public delivery** run 42324783966, started by the release itself, overall **failure** because of one job. Summaries in `docs/evidence/release/ci-public-v0.1.0/`.
+**Public delivery** rerun 42326884105, against the published release, on the corrected workflow at `8d95ca7`: **success, nine jobs of nine.** Tests 42326876604 on that commit: success, backend 99.15% lines (gate 99), frontend 100%. Summaries in `docs/evidence/release/ci-public-rerun-v0.1.0/`. The release was unchanged between runs: 18 assets, same tag, and `verify-published.mjs` still ALL OK from here afterwards.
 
 | Check, against the real public release | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
 | Anonymous feed, downloads, checksums, signatures | **Pass**, one job covering all targets | | | |
-| Install from public URLs, app, separate CLI, samples, exit code, Node and Python agents | **Fail on CI, see below** | **Pass** | **Pass** | **Pass** |
+| Install from public URLs, app, separate CLI, samples, exit code, Node and Python agents | **Pass** | **Pass** | **Pass** | **Pass** |
 | 0.0.9 finds the release on the real feed, downloads, verifies the production signature, installs, relaunches | **Pass** | **Pass** | **Pass** | **Pass** |
 | Through that: history kept, `peak run` workload survives with its own exit code, new app monitors the CLI | **Pass** | **Pass** | **Pass** | **Pass** |
 
-**The Linux failure, and what it means.** `peak: error while loading shared libraries: libEGL.so.1`. That job's runner had only `libfuse2` and `xvfb`. Every earlier Linux check had WebKit dev packages installed, which pulled these libraries in and hid the dependency. The published AppImage expects 13 libraries from the host: `libEGL`, `libGL`, `libX11`, `libX11-xcb`, `libdrm`, `libexpat`, `libfontconfig`, `libfreetype`, `libfribidi`, `libgbm`, `libharfbuzz`, `libwayland-client`, `libxcb`. **The release isn't corrupt, and no containment is needed.** It does mean:
+The first run, 42324783966, kept in `docs/evidence/release/ci-public-v0.1.0/`, failed one job: the Linux install, explained next. Its other eight jobs passed.
+
+**That first Linux failure, and what it means.** `peak: error while loading shared libraries: libEGL.so.1`. That job's runner had only `libfuse2` and `xvfb`. Every earlier Linux check had WebKit dev packages installed, which pulled these libraries in and hid the dependency. The published AppImage expects 13 libraries from the host: `libEGL`, `libGL`, `libX11`, `libX11-xcb`, `libdrm`, `libexpat`, `libfontconfig`, `libfreetype`, `libfribidi`, `libgbm`, `libharfbuzz`, `libwayland-client`, `libxcb`. **The release isn't corrupt, and no containment is needed.** It does mean:
 - **On a bare server or minimal container, Peak doesn't run at all, including `peak run` and `peak version`.** The README said nothing about this, and now does. Not tested on a full desktop install, or on other distributions; the list above suggests they'd be fine, since desktops carry these libraries.
 
 **Run by me, against the real public URLs:**
@@ -243,7 +245,7 @@ Local gates on this tree: backend 99.01% lines (gate 99), frontend 100% with 294
 
 **Signing key.** Generated, password-protected, outside git, mode 600, in a mode 700 directory: `/mnt/HC_Volume_107248377/.peak-signing/` (`peak-updater.key`, `peak-updater.password`, `peak-updater.key.pub`). The public half is in `tauri.conf.json`. **Back it up: losing it strands every installed copy.**
 
-**Disposable environment still up, for the next round:** container `peak-release-env` and its chroot at `.peak-sysroot/rel-root`, about 8 GB on the data volume. Remove both when this scope closes; the signing key isn't in there.
+**Disposable environment:** container `peak-release-env` and its chroot have been removed. The signing files were checked unchanged before and after.
 
 ## Accepted discovery fix: "the cli keeps saying the app isn't running while it is running"
 
@@ -572,9 +574,8 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:**
-1. Commit this tree and push it to `master`, excluding your own uncommitted files as you see fit. No tag or release changes. It changes `.github/workflows/public-delivery.yml`, `scripts/install-release.sh`, the README and docs, not the app.
-2. Rerun: `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak --ref master -f tag=v0.1.0`. It checks the published `v0.1.0` again, using that workflow.
-3. Send me back here with the run. Nothing of mine is running or waiting until then. If it passes, delivery is complete, and I'll take down my test environment.
+**PM:** accept public delivery. Commit `docs/evidence/release/ci-public-rerun-v0.1.0/` and this file when convenient; nothing depends on it.
+
+**Then, on PM's word:** start the Go, Bun and PHP profiling agents, with Flutter as a bounded feasibility look. Not started. Nothing of mine is running.
 
 **Separately:** the updater key and its paired password still need an off-server backup.
