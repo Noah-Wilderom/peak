@@ -91,13 +91,14 @@ const magick = () => (run("magick", ["-version"]).status === 0 ? "magick" : "con
  * Light text on a dark button doesn't read at all that way, so each dark button is found as a shape
  * and read by itself.
  */
-function readScreen() {
+function readScreen({ whole = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "peak-ocr-"))
   const shot = join(dir, "screen.png")
   const page = join(dir, "page.png")
   // Only the window, where macOS will say where it is: a 1920 by 1080 screen is mostly desktop,
   // and reading it all took long enough for programs to end first.
-  const frame = windowFrame()
+  // The menu bar is outside the window, so reading it takes the whole screen.
+  const frame = whole ? null : windowFrame()
   run("screencapture", frame ? ["-x", "-R", frame.join(","), shot] : ["-x", shot])
   const pixels = Number(run("sips", ["-g", "pixelWidth", shot]).stdout.match(/pixelWidth: (\d+)/)?.[1])
   const points = Number(run("osascript", ["-e", 'tell application "Finder" to get item 3 of (bounds of window of desktop)']).stdout.trim())
@@ -147,9 +148,9 @@ function nearly(a, b) {
   return a.length > b.length ? a.slice(i + 1) === b.slice(j) : a.slice(i) === b.slice(j + 1)
 }
 
-function locateAll(name) {
+function locateAll(name, options) {
   const wanted = name.toLowerCase().replace(/[.]/g, "").split(/\s+/)
-  const words = readScreen()
+  const words = readScreen(options)
   // A control's own words are a line by themselves. "CPU" the tab, not "CPU profiles" the label.
   const sizes = new Map()
   for (const w of words) sizes.set(w.line, (sizes.get(w.line) ?? 0) + 1)
@@ -160,18 +161,27 @@ function locateAll(name) {
       const exact = wanted.every((w, j) => words[i + j].plain === w)
       // The case as written counts too: the History button, not "From history" above the runs.
       const cased = name.split(/\s+/).every((w, j) => words[i + j].word.replace(/[.,:]$/, "") === w)
-      hits.push({ rank: (exact ? 8 : 0) + (cased ? 4 : 0) + (sizes.get(words[i].line) === wanted.length ? 2 : wanted.length > 1 && sizes.get(words[i].line) === wanted.length + 1 ? 1 : 0), x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
+      hits.push({ line: words[i].line, word: words[i], rank: (exact ? 8 : 0) + (cased ? 4 : 0) + (sizes.get(words[i].line) === wanted.length ? 2 : wanted.length > 1 && sizes.get(words[i].line) === wanted.length + 1 ? 1 : 0), x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
     }
   }
-  return hits.sort((a, b) => b.rank - a.rank || a.y - b.y)
+  // A one-word control is a line by itself, or beside its icon. "CPU" in "CPU 100%" is the machine's
+  // figure, and pressing it opens another page.
+  const lines = new Map()
+  for (const w of words) lines.set(w.line, [...(lines.get(w.line) ?? []), w])
+  const alone = (h) => {
+    if (wanted.length > 1) return true
+    const others = lines.get(h.line).filter((w) => w !== h.word)
+    return others.every((w) => !/[\p{L}\p{N}]{2,}/u.test(w.word))
+  }
+  return hits.filter(alone).sort((a, b) => b.rank - a.rank || a.y - b.y)
 }
 
 function clickAt({ x, y }) {
   run("cliclick", [`c:${x},${y}`])
 }
 
-function bySight(name, press) {
-  const [at] = locateAll(name)
+function bySight(name, press, options) {
+  const [at] = locateAll(name, options)
   if (at && press) clickAt(at)
   return !!at
 }
@@ -181,9 +191,11 @@ function bySight(name, press) {
 let pane = null
 function focusPane() {
   if (!pane) {
-    const [tab] = locateAll("Profiler")
+    // The pane's own left margin, under its tabs: nothing there to press. Clicking content, such
+    // as a flame graph, would act on it, and did.
+    const [tab] = locateAll("Overview")
     if (!tab) return false
-    pane = { x: tab.x + 400, y: tab.y + 90 }
+    pane = { x: tab.x - 55, y: tab.y + 150 }
   }
   clickAt(pane)
   return true
@@ -198,7 +210,10 @@ export function scrollDown() {
 /** Back to the top of the main pane. */
 export function scrollToTop() {
   if (!IS_MAC || macTree()) return
-  if (focusPane()) for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
+  if (focusPane()) {
+    run("cliclick", ["kp:home"])
+    for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
+  }
 }
 
 /**
@@ -290,9 +305,9 @@ export async function typeInto(field, text) {
     // character viewer over the window and took the rest of the text.
     // And by the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.
     spawnSync("pbcopy", [], { input: text })
-    if (!bySight("Edit", true)) return false
+    if (!bySight("Edit", true, { whole: true })) return false
     await sleep(800)
-    return bySight("Paste", true)
+    return bySight("Paste", true, { whole: true })
   }
   const ps = `
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes

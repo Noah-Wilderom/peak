@@ -4,13 +4,32 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `908cca1`: everything passes except macOS's window proof, at 31 and 30 failing checks, mostly reopening after the first run. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `466fc09`: everything passes except macOS's window proof, at 26 and 29 failing checks: pasting, scrolling back up, and one misread control. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Eighth native run: `466fc09`
+
+**Update proof 42379181901, including the `v0.1.0` rehearsal on all four, and Tests 42379181873 passed**, with the backend at 99.16% on CI. Release 42379181876 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-466fc09/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `466fc09` | **153 / 0 / 0** | **132 / 0 / 0** | 126 / 26 / 0 | 123 / 29 / 0 |
+
+**macOS gives the window's position** (`0,31,1040,680` on arm64, `280,48,1360,880` on x64), so only the window is read now. History now opens on every reopen.
+
+**Still failing, and why, from the logs and captures:**
+
+- **Pasting, and with it Capture and every History search:** the window frame left out the menu bar, so the Edit menu wasn't there to click. Menus are now read from the whole screen.
+- **Scrolling back up:** to give the pane the keyboard, the harness clicked inside the page. On arm64 that landed on Go's flame graph, which zoomed ("Reset zoom" is in the log), and page-up didn't bring the page back, so "Objects, estimated" was out of view. It now clicks the pane's empty left margin, and adds Home to the page-ups.
+- **macOS x64, Collect garbage:** after reading the snapshot table, the page was scrolled down past the button. That's the same scrolling problem.
+- **macOS x64, Bun's terminal profile:** the window was on the machine's page, not the run's. The likely cause, not observed directly: "CPU" in the sidebar's "CPU 100%" was pressed for the CPU tab, which opens that page. A one-word control now has to be a line by itself, or beside its icon.
+
+Checked locally against this run's captures, with stand-ins for the OS tools: CPU, Heap, History and Record 5s are clicked at the right places on both screens, the Edit menu at the top of the screen, and the scroll focus lands in the empty margin.
 
 ### Seventh native run: `908cca1`
 
