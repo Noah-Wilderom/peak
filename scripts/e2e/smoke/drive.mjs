@@ -106,7 +106,9 @@ function readScreen() {
   for (const [, width, height, left, top] of found) {
     const [w, h, x, y] = [width, height, left, top].map(Number)
     // Button-shaped, in either a 1x or a 2x capture.
-    if (w < 40 * (pixels / (points || pixels)) || h < 18 || h > 90) continue
+    // Button-shaped, in either a 1x or a 2x capture, and not the menu bar or the Dock.
+    const scale = pixels / (points || pixels)
+    if (w < 40 * scale || w > 500 * scale || h < 18 || h > 90 || y < 30 * scale) continue
     const crop = join(dir, `shape-${n++}.png`)
     run(tool, [shot, "-alpha", "off", "-crop", `${w}x${h}+${x}+${y}`, "+repage", "-colorspace", "Gray", "-negate", "-resize", "300%", crop])
     const text = run("tesseract", [crop, "stdout", "--psm", "7"]).stdout.trim().replace(/^\W+\s*/, "")
@@ -156,20 +158,29 @@ function bySight(name, press) {
   return !!at
 }
 
+// Where to click to give the main pane the keyboard, found once per window: reading the screen
+// takes seconds, and scrolling shouldn't cost that each time.
+let pane = null
+function focusPane() {
+  if (!pane) {
+    const [tab] = locateAll("Profiler")
+    if (!tab) return false
+    pane = { x: tab.x + 400, y: tab.y + 90 }
+  }
+  clickAt(pane)
+  return true
+}
+
 /** Scroll the main pane, where only the screen can be read and what's below it can't be. */
 export function scrollDown() {
   if (!IS_MAC || macTree()) return
-  const [area] = locateAll("Profiler")
-  if (area) clickAt({ x: area.x + 400, y: area.y + 90 })
-  run("cliclick", ["kp:page-down"])
+  if (focusPane()) run("cliclick", ["kp:page-down"])
 }
 
 /** Back to the top of the main pane. */
 export function scrollToTop() {
   if (!IS_MAC || macTree()) return
-  const [area] = locateAll("Profiler")
-  if (area) clickAt({ x: area.x + 400, y: area.y + 90 })
-  for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
+  if (focusPane()) for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
 }
 
 /**
@@ -256,9 +267,11 @@ export async function typeInto(field, text) {
   }
   if (IS_MAC) {
     // Where the field has a placeholder to find by, otherwise it's focused on arrival.
-    const hint = field === "Search" ? "Search" : null
-    if (hint && !bySight(hint, true)) return false
-    return run("cliclick", [`t:${text}`]).status === 0
+    if (field === "Search" && !bySight("Search", true)) return false
+    // Pasted, not typed: typed keys can land in macOS's own shortcuts, which once opened the
+    // character viewer over the window and took the rest of the text.
+    spawnSync("pbcopy", { input: text })
+    return run("cliclick", ["kd:cmd", "t:v", "ku:cmd"]).status === 0
   }
   const ps = `
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes
@@ -278,6 +291,7 @@ exit 3`
 
 /** Start the installed app. On Linux WebDriver starts it, which is what lets it be driven. */
 export async function openApp() {
+  pane = null
   if (!LINUX) return void launch()
   if (!driverProcess) {
     driverProcess = spawn(process.env.PEAK_TAURI_DRIVER || join(process.env.HOME, ".cargo/bin/tauri-driver"), ["--native-driver", "/usr/bin/WebKitWebDriver"], {

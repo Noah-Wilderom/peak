@@ -4,13 +4,34 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `6c5166c`: all four targets press the real `v0.1.0`'s buttons, and signatures and smoke pass on production packages. The window proof passes only on Windows. Linux and macOS have harness fixes awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `5f34c8b`: the window proof passes on Linux and Windows, and the real `v0.1.0`'s buttons can be pressed on all four. macOS's window proof still fails, with fixes awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Fifth native run: `5f34c8b`
+
+**Update proof 42355295391 and Tests 42355295451 passed.** Release 42355295461 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-5f34c8b/`.
+
+Window proof, on production packages. Counts are observed passes, failures and unobserved checks, made from the `unobserved` flags, since this run's format would have marked an unobserved check `ok: true`. This run had none:
+
+| | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Window proof | **Pass, all observed** | **Pass, all observed** | Fails | Fails |
+| Counts | 153 pass, 0 fail, 0 unobserved, of 153 | 132 pass, 0 fail, 0 unobserved, of 132 | 114 pass, 38 fail, 0 unobserved, of 152 | 97 pass, 55 fail, 0 unobserved, of 152 |
+
+- **Linux passes**, including the 5 checks that failed at `b72de3f` and the non-selected-run result, after the click retry.
+- **macOS arm64 now presses Record and Take snapshot natively**, and CPU profiles and snapshots appear in its window. Failures left: Collect garbage, Capture, History search and reopening, the no-agent screen, the selection check, and results recorded from the terminal on runs that had already ended.
+- **Causes, from its logs and captures:**
+  - The program ended before the slower steps reached it. On macOS x64, a capture shows "Exited", 2m 30s in, before Record was pressed.
+  - Typing the Capture command with simulated keys opened macOS's character viewer, which took the rest of the text, and the window was no longer in front. A capture shows this.
+  - "Collect garbage" shares a line with its icon on screen, and the harness looked for a line holding only those words.
+- **Fixes, in the working tree:** commands are pasted, not typed. A control's own words are looked for, whatever shares its line. Programs run for 5 minutes on macOS. Where to click to scroll is found once per window instead of with a fresh read each time. Buttons are read only inside the window.
+
+**Unobserved now fails the proof.** At `6c5166c`, an unobserved control was written `ok: true`. The window proof now writes `pass`, `fail` or `unobserved` for each check, passes only if every check is an observed pass, and prints the three counts. `src-tauri/agents/tests/proof-record.test.mjs` tests this, including an older record's `ok` flag on an unobserved check. A disabled control that can't be read is pressed, and recorded as `semantic` when nothing comes of it. A control that can't be found is `unobserved`.
 
 ### Fourth native run: `6c5166c`
 

@@ -8,15 +8,12 @@
 import { IS_MAC, IS_WINDOWS, PLATFORM, cli, install, join, liveApps, log, mkdirSync, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
 import { closeApp, contents, openApp, press, readsState, scrollDown, scrollToTop, stopDriving, typeInto } from "../smoke/drive.mjs"
 import { phpHasExcimer, programs } from "../smoke/probes.mjs"
+import { newRecord } from "../smoke/record.mjs"
 
 const [artifacts, out] = process.argv.slice(2)
 mkdirSync(out, { recursive: true })
-const record = {}
-const check = (name, ok, detail) => {
-  record[name] = { ok: !!ok, detail }
-  log(ok ? "ok  " : "FAIL", name, detail ?? "")
-  if (!ok) process.exitCode = 1
-}
+const proof = newRecord(log)
+const { check } = proof
 
 // ─── the window ─────────────────────────────────────────────────────────────
 async function look() {
@@ -54,7 +51,13 @@ async function pressMatching(pattern, ms = 30_000) {
   const end = Date.now() + (sight ? Math.max(ms, 45_000) : ms)
   let scrolled = 0
   if (sight) scrollToTop()
+  // Reading the screen, a control's words can share a line with its icon, so the pattern's own
+  // words are what's looked for.
+  const words = pattern.source.replace(/^\^|\$$/g, "").replace(/\\(.)/g, "$1")
+  // Only plain words, and escaped punctuation: not \b, \s, \d.
+  const literal = sight && !/[\\^$.*+?()[\]{}|]/.test(pattern.source.replace(/^\^|\$$/g, "").replace(/\\[^A-Za-z0-9]/g, ""))
   while (Date.now() < end) {
+    if (literal && (await press(words))) return true
     // Reading the screen says what's there, not whether it's enabled. Elsewhere it has to be.
     const hit = (await look()).items.find((i) => pattern.test(i.name) && (i.enabled === true || (i.enabled === undefined && !readsState())))
     if (hit && (await press(hit.name))) return true
@@ -84,12 +87,11 @@ async function checkDisabled(label, name, run) {
   const after = storedRunById(run)
   const quiet = before?.cpuProfiles === after?.cpuProfiles && before?.snapshots === after?.snapshots && !/Recording|Capturing/.test((await look()).text)
   if (!pressed) {
-    // Greyed out, its words may not read. That's not evidence either way, so it's recorded as neither.
-    record[label] = { ok: true, unobserved: true, detail: `"${name}" couldn't be found on screen, so whether it's disabled wasn't observed` }
-    log("NOT OBSERVED", label)
+    // Its words didn't read, so there's no evidence either way, and the proof can't pass on it.
+    proof.unobserved(label, `"${name}" couldn't be found on screen, so whether it's disabled wasn't observed`)
     return
   }
-  check(label, quiet, "attribute not readable here: pressed instead, and nothing came of it")
+  check(label, quiet, "semantic: the attribute can't be read here, so it was pressed, and nothing came of it")
 }
 const shot = (name) => desktopShot(out, `${PLATFORM}-${name}`)
 async function openWindow() {
@@ -115,7 +117,7 @@ await shot("window")
 
 // ─── each runtime, while it runs ────────────────────────────────────────────
 // Reading the screen takes far longer than asking WebDriver or UI Automation.
-const SECONDS = IS_MAC ? 150 : 70
+const SECONDS = IS_MAC ? 300 : 70
 const kept = []
 
 async function runtimeInWindow({ name, label, versionShape, program, cpu, snapshot, gc, missing }) {
@@ -200,7 +202,7 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
 
 // Started from the window's own Capture page, rather than a terminal.
 {
-  const program = programs.bun(IS_MAC ? 90 : 20)
+  const program = programs.bun(IS_MAC ? 150 : 20)
   const marker = program.command.at(-1)
   const command = `bun "${join(program.cwd, marker).replaceAll("\\", "/")}"`
   check("capture: the page opens", await pressMatching(/^Capture$/))
@@ -224,8 +226,8 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
 
 // A result from the terminal, on a run that isn't the one on screen, leaves the window where it is.
 {
-  const shown = programs.node(IS_MAC ? 90 : 30)
-  const other = programs.python(IS_MAC ? 90 : 30)
+  const shown = programs.node(IS_MAC ? 200 : 30)
+  const other = programs.python(IS_MAC ? 200 : 30)
   const running = [cli(["run", "--", ...shown.command], { cwd: shown.cwd }), cli(["run", "--", ...other.command], { cwd: other.cwd })]
   const find = (program) => waitFor("a run's agent", async () => (asJson((await cli(["ps", "--json"]).done).out) ?? []).find((r) => r.command.includes(program.command.find((p) => p.includes("work-"))) && r.profiling) ?? null, 60_000).catch(() => null)
   const [a, b] = [await find(shown), await find(other)]
@@ -287,7 +289,9 @@ for (const run of kept) {
   await shot(`${run.name}-reopened`)
 }
 await closeApp()
-writeFileSync(join(out, `agents-ui-${PLATFORM}.json`), JSON.stringify(record, null, 2))
+const counts = proof.counts()
+writeFileSync(join(out, `agents-ui-${PLATFORM}.json`), JSON.stringify({ counts, checks: proof.entries }, null, 2))
 stopDriving()
-log(process.exitCode ? "AGENTS UI FAILED" : "AGENTS UI OK")
-process.exit(process.exitCode ?? 0)
+log(`pass ${counts.pass}, fail ${counts.fail}, not observed ${counts.unobserved}, of ${counts.total}`)
+log(proof.passed() ? "AGENTS UI OK" : "AGENTS UI FAILED")
+process.exit(proof.passed() ? 0 : 1)
