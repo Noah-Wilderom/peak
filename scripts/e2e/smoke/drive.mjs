@@ -118,7 +118,9 @@ function readScreen({ whole = false } = {}) {
     const [w, h, x, y] = [width, height, left, top].map(Number)
     // Button-shaped, in either a 1x or a 2x capture, and not the menu bar, title bar or Dock.
     if (w < 40 * scale || w > 500 * scale || h < 18 || h > 90 || y < 30 * scale) continue
-    regions.push("-region", `${w}x${h}+${x}+${y}`, "-negate", "-threshold", "40%", "+region")
+    // Inside its rounded edges, which would otherwise read as letters.
+    const inset = Math.round(3 * scale)
+    regions.push("-region", `${w - 2 * inset}x${h - 2 * inset}+${x + inset}+${y + inset}`, "-negate", "-threshold", "40%", "+region")
   }
   // A capture has an alpha channel, which ImageMagick 7 keeps through all this, leaving tesseract nothing.
   run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", ...regions, "-resize", `${ENLARGE * 100}%`, "-threshold", "75%", page])
@@ -178,7 +180,8 @@ function locateAll(name, options) {
     // A menu's title shares its line with the others: File Edit View.
     if (wanted.length > 1 || options?.inLine) return true
     const others = lines.get(h.line).filter((w) => w !== h.word)
-    return others.every((w) => !/[\p{L}\p{N}]{2,}/u.test(w.word))
+    // Two-character scraps come from a button's inverted edges: "iG Capture".
+    return others.every((w) => !/[\p{L}\p{N}]{3,}/u.test(w.word))
   }
   return hits.filter(alone).sort((a, b) => b.rank - a.rank || a.y - b.y)
 }
@@ -310,6 +313,12 @@ const LINUX = !IS_WINDOWS && !IS_MAC
 export async function present(name) {
   if (LINUX) return (await linuxContents()).some((i) => i.name === name || i.name.includes(name))
   return IS_WINDOWS ? windows(name, false) : macAny(name, false)
+}
+
+/** Press a control that shares its line with others, such as a tab. */
+export async function pressInLine(name) {
+  if (LINUX || IS_WINDOWS || macTree()) return press(name)
+  return bySight(name, true, { inLine: true })
 }
 
 /** Press the control called `name`, if it's there. */

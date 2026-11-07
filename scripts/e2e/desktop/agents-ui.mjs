@@ -6,7 +6,7 @@
 // accessibility API, as a release has no debug port.
 //   PEAK_SMOKE_PLATFORM=... [PEAK_TAURI_DRIVER=...] agents-ui.mjs <artifacts dir> <output dir>
 import { IS_MAC, IS_WINDOWS, PLATFORM, cli, install, join, liveApps, log, mkdirSync, shot as desktopShot, sleep, storedRunById, waitFor, writeFileSync } from "../smoke/lib.mjs"
-import { closeApp, contents, openApp, press, readsState, scrollDown, scrollToTop, stopDriving, typeInto } from "../smoke/drive.mjs"
+import { closeApp, contents, openApp, press, pressInLine, readsState, scrollDown, scrollToTop, stopDriving, typeInto } from "../smoke/drive.mjs"
 import { phpHasExcimer, programs } from "../smoke/probes.mjs"
 import { newRecord } from "../smoke/record.mjs"
 
@@ -150,7 +150,13 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("Take snapshot can be pressed"), await pressMatching(/^Take snapshot$/))
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
-    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/Objects\W+estimated/, 8000) && !/\d+ types/.test((await look()).text))
+    if (name === "go") {
+      // The card's label is small and grey; its count, "N functions", is the other half of the wording.
+      const label = await see(/Objects\W+estimated|\b\d+ functions\b/, 8000)
+      const text = (await look()).text
+      const which = [/Objects\W+estimated/.test(text) && "label read", /\b\d+ functions\b/.test(text) && "count read"].filter(Boolean).join(", ")
+      check(t("Go's objects are estimates from allocating functions, not types"), label && !/\d+ types/.test(text), which || "neither read")
+    }
     await shot(`${name}-heap`)
   } else {
     await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
@@ -286,7 +292,8 @@ for (const run of kept) {
     check(t("the run is listed and opens"), await pressMatching(/^Open$/))
   }
   await sleep(1000)
-  check(t("the Profiler tab opens"), await pressMatching(/^Profiler\b/))
+  // A tab's name shares its line with the other tabs, and with its count.
+  check(t("the Profiler tab opens"), readsState() ? await pressMatching(/^Profiler\b/) : await pressInLine("Profiler"))
   check(t("the agent's identity is still there"), await see(new RegExp(`${run.label}\\s+${number}`)))
   check(t("as what it reported, not as live"), await see(/Agent has disconnected/, 5000))
   if (run.cpu) {

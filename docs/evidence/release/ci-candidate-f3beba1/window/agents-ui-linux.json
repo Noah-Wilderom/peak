@@ -1,0 +1,659 @@
+{
+  "counts": {
+    "pass": 153,
+    "fail": 0,
+    "unobserved": 0,
+    "total": 153
+  },
+  "checks": {
+    "node: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: Record 5s can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: shows it's recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: the profile appears, with its length": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: explained by how it was measured": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/Sampled by V8/"
+    },
+    "node: Take snapshot can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: the snapshot appears": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: and shows what the program holds": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/SmokeThing/"
+    },
+    "node: Collect garbage can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: a profile from the terminal appears in the window": {
+      "result": "pass",
+      "ok": true,
+      "detail": " 3560"
+    },
+    "node: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "node: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "node: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 2, snapshots 1"
+    },
+    "python: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: says why there's no live heap": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/no cheap total/"
+    },
+    "python: Record 5s can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: shows it's recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: the profile appears, with its length": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: explained by how it was measured": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/Python stack sampled/"
+    },
+    "python: Take snapshot can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: the snapshot appears": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: and shows what the program holds": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/SmokeThing/"
+    },
+    "python: Collect garbage can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: a profile from the terminal appears in the window": {
+      "result": "pass",
+      "ok": true,
+      "detail": " 3748"
+    },
+    "python: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "python: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "python: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 2, snapshots 1"
+    },
+    "bun: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: says why there's no collections": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/doesn't publish individual garbage collections/"
+    },
+    "bun: Record 5s can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: shows it's recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: the profile appears, with its length": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: explained by how it was measured": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/Sampled by JavaScriptCore/"
+    },
+    "bun: Take snapshot can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: the snapshot appears": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: and shows what the program holds": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/SmokeThing/"
+    },
+    "bun: Collect garbage can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: a profile from the terminal appears in the window": {
+      "result": "pass",
+      "ok": true,
+      "detail": " 3374"
+    },
+    "bun: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "bun: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 2, snapshots 1"
+    },
+    "php: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: says why there's no delay": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/no event loop to delay/"
+    },
+    "php: says why there's no snapshots": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/no built-in way to list/"
+    },
+    "php: Record 5s can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: shows it's recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: the profile appears, with its length": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: explained by how it was measured": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/sampled by Excimer/"
+    },
+    "php: taking a snapshot is disabled": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: the heap view doesn't invite a snapshot": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: Collect garbage can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: a profile from the terminal appears in the window": {
+      "result": "pass",
+      "ok": true,
+      "detail": " 1470"
+    },
+    "php: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "php: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "php: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 2, snapshots 0"
+    },
+    "php-alone: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: says why there's no live figures": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/pecl install excimer/"
+    },
+    "php-alone: says why there's no delay": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/no event loop to delay/"
+    },
+    "php-alone: says why there's no snapshots": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/no built-in way to list/"
+    },
+    "php-alone: recording is disabled": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: the CPU view doesn't invite recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: taking a snapshot is disabled": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: the heap view doesn't invite a snapshot": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: collecting garbage is disabled": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "php-alone: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 0, snapshots 0"
+    },
+    "go: builds against the installed SDK": {
+      "result": "pass",
+      "ok": true,
+      "detail": ""
+    },
+    "go: connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: the window names the runtime and its version": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: and the agent's version": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: and that it's connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: Record 5s can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: shows it's recording": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: the profile appears, with its length": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: explained by how it was measured": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/all goroutines/"
+    },
+    "go: Take snapshot can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: the snapshot appears": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: and shows what the program holds": {
+      "result": "pass",
+      "ok": true,
+      "detail": "/smokeAlloc/"
+    },
+    "go: Go's objects are estimates from allocating functions, not types": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: Collect garbage can be pressed": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: a profile from the terminal appears in the window": {
+      "result": "pass",
+      "ok": true,
+      "detail": " 3062"
+    },
+    "go: the program's exit code is its own": {
+      "result": "pass",
+      "ok": true,
+      "detail": "exit 0: "
+    },
+    "go: after it ends, the window says the agent has gone": {
+      "result": "pass",
+      "ok": true
+    },
+    "go: the buttons' results are in history": {
+      "result": "pass",
+      "ok": true,
+      "detail": "cpu 2, snapshots 1"
+    },
+    "capture: the page opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture: takes a command": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture: starts it": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture: the agent connected": {
+      "result": "pass",
+      "ok": true,
+      "detail": "0.1.1"
+    },
+    "capture: the window names the runtime": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture: ended on its own, with its own exit code": {
+      "result": "pass",
+      "ok": true,
+      "detail": 0
+    },
+    "selection: both runs connected": {
+      "result": "pass",
+      "ok": true
+    },
+    "selection: the first run is on screen": {
+      "result": "pass",
+      "ok": true
+    },
+    "selection: the other run was profiled from the terminal": {
+      "result": "pass",
+      "ok": true,
+      "detail": ""
+    },
+    "selection: the window stayed on the first run": {
+      "result": "pass",
+      "ok": true
+    },
+    "selection: and the other run has the result": {
+      "result": "pass",
+      "ok": true
+    },
+    "no agent: the window says profiling isn't available": {
+      "result": "pass",
+      "ok": true
+    },
+    "no agent: and that attaching only gives OS-level monitoring, or how to opt in": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "node, reopened: the CPU profile is there": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "python, reopened: the CPU profile is there": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "bun, reopened: the CPU profile is there": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "php, reopened: the CPU profile is there": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "php-alone, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    },
+    "go, reopened: the CPU profile is there": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture-bun, reopened: History opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture-bun, reopened: the run is listed and opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture-bun, reopened: the Profiler tab opens": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture-bun, reopened: the agent's identity is still there": {
+      "result": "pass",
+      "ok": true
+    },
+    "capture-bun, reopened: as what it reported, not as live": {
+      "result": "pass",
+      "ok": true
+    }
+  }
+}

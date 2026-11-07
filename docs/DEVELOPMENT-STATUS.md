@@ -4,13 +4,35 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `54f66b0`: everything passes except macOS's window proof, at 38 and 57 failing checks, from harness defects and slow screen reading. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `f3beba1`: everything passes except macOS's window proof. Both Macs now pass every runtime check in the window, and fail the same 33, on the Capture button and reopened runs' Profiler tab. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Eleventh native run: `f3beba1`
+
+**Update proof 42411196750, including the `v0.1.0` rehearsal on all four, and Tests 42411196795 passed**, with the backend at 99.16% on CI. Release 42411196725 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-f3beba1/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `f3beba1` | **153 / 0 / 0** | **132 / 0 / 0** | 127 / 33 / 0 of 160 | 127 / 33 / 0 of 160 |
+
+**Newly observed on macOS:**
+
+- Both Macs now pass every runtime check in the window: Record, Take snapshot, Collect garbage, CPU and heap results, the snapshot tables, PHP's refusals and reasons, terminal results, the non-selected run, and the no-agent screen.
+- The Swift mouse wheel scrolls ("mouse wheel: built"; a capture shows the page scrolled).
+- x64 reached its snapshot in about 2.5 minutes, against over 7 before, after the change to one reading pass per screen.
+- History search now finds and opens every run.
+
+**Failing on both Macs, the same 33 checks, for two reasons:**
+
+- **The Profiler tab of a reopened run:** a tab shares its line with the others ("Overview Memory Profiler 2 Stats"), and the one-word rule set it aside. Tabs are now looked for within their line.
+- **The Capture button:** it read as "iG Capture |", from the rounded edges of the inverted button, so it wasn't alone on its line. Each inverted area now stops short of the button's edge, and two-character scraps no longer count as other words. Locally, against this run's capture, Capture and Profiler are clicked at the right places. Capture's failure took its own checks and the captured run's reopening with it.
+
+**Go's wording:** the snapshot cards' small grey labels weren't read on arm64, though "8 functions" beneath was, and no "types" appeared. The check now accepts either the label or the count, and records which it read. The label itself is still unobserved on that Mac.
 
 ### Tenth native run: `54f66b0`
 
