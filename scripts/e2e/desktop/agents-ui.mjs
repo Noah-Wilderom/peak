@@ -137,7 +137,8 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
 
   if (cpu) {
     await pressMatching(/^CPU$/, 5000)
-    check(t("Record 5s can be pressed"), await pressMatching(/^Record 5s$/))
+    // Reading the screen takes seconds, so the 10 second recording leaves time to see it running.
+    check(t(`Record ${IS_MAC ? 10 : 5}s can be pressed`), await pressMatching(IS_MAC ? /^Record 10s$/ : /^Record 5s$/))
     check(t("shows it's recording"), await see(/Recording/, 4000))
     check(t("the profile appears, with its length"), await see(/Profile\s+1/, 40_000))
     check(t("explained by how it was measured"), await see(cpu, 5000), String(cpu))
@@ -220,8 +221,13 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
       return r && r.exit_code !== null ? r : null
     }, (IS_MAC ? 150 : 20) * 1000 + 90_000).catch(() => null)
     check("capture: ended on its own, with its own exit code", stored?.exit_code === 0, stored?.exit_code)
-    kept.push({ name: "capture-bun", label: "Bun", marker, cpu: false, snapshot: false })
+  } else {
+    // Its later checks are still required, and fail rather than vanish from the record.
+    check("capture: the window names the runtime", false, "the captured run never connected")
+    check("capture: ended on its own, with its own exit code", false, "the captured run never connected")
   }
+  // Reopened like any other: with no such run, that fails too.
+  kept.push({ name: "capture-bun", label: "Bun", marker, cpu: false, snapshot: false })
 }
 
 // A result from the terminal, on a run that isn't the one on screen, leaves the window where it is.

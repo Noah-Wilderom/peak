@@ -4,13 +4,31 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `466fc09`: everything passes except macOS's window proof, at 26 and 29 failing checks: pasting, scrolling back up, and one misread control. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `f3c6a0e`: everything passes except macOS's window proof, at 36 and 39 failing checks, from scrolling and pasting regressions in the harness. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Ninth native run: `f3c6a0e`
+
+**Update proof 42387850076, including the `v0.1.0` rehearsal on all four, and Tests 42387850169 passed**, with the backend at 99.16% on CI. Release 42387850110 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-f3c6a0e/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `f3c6a0e` | **153 / 0 / 0** | **132 / 0 / 0** | 116 / 36 / 0 | 113 / 39 / 0 |
+
+**Worse on macOS, for two reasons of mine:**
+
+- **Scrolling stopped:** clicking the pane's empty margin didn't give it the keyboard. A capture shows the heap page unmoved, with the table below the window, so the snapshot rows and Go's caption weren't reached. Scrolling is now by the mouse wheel, over the pane, by a few lines of Swift built on the runner. It needs no focus and presses nothing. It falls back to the keyboard as before if Swift isn't there, and logs which it used.
+- **Pasting:** the Edit menu was never pressed. Last round's rule that a one-word control must be alone on its line also excluded menu titles, which share one: "File Edit View". Menus are exempt now, and each step of the paste logs if it fails.
+- **"Shows it's recording" on macOS x64:** the 5-second recording ended before the screen was read. macOS records 10 seconds instead, which leaves time to see it running.
+
+**Capture's checks are now always in the record.** `466fc09`'s macOS records had 152 checks against `908cca1`'s 160, because a failed Capture dropped the checks that followed it. They're now recorded as failures, along with the captured run's reopening.
+
+None of this has run natively. Locally, against a real capture with stand-ins, the Edit menu is clicked at the right place. Paste needs a real open menu, and the wheel needs Swift, which isn't on this server.
 
 ### Eighth native run: `466fc09`
 

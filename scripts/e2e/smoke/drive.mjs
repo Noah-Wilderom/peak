@@ -3,7 +3,7 @@
 // offers: WebDriver on Linux, UI Automation on Windows, and on macOS the accessibility API, or if
 // that shows nothing of the window, reading the screen and clicking on it.
 import { spawn, spawnSync } from "node:child_process"
-import { IS_MAC, IS_WINDOWS, closeApps, join, launch, log, mkdtempSync, paths, sleep, tmpdir, waitFor } from "./lib.mjs"
+import { IS_MAC, IS_WINDOWS, closeApps, join, launch, log, mkdtempSync, paths, sleep, tmpdir, waitFor, writeFileSync } from "./lib.mjs"
 
 const run = (bin, args, input) => spawnSync(bin, args, { encoding: "utf8", input, timeout: 120_000 })
 
@@ -169,7 +169,8 @@ function locateAll(name, options) {
   const lines = new Map()
   for (const w of words) lines.set(w.line, [...(lines.get(w.line) ?? []), w])
   const alone = (h) => {
-    if (wanted.length > 1) return true
+    // A menu's title shares its line with the others: File Edit View.
+    if (wanted.length > 1 || options?.inLine) return true
     const others = lines.get(h.line).filter((w) => w !== h.word)
     return others.every((w) => !/[\p{L}\p{N}]{2,}/u.test(w.word))
   }
@@ -186,34 +187,62 @@ function bySight(name, press, options) {
   return !!at
 }
 
-// Where to click to give the main pane the keyboard, found once per window: reading the screen
-// takes seconds, and scrolling shouldn't cost that each time.
+// Scrolling is by the mouse wheel, over the main pane: it needs no focus, and presses nothing.
+// Clicking to give the pane the keyboard instead landed on a flame graph and zoomed it, and
+// clicking its empty margin didn't give it the keyboard at all. cliclick has no wheel, so this is a
+// few lines of Swift, built once.
+const WHEEL = `import CoreGraphics
+import Foundation
+let a = CommandLine.arguments
+let at = CGPoint(x: Double(a[1])!, y: Double(a[2])!)
+CGWarpMouseCursorPosition(at)
+usleep(100_000)
+let e = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: Int32(a[3])!, wheel2: 0, wheel3: 0)!
+e.location = at
+e.post(tap: .cghidEventTap)
+`
+let wheel
+function wheelTool() {
+  if (wheel !== undefined) return wheel
+  const dir = mkdtempSync(join(tmpdir(), "peak-wheel-"))
+  const source = join(dir, "wheel.swift")
+  writeFileSync(source, WHEEL)
+  const built = run("swiftc", ["-O", "-o", join(dir, "wheel"), source])
+  wheel = built.status === 0 ? join(dir, "wheel") : null
+  log(`mouse wheel: ${wheel ? "built" : `not available (${(built.stderr ?? "").trim().slice(0, 300)})`}`)
+  return wheel
+}
+
 let pane = null
-function focusPane() {
+function paneCentre() {
   if (!pane) {
-    // The pane's own left margin, under its tabs: nothing there to press. Clicking content, such
-    // as a flame graph, would act on it, and did.
     const [tab] = locateAll("Overview")
-    if (!tab) return false
-    pane = { x: tab.x - 55, y: tab.y + 150 }
+    if (!tab) return null
+    pane = { x: tab.x + 300, y: tab.y + 320 }
   }
-  clickAt(pane)
-  return true
+  return pane
+}
+
+function scrollBy(pixels) {
+  const at = paneCentre()
+  if (!at) return false
+  const tool = wheelTool()
+  if (tool) return run(tool, [String(at.x), String(at.y), String(pixels)]).status === 0
+  // Without Swift, the keyboard, after a click on the pane, as before.
+  clickAt(at)
+  return run("cliclick", [pixels < 0 ? "kp:page-down" : "kp:page-up"]).status === 0
 }
 
 /** Scroll the main pane, where only the screen can be read and what's below it can't be. */
 export function scrollDown() {
   if (!IS_MAC || macTree()) return
-  if (focusPane()) run("cliclick", ["kp:page-down"])
+  scrollBy(-500)
 }
 
 /** Back to the top of the main pane. */
 export function scrollToTop() {
   if (!IS_MAC || macTree()) return
-  if (focusPane()) {
-    run("cliclick", ["kp:home"])
-    for (let i = 0; i < 4; i++) run("cliclick", ["kp:page-up"])
-  }
+  for (let i = 0; i < 4; i++) scrollBy(2000)
 }
 
 /**
@@ -305,9 +334,17 @@ export async function typeInto(field, text) {
     // character viewer over the window and took the rest of the text.
     // And by the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.
     spawnSync("pbcopy", [], { input: text })
-    if (!bySight("Edit", true, { whole: true })) return false
+    if (!bySight("Edit", true, { whole: true, inLine: true })) {
+      log("paste: no Edit menu on screen")
+      return false
+    }
     await sleep(800)
-    return bySight("Paste", true, { whole: true })
+    if (!bySight("Paste", true, { whole: true, inLine: true })) {
+      log("paste: the Edit menu has no Paste on screen")
+      run("cliclick", ["kp:esc"])
+      return false
+    }
+    return true
   }
   const ps = `
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes
