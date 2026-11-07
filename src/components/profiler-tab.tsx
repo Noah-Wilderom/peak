@@ -117,6 +117,7 @@ function CpuProfiler({ proc }: { proc: Proc }) {
   const profile = profiles.find((p) => p.id === selectedId) ?? profiles.at(-1)
   const running = proc.status === "running"
   const supported = can(proc, "cpu")
+  const canRecord = supported && running && proc.profiling
 
   useEffect(() => {
     mounted.current = true
@@ -201,8 +202,10 @@ function CpuProfiler({ proc }: { proc: Proc }) {
         </Card>
       ) : (
         <div className="flex min-h-[320px] flex-col items-center justify-center rounded-card bg-secondary text-center">
-          <h2 className="text-title">No profile selected.</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Record a few seconds to see where the time goes.</p>
+          <h2 className="text-title">{canRecord ? "No profile selected." : "No CPU profiles."}</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            {canRecord ? "Record a few seconds to see where the time goes." : supported ? "None were recorded while this run had an agent." : "This run's agent can't record them. The reason is on the left."}
+          </p>
         </div>
       )}
     </div>
@@ -221,6 +224,7 @@ function HeapProfiler({ proc }: { proc: Proc }) {
   const grower = snap ? topGrower(rows, snap.heapUsed) : null
   const running = proc.status === "running"
   const canSnapshot = can(proc, "snapshot")
+  const canTake = canSnapshot && running && proc.profiling
   const canCollect = proc.agent ? can(proc, "forcegc") : proc.hasGc
   const go = proc.runtime === "go"
 
@@ -296,7 +300,7 @@ function HeapProfiler({ proc }: { proc: Proc }) {
         <motion.div key={snap.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="flex min-w-0 flex-col gap-4">
           <div className="grid grid-cols-3 gap-4">
             <Metric label="Heap used" value={<Bytes value={snap.heapUsed} />} hint={base ? `${snap.heapUsed >= base.heapUsed ? "+" : "−"}${formatBytes(Math.abs(snap.heapUsed - base.heapUsed))} vs snapshot ${index}` : "First snapshot"} />
-            <Metric label="Objects" value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={`${rows.length} ${go ? "functions" : "types"}`} />
+            <Metric label={go ? "Objects, estimated" : "Objects"} value={formatCount(rows.reduce((a, r) => a + r.count, 0))} hint={go ? `From ${rows.length} allocating functions` : `${rows.length} types`} />
             {grower ? (
               <div className="rounded-card bg-danger/10 p-5 ring-1 ring-danger/25 ring-inset">
                 <p className="flex items-center gap-1.5 text-xs font-semibold text-danger">
@@ -308,7 +312,7 @@ function HeapProfiler({ proc }: { proc: Proc }) {
                 </p>
               </div>
             ) : (
-              <Metric label="Growth" value={base ? "None notable" : "—"} hint={base ? "No type grew more than 3% of heap" : "Take another snapshot to compare"} />
+              <Metric label="Growth" value={base ? "None notable" : "—"} hint={base ? `No ${go ? "function" : "type"} grew more than 3% of heap` : "Take another snapshot to compare"} />
             )}
           </div>
 
@@ -356,9 +360,9 @@ function HeapProfiler({ proc }: { proc: Proc }) {
         </motion.div>
       ) : (
         <div className="flex min-h-[320px] flex-col items-center justify-center rounded-card bg-secondary text-center">
-          <h2 className="text-title">{canSnapshot ? "No snapshot selected." : "No heap snapshots here."}</h2>
+          <h2 className="text-title">{canTake ? "No snapshot selected." : "No heap snapshots."}</h2>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            {canSnapshot ? "Take a heap snapshot to see what is holding memory." : "This runtime's agent can't take them. The reason is on the left."}
+            {canTake ? "Take a heap snapshot to see what is holding memory." : canSnapshot ? "None were taken while this run had an agent." : "This run's agent can't take them. The reason is on the left."}
           </p>
         </div>
       )}

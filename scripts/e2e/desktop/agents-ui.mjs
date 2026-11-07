@@ -28,7 +28,8 @@ async function see(pattern, ms = 30_000) {
   let text = ""
   let scrolled = 0
   while (Date.now() < end) {
-    text = (await look()).text
+    // Reading a screen wraps lines where the window does, and curls apostrophes.
+    text = (await look()).text.replace(/\s+/g, " ").replaceAll("\u2019", "'")
     if (pattern.test(text)) return true
     await sleep(500)
     // Reading the screen, what's further down the page takes scrolling to. A few times, and only
@@ -57,7 +58,7 @@ async function pressMatching(pattern, ms = 30_000) {
  */
 async function checkDisabled(label, name, run) {
   if (readsState()) {
-    return check(label, (await look()).items.find((i) => i.name === name)?.enabled === false)
+    return check(label, (await look()).items.find((i) => i.name === name && i.enabled !== undefined)?.enabled === false)
   }
   const before = storedRunById(run)
   const pressed = await press(name)
@@ -110,6 +111,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
   check(t("and the agent's version"), await see(new RegExp(`Peak agent\\s+${version.replaceAll(".", "\\.")}`), 5000))
   check(t("and that it's connected"), await see(/Connected/, 5000))
   for (const [what, reason] of missing) check(t(`says why there's no ${what}`), await see(reason, 5000), String(reason))
+  if (IS_WINDOWS && name === "php-alone") check(t("doesn't suggest an extension Windows can't install"), !/pecl install/.test((await look()).text))
   await shot(`${name}-connected`)
 
   if (cpu) {
@@ -122,6 +124,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
   } else {
     await pressMatching(/^CPU$/, 5000)
     await checkDisabled(t("recording is disabled"), "Record 5s", run.id)
+    check(t("the CPU view doesn't invite recording"), await see(/can't record them/, 8000))
     await shot(`${name}-cpu-refused`)
   }
   await pressMatching(/^Heap$/, 5000)
@@ -129,9 +132,11 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("Take snapshot can be pressed"), await pressMatching(/^Take snapshot$/))
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
+    if (name === "go") check(t("Go's objects are estimates from allocating functions, not types"), await see(/allocating\s+functions/, 8000))
     await shot(`${name}-heap`)
   } else {
     await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
+    check(t("the heap view doesn't invite a snapshot"), await see(/can't take them/, 8000))
     await shot(`${name}-heap-refused`)
   }
   if (gc) check(t("Collect garbage can be pressed"), await pressMatching(/^Collect garbage$/))
@@ -160,7 +165,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
   kept.push({ name, label, marker, cpu: !!cpu, snapshot: !!snapshot })
 }
 
-const WHY = { lag: /no event loop to delay/, list: /no built-in way to list/, excimer: /pecl install excimer/, bunGc: /doesn't publish individual garbage collections/, pyHeap: /no cheap total/ }
+const WHY = { lag: /no event loop to delay/, list: /no built-in way to list/, excimer: IS_WINDOWS ? /no Windows build/ : /pecl install excimer/, bunGc: /doesn't publish individual garbage collections/, pyHeap: /no cheap total/ }
 const number = "\\d+\\.\\d+"
 
 await runtimeInWindow({ name: "node", label: "Node\\.js", versionShape: number, program: programs.node(SECONDS), cpu: /Sampled by V8/, snapshot: /SmokeThing/, gc: true, missing: [] })
@@ -216,6 +221,8 @@ if (go.ok) await runtimeInWindow({ name: "go", label: "Go", versionShape: number
     check("selection: the window stayed on the first run", /Node\.js\s+\d/.test(text) && !/Python\s+\d/.test(text))
     await shot("selection-kept")
     await cli(["open", b.id]).done
+    // Its view has to have replaced the other one before its controls mean anything.
+    await see(/Python\s+\d/)
     await pressMatching(/^CPU$/, 5000)
     check("selection: and the other run has the result", await see(/Profile\s+1/, 15_000))
     await shot("selection-other-run")

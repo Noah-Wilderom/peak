@@ -35,6 +35,7 @@ describe("agent facts", () => {
     expect(setupFor("go").body).toMatch(/can't have anything injected/)
     expect(setupFor("bun").body).toMatch(/1\.2\.15/)
     expect(setupFor("php").code).toBe("pecl install excimer")
+    expect(setupFor("php").body).toMatch(/no Windows build/)
     for (const runtime of ["node", "python", "bun", "php"] as const) expect(setupFor(runtime).body).toMatch(/Attaching to a running process only gives OS-level monitoring/)
     expect(setupFor("python").body).toMatch(/Python/)
     expect(setupFor("shell").code).toBeUndefined()

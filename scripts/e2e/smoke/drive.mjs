@@ -89,7 +89,8 @@ function readScreen() {
   const tool = magick()
   const clean = (w) => w.toLowerCase().replace(/[.,:]/g, "")
   const ENLARGE = 2
-  run(tool, [shot, "-colorspace", "Gray", "-resize", `${ENLARGE * 100}%`, "-threshold", "75%", page])
+  // A capture has an alpha channel, which ImageMagick 7 keeps through all this, leaving tesseract nothing.
+  run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-resize", `${ENLARGE * 100}%`, "-threshold", "75%", page])
   const words = run("tesseract", [page, "stdout", "--psm", "11", "tsv"]).stdout.split("\n").slice(1).map((l) => l.split("\t")).filter((c) => c[11]?.trim()).map((c) => ({
     word: c[11].trim(),
     plain: clean(c[11].trim()),
@@ -99,7 +100,7 @@ function readScreen() {
     w: (Number(c[8]) / ENLARGE) * toPoints,
     h: (Number(c[9]) / ENLARGE) * toPoints,
   }))
-  const shapes = run(tool, [shot, "-colorspace", "Gray", "-negate", "-threshold", "75%", "-define", "connected-components:verbose=true", "-define", "connected-components:area-threshold=400", "-connected-components", "8", "null:"])
+  const shapes = run(tool, [shot, "-alpha", "off", "-colorspace", "Gray", "-negate", "-threshold", "75%", "-define", "connected-components:verbose=true", "-define", "connected-components:area-threshold=400", "-connected-components", "8", "null:"])
   const found = `${shapes.stdout}${shapes.stderr}`.matchAll(/(\d+)x(\d+)\+(\d+)\+(\d+) [\d.,]+ \d+ \w+\((?:255|100%)/g)
   let n = 0
   for (const [, width, height, left, top] of found) {
@@ -107,7 +108,7 @@ function readScreen() {
     // Button-shaped, in either a 1x or a 2x capture.
     if (w < 40 * (pixels / (points || pixels)) || h < 18 || h > 90) continue
     const crop = join(dir, `shape-${n++}.png`)
-    run(tool, [shot, "-crop", `${w}x${h}+${x}+${y}`, "+repage", "-colorspace", "Gray", "-negate", "-resize", "300%", crop])
+    run(tool, [shot, "-alpha", "off", "-crop", `${w}x${h}+${x}+${y}`, "+repage", "-colorspace", "Gray", "-negate", "-resize", "300%", crop])
     const text = run("tesseract", [crop, "stdout", "--psm", "7"]).stdout.trim().replace(/^\W+\s*/, "")
     // An icon inside a button reads as stray symbols.
     for (const word of text.split(/\s+/).map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}.]+$/gu, "")).filter(Boolean)) {
@@ -118,6 +119,16 @@ function readScreen() {
 }
 
 /** Every place the words of `name` are on screen, top to bottom. */
+/** One character off, as reading a screen often is: "Coltect garbage", "Record Ss". */
+function nearly(a, b) {
+  if (a === b) return true
+  if (Math.min(a.length, b.length) < 2 || Math.abs(a.length - b.length) > 1) return false
+  let [i, j] = [0, 0]
+  while (i < a.length && j < b.length && a[i] === b[j]) (i++, j++)
+  if (a.length === b.length) return a.slice(i + 1) === b.slice(j + 1)
+  return a.length > b.length ? a.slice(i + 1) === b.slice(j) : a.slice(i) === b.slice(j + 1)
+}
+
 function locateAll(name) {
   const wanted = name.toLowerCase().replace(/[.]/g, "").split(/\s+/)
   const words = readScreen()
@@ -126,12 +137,13 @@ function locateAll(name) {
   for (const w of words) sizes.set(w.line, (sizes.get(w.line) ?? 0) + 1)
   const hits = []
   for (let i = 0; i + wanted.length <= words.length; i++) {
-    if (wanted.every((w, j) => words[i + j].plain === w)) {
+    if (wanted.every((w, j) => nearly(words[i + j].plain, w))) {
       const last = words[i + wanted.length - 1]
-      hits.push({ whole: sizes.get(words[i].line) === wanted.length, x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
+      const exact = wanted.every((w, j) => words[i + j].plain === w)
+      hits.push({ rank: (exact ? 4 : 0) + (sizes.get(words[i].line) === wanted.length ? 2 : wanted.length > 1 && sizes.get(words[i].line) === wanted.length + 1 ? 1 : 0), x: Math.round((words[i].x + last.x + last.w) / 2), y: Math.round(words[i].y + words[i].h / 2) })
     }
   }
-  return hits.sort((a, b) => Number(b.whole) - Number(a.whole) || a.y - b.y)
+  return hits.sort((a, b) => b.rank - a.rank || a.y - b.y)
 }
 
 function clickAt({ x, y }) {

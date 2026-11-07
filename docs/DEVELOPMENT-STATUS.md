@@ -4,13 +4,44 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `131e76a`: the smoke test passes on all four targets, and the window proof on Linux and Windows. macOS's window proof and two of four `v0.1.0` button rehearsals (Linux, macOS x64) still fail, for harness reasons with fixes awaiting a native run.** Not ready to tag. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
+- **State:** **`v0.1.1` candidate `b72de3f`: smoke and signatures pass on all four targets. Linux and Windows press `v0.1.0`'s real buttons. macOS can't be driven yet, in either proof, and Linux's window proof has 5 harness failures. Fixes are in the working tree, awaiting a native run.** Not ready to tag. `v0.1.0` remains published, accepted and unchanged at `9e60f67`.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Third native run: `b72de3f`
+
+Tests 42342802619 passed. Release 42342802638 and Update proof 42342802632 failed. Raw results: `docs/evidence/release/ci-candidate-b72de3f/`.
+
+| Check | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Signatures and smoke | Pass | Pass | Pass | Pass |
+| Single-thread sampled time fits the recording (Node `sampled in`, ms) | Pass, 2017 in 2017 | Pass, 2100 in 2101 | Pass, 2126 in 2134 | Pass, 2037 in 2038 |
+| Window proof | 5 failures, in the harness | **Pass** | Fails: reads nothing | Fails: reads nothing |
+| `v0.1.0`'s real buttons | **Pass** | **Pass** | Fails: reads nothing | Fails: reads nothing |
+
+**Node's timing:** V8's own range replaced the timer, and on every target its samples now fit the recording, including the machine that showed 2272 in 2115. Each of those is one measurement on one run.
+
+**Go's figures** are CPU time across goroutines, not elapsed time: 1280 to 1760 ms in about 2000 ms. That's a program that sleeps between bursts. They're checked against the CPU count.
+
+**macOS can't be driven yet:**
+
+- The accessibility tree comes back empty with the script fixed, and no error (`0 items`). Requesting WebKit's tree made no difference. On this evidence, disabled attributes can't be read on the runner.
+- Reading the screen returned next to nothing, a regression from `131e76a`: captures have an alpha channel, and ImageMagick 7 keeps it through the threshold, so tesseract got a blank image. **Reproduced here with the runner's ImageMagick 7.1.2-35 on a real capture.** `-alpha off` fixes it there.
+- Tried locally: the real `drive.mjs` against real macOS captures, with stand-ins for `screencapture`, `sips`, `osascript` and `cliclick`. It finds Take snapshot, Collect garbage, CPU, Heap and History at the right coordinates, and reads PHP's version and reasons. **It has not run on a Mac**, and whether scrolling or the History search box work there is unknown.
+
+**Linux's 5 window failures were harness defects of mine,** and the app was right in each case: disabled-state checks found a text line before the control, and the selection check pressed CPU before the other run's view had replaced the first. The non-selected-run check itself passed: the window stayed on the first run.
+
+### Corrections from the saved screens, after `b72de3f` started
+
+Not yet run natively:
+
+- Go's snapshot card said "9 types". It's now "Objects, estimated", "From 9 allocating functions".
+- PHP alone's empty CPU view invited recording. Empty views now invite only what can be done: can't, or the run ended, and they say so.
+- On Windows, PHP alone recommended `pecl install excimer` for a build that doesn't exist. It now says live figures need Linux or macOS. The check for this reads the agent's own words, on Windows and elsewhere.
 
 ### Second native run: `131e76a`
 
@@ -25,7 +56,7 @@ Update proof 42337392754 and Release 42337392741 failed. Tests 42337392765 passe
 | Window proof, `agents-ui.mjs` | **Pass, 144 checks** | **Pass, 123 checks** | **Fail, 76 of 129** | **Fail, 101 of 129** |
 | Pressing the published `v0.1.0`'s buttons | Fail | **Pass** | **Pass, by reading the screen** | Fail |
 
-- **macOS with Excimer now connects.** The missing `EXCIMER_CPU` was the explanation fixed for, and the agent reports `excimer-wall` there, so that's supported, though not observed directly.
+- **PHP with Excimer on macOS is measured:** through the installed app and CLI, it reports `excimer-wall`, elapsed time, not Linux's on-CPU. Separately, the earlier diagnosis that `EXCIMER_CPU` is undefined there was never directly observed. The agent's guard for it fits what happened, and that's all.
 - **Node with `--no-use-osr` holds `busyWork` on all four.** That fits the OSR explanation. It doesn't confirm it, since no run has shown the frames of a failure.
 - **macOS window failures** are the harness, not the app. The accessibility script had a syntax error of mine (`on` is reserved in AppleScript), which left an unproven screen reader, and that one can't read light text on dark buttons, so "Take snapshot" and "Record 5s" were never found. Screenshots show the right window. **macOS is not yet proven.**
 - **Linux and macOS x64 rehearsals:** buttons pressed and the answer on screen in both screenshots. Only reading that small text failed.
@@ -43,7 +74,7 @@ Update proof 42337392754 and Release 42337392741 failed. Tests 42337392765 passe
 
 Local on this tree: frontend 313 tests at 100%, Node agent tests pass. No Rust changed since CI's 99.16%, and `agents-ui.mjs` and `drive.mjs` can't run on this server.
 
-### First native run: `f5116c8`
+### First native run: `f5116c8` (history: its diagnoses and fixes are as understood then)
 
 Update proof 42333866409, Release 42333866414, Tests 42333866424, **all failed**, and no draft was made. Raw logs, results and screenshots: `docs/evidence/release/ci-candidate-f5116c8/`.
 

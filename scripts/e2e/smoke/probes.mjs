@@ -107,6 +107,10 @@ export async function runProbes({ check, record, out, only }) {
     check(label("identifies its runtime and agent"), found.runtime === runtime && /^\d/.test(agent.runtimeVersion ?? "") && agent.agentVersion === versionNumber, `${found.runtime} ${agent.runtimeVersion}, agent ${agent.agentVersion}`)
     for (const c of caps) check(label(`offers ${c}`), agent.capabilities?.includes(c), (agent.capabilities ?? []).join(","))
     for (const c of missing) check(label(`says why there's no ${c}`), !agent.capabilities?.includes(c) && !!agent.unavailable?.[c], agent.unavailable?.[c])
+  if (runtime === "php" && missing.includes("cpu")) {
+    const advice = IS_WINDOWS ? /no Windows build/ : /pecl install excimer/
+    check(label("its advice is possible on this OS"), advice.test(agent.unavailable?.cpu ?? ""), agent.unavailable?.cpu)
+  }
 
     if (caps.includes("cpu")) {
       const cpu = await cli(["profile", found.id, "--ms", "2000", "--json"]).done
@@ -201,6 +205,7 @@ export async function runProbes({ check, record, out, only }) {
       await probeRuntime({ ...programs.php(SECONDS), name: "php", runtime: "php", frame: "busy_work", entry: "", caps: ["heap", "cpu", "forcegc", ...(timed ? ["gc"] : [])], missing: ["lag", "snapshot"], sampling: ["excimer-cpu", "excimer-wall"], lag: false, gauges: true })
     }
     // The same PHP with nothing extra loaded, which is all there is on Windows.
+    // What it says to do has to be possible there.
     await probeRuntime({ ...programs.phpAlone(8), name: "php-alone", runtime: "php", frame: "busy_work", entry: "", caps: [], missing: ["heap", "gc", "cpu", "forcegc", "lag", "snapshot"], lag: false, gauges: true })
     const dir = sourceDir()
     writeFileSync(join(dir, "own.php"), `<?php define("USER_PREPEND", true);`)

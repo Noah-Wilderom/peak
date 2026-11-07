@@ -15,6 +15,7 @@ namespace PeakAgent {
         const TICK_SECONDS = 0.5;
         const CPU_PERIOD_SECONDS = 0.005;
         const SETUP = 'Install the Excimer extension for this: pecl install excimer';
+        const NO_EXTENSION = 'Needs the Excimer extension, which has no Windows build, so PHP on Windows only reports as it ends. For this, run the program on Linux or macOS.';
 
         private static $sock = null;
         private static $pid = 0;
@@ -67,7 +68,9 @@ namespace PeakAgent {
         public static function describe($live)
         {
             $hasExcimer = class_exists('ExcimerTimer', false);
-            $why = $hasExcimer ? 'Only available for command-line PHP, where a timer can outlive a request.' : self::SETUP;
+            $why = $hasExcimer
+                ? 'Only available for command-line PHP, where a timer can outlive a request.'
+                : (PHP_OS_FAMILY === 'Windows' ? self::NO_EXTENSION : self::SETUP);
             $capabilities = [];
             $unavailable = [
                 'lag' => "PHP runs one request from start to end, with no event loop to delay.",

@@ -1,0 +1,878 @@
+  PEAK_SMOKE_REQUIRE: node,python,bun,php,go,php-excimer
+  DEBIAN_FRONTEND: noninteractive
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $EE592F21
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $215CF857
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $42E88939
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_HFS : 4)…
+          disk image (Apple_HFS : 4): verified   CRC32 $4CE6E03D
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $42E88939
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $A59EB8B0
+verified   CRC32 $CCE2A00E
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-vislrF
+"disk31" ejected.
+(node:53286) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   the installed copy says what it is peak 0.1.1 (macOS app, commit b72de3ff033b446b48f7807f145032b52510f6f4)
+collector: aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-a739b90586cfb817/peak-collector (for Linux targets) 
+ok   names its bundled collector aarch64: /Users/runner/Library/Application Support/peak/collectors/aarch64-a739b90586cfb817/peak-collector (for Linux targets)
+ok   with no app open, the command still runs and says why peak: the app isn't running on sat12-bq161-ceaae795-7f77-4dd5-9e4a-2da898799ca1-6689A4A2199F.local for runner — running without monitoring
+app pid 53709
+ok   the app stays open 
+ok   commands don't inherit the app's own environment clean
+ok   commands run where the CLI was started /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak place u1d6hW
+ok   output and exit code in the terminal exit 7
+ok   monitored by the open app smoke-1794030569408-err
+ok   the app recorded real samples and the exit samples 7, max rss 119013376, exit 7
+ok   the Node agent reported from inside the program lag samples 5
+ok   node: identifies its runtime and agent node 22.23.4, agent 0.1.1
+ok   node: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   node: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   node: CPU profile holds the program's own function, in milliseconds v8, 2126 ms sampled in 2134 ms, top: busyWork 1396, (idle) 462, (garbage collector) 127, post 93, writeUtf8String 22, (program) 14: 
+ok   node: says how it sampled v8
+ok   node: sampled time fits within the recording 2126 ms sampled in 2134 ms
+ok   node: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   node: forces a collection 
+ok   node: the app opens its profiler 
+ok   node: the program's exit code is its own exit 0: 
+ok   node: history keeps what the agent reported []
+ok   node: history keeps the CPU profile 1
+ok   node: history keeps the snapshot 1
+ok   node: delay reached the samples 28 of 30
+ok   node: live heap reached the samples 
+ok   node: collections are stored 544
+ok   node: a user's own NODE_OPTIONS still apply own=true agent=true
+ok   python: identifies its runtime and agent python 3.12.10, agent 0.1.1
+ok   python: offers gc gc,lag,cpu,snapshot,forcegc
+ok   python: offers lag gc,lag,cpu,snapshot,forcegc
+ok   python: offers cpu gc,lag,cpu,snapshot,forcegc
+ok   python: offers snapshot gc,lag,cpu,snapshot,forcegc
+ok   python: offers forcegc gc,lag,cpu,snapshot,forcegc
+ok   python: says why there's no heap CPython has no cheap total for its heap, so memory here is the process's.
+ok   python: CPU profile holds the program's own function, in milliseconds stack, 2020 ms sampled in 2020 ms, top: <module> 1784, busy_work 236, (root) 0: 
+ok   python: says how it sampled stack
+ok   python: sampled time fits within the recording 2020 ms sampled in 2020 ms
+ok   python: heap snapshot holds what the program allocated 60 entries, top dict: 
+ok   python: forces a collection 
+ok   python: the app opens its profiler 
+ok   python: the program's exit code is its own exit 0: 
+ok   python: history keeps what the agent reported []
+ok   python: history keeps the CPU profile 1
+ok   python: history keeps the snapshot 1
+ok   python: delay reached the samples 28 of 31
+ok   python: collections are stored 14
+ok   python: a user's own PYTHONPATH still applies own=found agent=True 
+ok   bun: a user's own BUN_OPTIONS don't lose the agent smol=4 agent=true 
+ok   bun: identifies its runtime and agent bun 1.4.4, agent 0.1.1
+ok   bun: offers heap heap,lag,snapshot,forcegc,cpu
+ok   bun: offers lag heap,lag,snapshot,forcegc,cpu
+ok   bun: offers cpu heap,lag,snapshot,forcegc,cpu
+ok   bun: offers snapshot heap,lag,snapshot,forcegc,cpu
+ok   bun: offers forcegc heap,lag,snapshot,forcegc,cpu
+ok   bun: says why there's no gc Bun doesn't publish individual garbage collections, so none are listed.
+ok   bun: CPU profile holds the program's own function, in milliseconds jsc, 2020 ms sampled in 2044 ms, top: busyWork 2003, SmokeThing 17, (root) 0: 
+ok   bun: says how it sampled jsc
+ok   bun: sampled time fits within the recording 2020 ms sampled in 2044 ms
+ok   bun: heap snapshot holds what the program allocated 60 entries, top (compiled code): 
+ok   bun: forces a collection 
+ok   bun: the app opens its profiler 
+ok   bun: the program's exit code is its own exit 0: 
+ok   bun: history keeps what the agent reported [{"name":"Live objects","value":86468,"unit":"count"},{"name":"Protected objects","value":11,"unit":"count"},{"name":"Extra memory","value":2273689,"unit":"bytes"}]
+ok   bun: history keeps the CPU profile 1
+ok   bun: history keeps the snapshot 1
+ok   bun: delay reached the samples 28 of 30
+ok   bun: live heap reached the samples 
+ok   bun: no collections are invented 0
+ok   php: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php: offers heap heap,cpu,forcegc,gc
+ok   php: offers cpu heap,cpu,forcegc,gc
+ok   php: offers forcegc heap,cpu,forcegc,gc
+ok   php: offers gc heap,cpu,forcegc,gc
+ok   php: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php: CPU profile holds the program's own function, in milliseconds excimer-wall, 2125 ms sampled in 2152 ms, top: busy_work 2125, (root) 0, (main) 0: 
+ok   php: says how it sampled excimer-wall
+ok   php: sampled time fits within the recording 2125 ms sampled in 2152 ms
+ok   php: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php: forces a collection 
+ok   php: the app opens its profiler 
+ok   php: the program's exit code is its own exit 0: 
+ok   php: history keeps what the agent reported [{"name":"Memory now","value":609024,"unit":"bytes"},{"name":"Peak memory","value":1196024,"unit":"bytes"},{"name":"Collector runs","value":1709,"unit":"count"},{"name":"Values collected","value":17079940,"unit":"count"}]
+ok   php: history keeps the CPU profile 1
+ok   php: no delay is claimed 
+ok   php: live heap reached the samples 
+ok   php: collections are stored 1689
+ok   php-alone: identifies its runtime and agent php 8.3.36, agent 0.1.1
+ok   php-alone: says why there's no heap Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no gc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no cpu Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no forcegc Install the Excimer extension for this: pecl install excimer
+ok   php-alone: says why there's no lag PHP runs one request from start to end, with no event loop to delay.
+ok   php-alone: says why there's no snapshot PHP has no built-in way to list what is in memory.
+ok   php-alone: a CPU profile is refused, with how to get one peak: Install the Excimer extension for this: pecl install excimer
+ok   php-alone: a snapshot is refused, with the reason peak: PHP has no built-in way to list what is in memory.
+ok   php-alone: the app opens its profiler 
+ok   php-alone: the program's exit code is its own exit 0: 
+ok   php-alone: history keeps what the agent reported [{"name":"Memory now","value":597584,"unit":"bytes"},{"name":"Peak memory","value":1178280,"unit":"bytes"},{"name":"Collector runs","value":744,"unit":"count"},{"name":"Values collected","value":7440000,"unit":"count"}]
+ok   php-alone: no delay is claimed 
+ok   php-alone: no collections are invented 0
+ok   php: a user's own auto_prepend_file still runs, and the exit code is the program's exit 4: own=yes agent=yes 
+ok   go: a program builds against the installed SDK 
+ok   go: identifies its runtime and agent go 1.27.3, agent 0.1.1
+ok   go: offers heap heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers gc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers lag heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers cpu heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers snapshot heap,gc,lag,cpu,snapshot,forcegc
+ok   go: offers forcegc heap,gc,lag,cpu,snapshot,forcegc
+ok   go: CPU profile holds the program's own function, in milliseconds pprof, 1380 ms sampled in 2173 ms, top: runtime.walltime 600, runtime.nanotime1 540, main.busyWork 30, time.Now 30, runtime.madvise 30, time.runtimeNow 20: 
+ok   go: says how it sampled pprof
+ok   go: sampled time is plausible for this many threads 1380 ms sampled in 2173 ms on 3 CPUs
+ok   go: heap snapshot holds what the program allocated 6 entries, top main.smokeAlloc: 
+ok   go: forces a collection 
+ok   go: the app opens its profiler 
+ok   go: the program's exit code is its own exit 0: 
+ok   go: history keeps what the agent reported [{"name":"Goroutines","value":3,"unit":"count"},{"name":"Time in GC","value":0.10025542596802269,"unit":"percent"},{"name":"Live objects","value":756930,"unit":"count"}]
+ok   go: history keeps the CPU profile 1
+ok   go: history keeps the snapshot 1
+ok   go: delay reached the samples 29 of 31
+ok   go: live heap reached the samples 
+ok   go: collections are stored 10
+ok   go: a program without the import has no agent, and that's what's reported peak: no profiling agent is attached to this process
+ok   explains how to profile each runtime Node.js  automatic. Started by Peak or `peak run`: heap, GC, event-loop delay, CPU, heap snapshots.
+SMOKE OK
+brew install tesseract cliclick imagemagick
+shell: /bin/bash -e {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+==> Downloading bottle manifests
+✔︎ Bottle Manifest tesseract (5.5.4)
+✔︎ Bottle Manifest cliclick (5.1)
+✔︎ Bottle Manifest imagemagick (7.1.2-35)
+==> Would install 3 formulae:
+tesseract    5.5.4
+cliclick     5.1
+imagemagick  7.1.2-35
+==> Would install 8 dependencies for tesseract:
+openjpeg    2.5.4_1
+leptonica   1.87.0
+libb2       0.98.1
+libarchive  3.8.11
+fribidi     1.0.18
+libdatrie   0.2.14
+libthai     0.1.30
+pango       1.58.2
+==> Would install 3 dependencies for imagemagick:
+libde265  1.1.3
+x265      4.3
+libheif   1.23.7
+==> Would upgrade 1 dependency for imagemagick:
+aom 3.15.1 -> 3.15.3
+==> Fetching downloads for: tesseract, cliclick and imagemagick
+✔︎ Bottle Manifest openjpeg (2.5.4_1)
+✔︎ Bottle Manifest leptonica (1.87.0)
+✔︎ Bottle Manifest libb2 (0.98.1)
+✔︎ Bottle cliclick (5.1)
+✔︎ Bottle Manifest libarchive (3.8.11)
+✔︎ Bottle Manifest fribidi (1.0.18)
+✔︎ Bottle openjpeg (2.5.4_1)
+✔︎ Bottle Manifest libdatrie (0.2.14)
+✔︎ Bottle leptonica (1.87.0)
+✔︎ Bottle Manifest libthai (0.1.30)
+✔︎ Bottle tesseract (5.5.4)
+✔︎ Bottle libb2 (0.98.1)
+✔︎ Bottle Manifest pango (1.58.2)
+✔︎ Bottle Manifest aom (3.15.3)
+✔︎ Bottle Manifest libde265 (1.1.3)
+✔︎ Bottle imagemagick (7.1.2-35)
+✔︎ Bottle fribidi (1.0.18)
+✔︎ Bottle Manifest x265 (4.3)
+✔︎ Bottle libarchive (3.8.11)
+✔︎ Bottle Manifest libheif (1.23.7)
+✔︎ Bottle libdatrie (0.2.14)
+✔︎ Bottle libthai (0.1.30)
+✔︎ Bottle pango (1.58.2)
+✔︎ Bottle aom (3.15.3)
+✔︎ Bottle libde265 (1.1.3)
+✔︎ Bottle x265 (4.3)
+✔︎ Bottle libheif (1.23.7)
+==> Installing dependencies for tesseract: openjpeg, leptonica, libb2, libarchive, fribidi, libdatrie, libthai and pango
+==> Installing tesseract dependency: openjpeg (2.5.4_1)
+==> Pouring openjpeg--2.5.4_1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/openjpeg/2.5.4_1: 518 files, 14.9MB
+==> Installing tesseract dependency: leptonica (1.87.0)
+==> Pouring leptonica--1.87.0.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/leptonica/1.87.0: 55 files, 7.1MB
+==> Installing tesseract dependency: libb2 (0.98.1)
+==> Pouring libb2--0.98.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libb2/0.98.1: 9 files, 112.7KB
+==> Installing tesseract dependency: libarchive (3.8.11)
+==> Pouring libarchive--3.8.11.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libarchive/3.8.11: 65 files, 4.1MB
+==> Installing tesseract dependency: fribidi (1.0.18)
+==> Pouring fribidi--1.0.18.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/fribidi/1.0.18: 69 files, 763.1KB
+==> Installing tesseract dependency: libdatrie (0.2.14)
+==> Pouring libdatrie--0.2.14.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libdatrie/0.2.14: 20 files, 276.1KB
+==> Installing tesseract dependency: libthai (0.1.30)
+==> Pouring libthai--0.1.30.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libthai/0.1.30: 30 files, 955KB
+==> Installing tesseract dependency: pango (1.58.2)
+==> Pouring pango--1.58.2.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/pango/1.58.2: 69 files, 3.7MB
+==> Installing tesseract
+==> Pouring tesseract--5.5.4.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/tesseract/5.5.4: 74 files, 26.1MB
+==> Pouring cliclick--5.1.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/cliclick/5.1: 6 files, 161.3KB
+==> Installing dependencies for imagemagick: aom, libde265, x265 and libheif
+==> Upgrading imagemagick dependency: aom (3.15.1 -> 3.15.3)
+==> Pouring aom--3.15.3.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/aom/3.15.3: 30 files, 11.3MB
+==> Installing imagemagick dependency: libde265 (1.1.3)
+==> Pouring libde265--1.1.3.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libde265/1.1.3: 18 files, 435.2KB
+==> Installing imagemagick dependency: x265 (4.3)
+==> Pouring x265--4.3.arm64_tahoe.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/x265/4.3: 12 files, 17.3MB
+==> Installing imagemagick dependency: libheif (1.23.7)
+==> Pouring libheif--1.23.7.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libheif/1.23.7: 53 files, 9MB
+==> Installing imagemagick
+==> Pouring imagemagick--7.1.2-35.arm64_tahoe.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/imagemagick/7.1.2-35: 681 files, 28.7MB
+==> Caveats
+==> tesseract
+This formula contains only the "eng" and "osd" language data files.
+If you need any other supported languages, run `brew install tesseract-lang`.
+==> imagemagick
+imagemagick-full includes additional tools and libraries that are not included in the regular imagemagick formula.
+export PEAK_TAURI_DRIVER="$HOME/.cargo/bin/tauri-driver"
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+else
+  node scripts/e2e/desktop/agents-ui.mjs artifacts smoke-output/window
+fi
+shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PEAK_SMOKE_PLATFORM: darwin-aarch64
+expected   CRC32 $CCE2A00E
+/dev/disk31         	GUID_partition_scheme          	
+/dev/disk31s1       	Apple_HFS                      	/private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/peak-dmg-LX1QY5
+"disk31" ejected.
+(node:60490) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok   node: connected 
+accessibility tree on macOS: not usable, 0 items: 
+never saw /Node\.js\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL node: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL node: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL node: and that it's connected 
+FAIL node: Record 5s can be pressed 
+never saw /Recording/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: shows it's recording 
+never saw /Profile\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: the profile appears, with its length 
+never saw /Sampled by V8/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: explained by how it was measured /Sampled by V8/
+FAIL node: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: the snapshot appears 
+never saw /SmokeThing/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: and shows what the program holds /SmokeThing/
+FAIL node: Collect garbage can be pressed 
+FAIL node: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 11
+ok   node: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL node: after it ends, the window says the agent has gone 
+FAIL node: the buttons' results are in history cpu 0, snapshots 0
+ok   python: connected 
+never saw /Python\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL python: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL python: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL python: and that it's connected 
+never saw /no cheap total/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL python: says why there's no live heap /no cheap total/
+FAIL python: Record 5s can be pressed 
+never saw /Recording/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: shows it's recording 
+never saw /Profile\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: the profile appears, with its length 
+never saw /Python stack sampled/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: explained by how it was measured /Python stack sampled/
+FAIL python: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: the snapshot appears 
+never saw /SmokeThing/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: and shows what the program holds /SmokeThing/
+FAIL python: Collect garbage can be pressed 
+FAIL python: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 11
+ok   python: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL python: after it ends, the window says the agent has gone 
+FAIL python: the buttons' results are in history cpu 0, snapshots 0
+ok   bun: connected 
+never saw /Bun\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL bun: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL bun: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL bun: and that it's connected 
+never saw /doesn't publish individual garbage collections/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL bun: says why there's no collections /doesn't publish individual garbage collections/
+FAIL bun: Record 5s can be pressed 
+never saw /Recording/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: shows it's recording 
+never saw /Profile\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: the profile appears, with its length 
+never saw /Sampled by JavaScriptCore/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: explained by how it was measured /Sampled by JavaScriptCore/
+FAIL bun: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: the snapshot appears 
+never saw /SmokeThing/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: and shows what the program holds /SmokeThing/
+FAIL bun: Collect garbage can be pressed 
+FAIL bun: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 11
+ok   bun: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL bun: after it ends, the window says the agent has gone 
+FAIL bun: the buttons' results are in history cpu 0, snapshots 0
+ok   php: connected 
+never saw /PHP\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php: and that it's connected 
+never saw /no event loop to delay/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php: says why there's no delay /no event loop to delay/
+never saw /no built-in way to list/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php: says why there's no snapshots /no built-in way to list/
+FAIL php: Record 5s can be pressed 
+never saw /Recording/ in:
+Bn
+OO
+Bn
+OO
+FAIL php: shows it's recording 
+never saw /Profile\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL php: the profile appears, with its length 
+never saw /sampled by Excimer/ in:
+Bn
+OO
+Bn
+OO
+FAIL php: explained by how it was measured /sampled by Excimer/
+NOT OBSERVED php: taking a snapshot is disabled
+FAIL php: Collect garbage can be pressed 
+FAIL php: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 11
+ok   php: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL php: after it ends, the window says the agent has gone 
+FAIL php: the buttons' results are in history cpu 0, snapshots 0
+ok   php-alone: connected 
+never saw /PHP\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: and that it's connected 
+never saw /pecl install excimer/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: says why there's no live figures /pecl install excimer/
+never saw /no event loop to delay/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: says why there's no delay /no event loop to delay/
+never saw /no built-in way to list/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL php-alone: says why there's no snapshots /no built-in way to list/
+NOT OBSERVED php-alone: recording is disabled
+NOT OBSERVED php-alone: taking a snapshot is disabled
+NOT OBSERVED php-alone: collecting garbage is disabled
+ok   php-alone: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL php-alone: after it ends, the window says the agent has gone 
+ok   php-alone: the buttons' results are in history cpu 0, snapshots 0
+ok   go: builds against the installed SDK 
+ok   go: connected 
+never saw /Go\s+\d+\.\d+/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL go: the window names the runtime and its version 
+never saw /Peak agent\s+0\.1\.1/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL go: and the agent's version 
+never saw /Connected/ in:
+Bn
+OO
+OO
+Bn
+OO
+OO
+FAIL go: and that it's connected 
+FAIL go: Record 5s can be pressed 
+never saw /Recording/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: shows it's recording 
+never saw /Profile\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: the profile appears, with its length 
+never saw /all goroutines/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: explained by how it was measured /all goroutines/
+FAIL go: Take snapshot can be pressed 
+never saw /Snapshot\s+1/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: the snapshot appears 
+never saw /smokeAlloc/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: and shows what the program holds /smokeAlloc/
+FAIL go: Collect garbage can be pressed 
+FAIL go: a profile from the terminal appears in the window peak: no profiling agent is attached to this process 11
+ok   go: the program's exit code is its own exit 0: 
+never saw /Agent has disconnected/ in:
+Bn
+OO
+Bn
+OO
+FAIL go: after it ends, the window says the agent has gone 
+FAIL go: the buttons' results are in history cpu 0, snapshots 0
+FAIL capture: the page opens 
+ok   capture: takes a command 
+FAIL capture: starts it 
+FAIL capture: the agent connected 
+ok   selection: both runs connected 
+never saw /Node\.js\s+\d/ in:
+
+FAIL selection: the first run is on screen 
+FAIL selection: the other run was profiled from the terminal peak: no profiling agent is attached to this process
+FAIL selection: the window stayed on the first run 
+never saw /Profile\s+1/ in:
+
+FAIL selection: and the other run has the result 
+never saw /profiling aren't available/ in:
+
+FAIL no agent: the window says profiling isn't available 
+never saw /Attaching to a running process only gives OS-level monitoring|Peak has profiling agents for/ in:
+
+FAIL no agent: and that attaching only gives OS-level monitoring, or how to opt in 
+FAIL node, reopened: History opens 
+FAIL node, reopened: searching finds the run 
+FAIL node, reopened: the run is listed and opens 
+FAIL node, reopened: the Profiler tab opens 
+never saw /Node\.js\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL node, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL node, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Bn
+Bn
+FAIL node, reopened: the CPU profile is there 
+FAIL python, reopened: History opens 
+FAIL python, reopened: searching finds the run 
+FAIL python, reopened: the run is listed and opens 
+FAIL python, reopened: the Profiler tab opens 
+never saw /Python\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL python, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL python, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Bn
+Bn
+FAIL python, reopened: the CPU profile is there 
+FAIL bun, reopened: History opens 
+FAIL bun, reopened: searching finds the run 
+FAIL bun, reopened: the run is listed and opens 
+FAIL bun, reopened: the Profiler tab opens 
+never saw /Bun\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL bun, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL bun, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Bn
+Bn
+FAIL bun, reopened: the CPU profile is there 
+FAIL php, reopened: History opens 
+FAIL php, reopened: searching finds the run 
+FAIL php, reopened: the run is listed and opens 
+FAIL php, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL php, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL php, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Bn
+Bn
+FAIL php, reopened: the CPU profile is there 
+FAIL php-alone, reopened: History opens 
+FAIL php-alone, reopened: searching finds the run 
+FAIL php-alone, reopened: the run is listed and opens 
+FAIL php-alone, reopened: the Profiler tab opens 
+never saw /PHP\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL php-alone, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL php-alone, reopened: as what it reported, not as live 
+FAIL go, reopened: History opens 
+FAIL go, reopened: searching finds the run 
+FAIL go, reopened: the run is listed and opens 
+FAIL go, reopened: the Profiler tab opens 
+never saw /Go\s+\d+\.\d+/ in:
+Bn
+Bn
+FAIL go, reopened: the agent's identity is still there 
+never saw /Agent has disconnected/ in:
+Bn
+Bn
+FAIL go, reopened: as what it reported, not as live 
+never saw /Profile\s+1/ in:
+Bn
+Bn
+FAIL go, reopened: the CPU profile is there 
+AGENTS UI FAILED
+with:
+  name: smoke-darwin-aarch64
+  path: smoke-output
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ***
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ***
+  CARGO_HOME: /Users/runner/.cargo
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CACHE_ON_FAILURE: false
+  pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+  Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+  Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+(node:95621) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+With the provided path, there will be 44 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Beginning upload of artifact content to blob storage
+(node:95621) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Uploaded bytes 7236905
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact zip is 690389190fc3ea16cfd8618fec79766f3c13ecfa1ad05ddc9791fae7b2af032f
+Finalizing artifact upload
+Artifact smoke-darwin-aarch64.zip successfully finalized. Artifact ID 13564266956
+Artifact smoke-darwin-aarch64 has been successfully uploaded! Final size is 7236905 bytes. Artifact ID is 13564266956
+Artifact download URL: https://github.com/Noah-Wilderom/peak/actions/runs/42342802638/artifacts/13564266956
+Post job cleanup.
+Post job cleanup.
+[command]/opt/homebrew/bin/git version
+git version 2.56.0
+Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/3ed2b024-16cc-4684-9ec7-bbbe4f53a138/.gitconfig'
+Temporarily overriding HOME='/Users/runner/work/_temp/3ed2b024-16cc-4684-9ec7-bbbe4f53a138' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/peak/peak
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes

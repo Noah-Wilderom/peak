@@ -36,9 +36,9 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
 | Updater signature checked independently | CI | CI | CI | CI |
 | Runtime agents report from inside the program (`smoke.mjs`), for 0.1.0: Node, Python | CI | CI | CI | CI |
-| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `131e76a` | CI | CI, PHP without Excimer | CI | CI |
-| The agents in the installed window (`agents-ui.mjs`), candidate `131e76a` | CI | CI | **Failing:** harness, fix not yet run | **Failing:** harness, fix not yet run |
-| Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `131e76a` | **Failing:** fix not yet run | CI | CI, by reading the screen | **Failing:** fix not yet run |
+| Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `b72de3f` | CI | CI, PHP without Excimer | CI | CI |
+| The agents in the installed window (`agents-ui.mjs`), candidate `b72de3f` | **Failing:** harness, 5 checks, fix not yet run | CI | **Failing:** can't read the window, fix not yet run | **Failing:** can't read the window, fix not yet run |
+| Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `b72de3f` | CI | CI | **Failing:** can't read the window, fix not yet run | **Failing:** can't read the window, fix not yet run |
 | The previous release's own update to this one (`release-upgrade.mjs`) | After publication | After publication | After publication | After publication |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |

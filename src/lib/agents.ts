@@ -77,7 +77,7 @@ export function setupFor(runtime: Runtime): AgentSetup {
       }
     case "php":
       return {
-        body: "Peak loads an agent into command-line PHP when it starts the process. Attaching to a running process only gives OS-level monitoring. For more than figures at exit, install the Excimer extension.",
+        body: "Peak loads an agent into command-line PHP when it starts the process. Attaching to a running process only gives OS-level monitoring. For more than figures at exit on Linux or macOS, install the Excimer extension, which has no Windows build.",
         code: "pecl install excimer",
         then: "Start it from Capture or with peak run --.",
       }

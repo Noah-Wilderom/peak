@@ -1,0 +1,655 @@
+info: cargo-llvm-cov currently setting cfg(coverage); you can opt-out it by passing --no-cfg-coverage
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling proc-macro2 v1.0.107
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling libc v0.2.191
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling syn v3.0.9
+   Compiling indexmap v2.14.2
+   Compiling smallvec v1.16.4
+   Compiling pkg-config v0.3.34
+   Compiling syn v2.0.119
+   Compiling heck v0.5.0
+   Compiling winnow v0.5.40
+   Compiling target-lexicon v0.12.16
+   Compiling cfg-if v1.0.5
+   Compiling cfg-expr v0.15.8
+   Compiling version-compare v0.2.1
+   Compiling memchr v2.8.3
+   Compiling synstructure v0.14.0
+   Compiling itoa v1.0.18
+   Compiling pin-project-lite v0.2.17
+   Compiling writeable v0.6.4
+   Compiling futures-core v0.3.34
+   Compiling litemap v0.8.3
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.7
+   Compiling zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+   Compiling siphasher v1.0.4
+   Compiling winnow v1.0.5
+   Compiling utf_types v1.0.0
+   Compiling autocfg v1.5.1
+   Compiling utf8_iter v1.1.0
+   Compiling phf_shared v0.13.1
+   Compiling version_check v0.9.5
+   Compiling once_cell v1.21.4
+   Compiling icu_normalizer_data v2.4.0
+   Compiling icu_properties_data v2.4.0
+   Compiling fastrand v2.5.0
+   Compiling phf_generator v0.13.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling zmij v1.0.23
+   Compiling bytes v1.12.1
+   Compiling bitflags v2.13.2
+   Compiling semver v1.0.28
+   Compiling yoke v0.8.4
+   Compiling toml_datetime v0.6.3
+   Compiling serde_spanned v0.6.9
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling toml_edit v0.20.2
+   Compiling slab v0.4.12
+   Compiling zerovec v0.11.9
+   Compiling parking_lot_core v0.9.12
+   Compiling http v1.5.0
+   Compiling phf_macros v0.13.1
+   Compiling log v0.4.35
+   Compiling num-conv v0.2.2
+   Compiling time-core v0.1.9
+   Compiling thiserror v2.0.21
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling tinystr v0.8.5
+   Compiling phf_codegen v0.13.1
+   Compiling thiserror-impl v2.0.21
+   Compiling find-msvc-tools v0.1.15
+   Compiling toml v0.8.2
+   Compiling shlex v2.0.1
+   Compiling ident_case v1.0.1
+   Compiling typeid v1.0.3
+   Compiling system-deps v6.2.2
+   Compiling powerfmt v0.2.1
+   Compiling strsim v0.11.1
+   Compiling darling_core v0.24.1
+   Compiling cc v1.11.0
+   Compiling icu_locale_core v2.4.0
+   Compiling glib-sys v0.18.1
+   Compiling gobject-sys v0.18.0
+   Compiling gio-sys v0.18.1
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling toml_writer v1.2.0+spec-1.1.0
+   Compiling base64 v0.23.1
+   Compiling erased-serde v0.4.11
+   Compiling icu_provider v2.4.0
+   Compiling icu_collections v2.4.0
+   Compiling futures-macro v0.3.34
+   Compiling aho-corasick v1.1.5
+   Compiling fnv v1.0.7
+   Compiling darling_macro v0.24.1
+   Compiling web-time v1.1.0
+   Compiling new_debug_unreachable v1.0.6
+   Compiling regex-syntax v0.8.11
+   Compiling futures-task v0.3.34
+   Compiling futures-util v0.3.34
+   Compiling darling v0.24.1
+   Compiling phf v0.13.1
+   Compiling string_cache_codegen v0.6.1
+   Compiling serde_json v1.0.154
+   Compiling alloc-no-stdlib v3.0.0
+   Compiling precomputed-hash v0.1.1
+   Compiling getrandom v0.4.3
+   Compiling regex-automata v0.4.18
+   Compiling alloc-stdlib v0.3.0
+   Compiling web_atoms v0.2.6
+   Compiling parking_lot v0.12.5
+   Compiling serde_with_macros v3.24.0
+   Compiling icu_properties v2.4.0
+   Compiling icu_normalizer v2.4.0
+   Compiling proc-macro-error-attr v1.0.4
+   Compiling quick-xml v0.42.0
+   Compiling regex v1.13.1
+   Compiling syn v1.0.109
+   Compiling anyhow v1.0.104
+   Compiling futures-io v0.3.34
+   Compiling idna_adapter v1.2.2
+   Compiling string_cache v0.9.0
+   Compiling brotli-decompressor v6.2.0
+   Compiling rustc_version v0.4.1
+   Compiling proc-macro-error v1.0.4
+   Compiling serde_spanned v1.1.2
+   Compiling dunce v1.0.5
+   Compiling same-file v1.0.6
+   Compiling percent-encoding v2.3.2
+   Compiling dtoa v1.0.11
+   Compiling walkdir v2.5.0
+   Compiling dtoa-short v0.3.5
+   Compiling form_urlencoded v1.2.2
+   Compiling toml v1.2.0+spec-1.1.0
+   Compiling brotli v9.1.1
+   Compiling uuid v1.29.0
+   Compiling idna v1.1.0
+   Compiling tendril v0.5.1
+   Compiling gdk-sys v0.18.2
+   Compiling selectors v0.38.0
+   Compiling indexmap v1.9.3
+   Compiling derive_more-impl v2.1.1
+   Compiling cssparser-macros v0.7.1
+   Compiling futures-channel v0.3.34
+   Compiling glob v0.3.4
+   Compiling ctor v1.0.13
+   Compiling camino v1.2.6
+   Compiling derive_more v2.1.1
+   Compiling cssparser v0.37.0
+   Compiling markup5ever v0.39.0
+   Compiling url v2.5.8
+   Compiling servo_arc v0.4.3
+   Compiling serde_derive_internals v0.29.1
+   Compiling bit-vec v0.8.0
+   Compiling schemars v0.8.22
+   Compiling thiserror v1.0.69
+   Compiling rustc-hash v2.1.3
+   Compiling deranged v0.5.9
+   Compiling hashbrown v0.12.3
+   Compiling schemars_derive v0.8.22
+   Compiling bit-set v0.8.0
+   Compiling html5ever v0.39.0
+   Compiling time v0.3.55
+   Compiling cfb v0.14.0
+   Compiling jsonptr v0.7.1
+   Compiling proc-macro-crate v2.0.2
+   Compiling cargo-platform v0.1.9
+   Compiling thiserror-impl v1.0.69
+   Compiling foldhash v0.2.0
+   Compiling tauri-utils v2.10.2
+   Compiling dyn-clone v1.0.20
+   Compiling heck v0.4.1
+   Compiling glib-macros v0.18.5
+   Compiling plist v1.10.3
+   Compiling dom_query v0.28.0
+   Compiling cargo_metadata v0.19.2
+   Compiling serde-untagged v0.1.9
+   Compiling infer v0.22.0
+   Compiling json-patch v4.2.0
+   Compiling urlpattern v0.6.0
+   Compiling serde_with v3.24.0
+   Compiling futures-executor v0.3.34
+   Compiling gdk-pixbuf-sys v0.18.0
+   Compiling cairo-sys-rs v0.18.2
+   Compiling pango-sys v0.18.0
+   Compiling glib v0.18.5
+   Compiling atk-sys v0.18.2
+   Compiling crossbeam-utils v0.8.23
+   Compiling gio v0.18.4
+   Compiling gtk-sys v0.18.2
+   Compiling option-ext v0.2.0
+   Compiling dirs-sys v0.5.0
+   Compiling dirs v7.0.0
+   Compiling embed-resource v3.0.12
+   Compiling memoffset v0.9.1
+   Compiling parking v2.2.1
+   Compiling rustix v1.1.6
+   Compiling tauri-winres v0.3.7
+   Compiling cargo_toml v1.0.1
+   Compiling field-offset v0.3.6
+   Compiling toml_edit v0.19.15
+   Compiling cairo-rs v0.18.5
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.4
+   Compiling adler2 v2.0.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling static_vcruntime v3.0.0
+   Compiling tauri-build v2.7.4
+   Compiling tokio v1.54.1
+   Compiling tauri-plugin v2.7.2
+   Compiling proc-macro-crate v1.3.1
+   Compiling javascriptcore-rs-sys v1.1.1
+   Compiling soup3-sys v0.5.0
+   Compiling generic-array v0.14.7
+   Compiling gtk v0.18.2
+   Compiling simd-adler32 v0.3.10
+   Compiling gtk3-macros v0.18.2
+   Compiling atk v0.18.2
+   Compiling webkit2gtk-sys v2.0.2
+   Compiling time-macros v0.2.32
+   Compiling gdk-pixbuf v0.18.5
+   Compiling pango v0.18.3
+   Compiling x11 v2.21.0
+   Compiling typenum v1.20.1
+   Compiling crc32fast v1.5.4
+   Compiling gdk v0.18.2
+   Compiling tauri v2.12.5
+   Compiling gdkx11-sys v0.18.2
+   Compiling toml_edit v0.25.18+spec-1.1.0
+   Compiling enumflags2_derive v0.7.12
+   Compiling atomic-waker v1.1.2
+   Compiling bitflags v1.3.2
+   Compiling proc-macro-crate v3.5.0
+   Compiling miniz_oxide v0.9.1
+   Compiling event-listener v5.4.2
+   Compiling concurrent-queue v2.5.0
+   Compiling ring v0.17.14
+   Compiling dpi v0.1.2
+   Compiling zvariant_utils v4.2.0
+   Compiling cookie v0.18.2
+   Compiling x11-dl v2.21.0
+   Compiling libdbus-sys v0.2.7
+   Compiling event-listener-strategy v0.5.4
+   Compiling flate2 v1.1.10
+   Compiling zvariant_derive v5.15.1
+   Compiling javascriptcore-rs v1.1.2
+   Compiling soup3 v0.5.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling fdeflate v0.3.7
+   Compiling miniz_oxide v0.8.9
+   Compiling futures-lite v2.6.1
+   Compiling tracing-core v0.1.36
+   Compiling tracing-attributes v0.1.31
+   Compiling raw-window-handle v0.6.2
+   Compiling zeroize v1.9.1
+   Compiling endi v1.1.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling tracing v0.1.44
+   Compiling png v0.18.1
+   Compiling digest v0.10.7
+   Compiling crossbeam-channel v0.5.17
+   Compiling async-io v2.6.0
+   Compiling dlopen2_derive v0.4.3
+   Compiling getrandom v0.2.17
+   Compiling cpufeatures v0.2.17
+   Compiling tauri-runtime v2.12.2
+   Compiling wry v0.57.1
+   Compiling byteorder v1.5.0
+   Compiling untrusted v0.9.0
+   Compiling ico v0.6.0
+   Compiling sha2 v0.10.9
+   Compiling dlopen2 v0.8.2
+   Compiling dbus v0.9.12
+   Compiling gdkx11 v0.18.2
+   Compiling webkit2gtk v2.0.2
+   Compiling enumflags2 v0.7.12
+   Compiling polling v3.11.0
+   Compiling gdkwayland-sys v0.18.2
+   Compiling http-body v1.1.0
+   Compiling zcheapstr v1.2.0
+   Compiling serde_repr v0.1.21
+   Compiling errno v0.3.14
+   Compiling getrandom v0.3.4
+   Compiling rand_core v0.10.1
+   Compiling rustls v0.23.46
+   Compiling tauri-runtime-wry v2.12.3
+   Compiling muda v0.20.0
+   Compiling httparse v1.10.1
+   Compiling async-task v4.7.1
+   Compiling signal-hook-registry v1.4.8
+   Compiling zvariant v5.15.1
+   Compiling tao v0.37.2
+   Compiling rustls-webpki v0.103.16
+   Compiling tauri-codegen v2.7.4
+   Compiling async-channel v2.5.0
+   Compiling keyboard-types v0.8.3
+   Compiling serialize-to-javascript-impl v0.1.2
+   Compiling subtle v2.6.1
+   Compiling try-lock v0.2.5
+   Compiling tower-service v0.3.3
+   Compiling serialize-to-javascript v0.1.2
+   Compiling want v0.3.2
+   Compiling tauri-macros v2.7.4
+   Compiling async-signal v0.2.14
+   Compiling zbus_names v4.3.5
+   Compiling async-lock v3.5.0
+   Compiling piper v0.2.5
+   Compiling mime v0.3.18
+   Compiling blocking v1.7.0
+   Compiling async-process v2.5.0
+   Compiling hyper v1.12.0
+   Compiling zbus_macros v5.19.0
+   Compiling async-executor v1.14.1
+   Compiling async-broadcast v0.7.2
+   Compiling async-recursion v1.2.0
+   Compiling async-trait v0.1.92
+   Compiling sync_wrapper v1.0.2
+   Compiling ordered-stream v0.2.0
+   Compiling vcpkg v0.2.15
+   Compiling ipnet v2.12.2
+   Compiling openssl-probe v0.2.2
+   Compiling tower-layer v0.3.3
+   Compiling hex v0.4.3
+   Compiling zbus v5.19.0
+   Compiling libsqlite3-sys v0.35.0
+   Compiling tower v0.5.3
+   Compiling hyper-util v0.1.21
+   Compiling rustls-native-certs v0.8.5
+   Compiling tokio-rustls v0.26.6
+   Compiling tauri-plugin-opener v2.7.2
+   Compiling tauri-plugin-process v2.4.0
+   Compiling tauri-plugin-notification v2.8.0
+   Compiling tauri-plugin-updater v2.14.1
+   Compiling is-docker v0.2.0
+   Compiling cpufeatures v0.3.1
+   Compiling foldhash v0.1.5
+   Compiling futures-sink v0.3.34
+   Compiling hashbrown v0.15.5
+   Compiling tokio-util v0.7.20
+   Compiling chacha20 v0.10.2
+   Compiling is-wsl v0.4.0
+   Compiling hyper-rustls v0.27.10
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling tower-http v0.6.11
+   Compiling tempfile v3.27.0
+   Compiling http-body-util v0.1.5
+   Compiling xattr v1.7.0
+   Compiling filetime v0.2.29
+   Compiling tar v0.4.46
+   Compiling reqwest v0.13.5
+   Compiling notify-rust v4.18.2
+   Compiling open v5.4.5
+   Compiling rand v0.10.3
+   Compiling hashlink v0.10.0
+   Compiling peak v0.1.1 (/mnt/HC_Volume_107248377/peak/src-tauri)
+   Compiling peak-core v0.1.1 (/mnt/HC_Volume_107248377/peak/src-tauri/peak-core)
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling minisign-verify v0.3.0
+   Compiling fallible-iterator v0.3.0
+   Compiling rusqlite v0.37.0
+   Compiling peak-collector v0.1.1 (/mnt/HC_Volume_107248377/peak/src-tauri/peak-collector)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 59s
+     Running unittests src/lib.rs (target/llvm-cov-target/debug/deps/peak_lib-98b2907209d07d6b)
+
+running 109 tests
+test bundled::tests::only_serves_its_own_architecture ... ok
+test bundled::tests::a_data_directory_it_cannot_write_is_an_error ... ok
+test cli::tests::computes_exit_codes ... ok
+test bundled::tests::unpacks_once_and_repairs_a_damaged_copy ... ok
+test cli::tests::describes_each_failure ... ok
+test cli::tests::formats_results_for_people ... ok
+test cli::tests::an_older_app_hanging_up_counts_as_turned_away ... ok
+peak: the app isn't running on t3-dev for dev — running without monitoring
+peak: the app isn't running on t3-dev for dev — running without monitoring
+test cli::tests::help_and_spawn_errors ... ok
+test cli::tests::parses_arguments ... ok
+test cli::tests::passes_over_an_app_that_cant_take_it ... ok
+test cli::tests::quotes_for_the_shell ... ok
+test cli::tests::control_says_why_it_cant_get_an_answer ... ok
+test cli::tests::runs_without_the_app ... ok
+test bundled::tests::the_embedded_collector_is_static_and_runs ... ok
+test cli::tests::says_when_there_is_no_collector_for_an_architecture ... ok
+test cli::tests::says_an_open_apps_port_is_closed ... ok
+test cli::tests::says_which_app_when_several_are_open ... ok
+test cli::tests::still_works_with_an_older_apps_record ... ok
+test cli::tests::tells_a_bad_record_from_no_app ... ok
+test cli::tests::unexpected_reply_falls_back ... ok
+test cli::tests::wrong_secret_falls_back ... ok
+test cli::tests::streams_to_a_running_app ... ok
+test db::tests::applies_retention_and_closes_dangling_runs ... ok
+test db::tests::filters_deletes_and_prunes ... ok
+test db::tests::round_trips_a_run ... ok
+test db::tests::stores_artifacts_and_fills_empty_history ... ok
+test discovery::tests::judges_a_record ... ok
+test discovery::tests::looks_in_the_environments_directory_and_the_accounts ... ok
+test discovery::tests::one_app_closing_leaves_the_other_findable ... ok
+test discovery::tests::prefers_this_data_directory_then_the_newest ... ok
+test discovery::tests::publishes_privately_restores_and_retires ... ok
+test discovery::tests::reads_this_system ... ok
+test discovery::tests::reports_what_it_cant_use ... ok
+test discovery::tests::reports_what_it_couldnt_publish ... ok
+test discovery::tests::says_when_an_app_is_out_of_reach ... ok
+test discovery::tests::tries_a_verified_app_before_an_older_record ... ok
+test release::tests::describes_itself ... ok
+test release::tests::goes_back_to_where_an_appimage_was_launched ... ok
+test release::tests::recognises_a_windows_install_by_its_uninstaller ... ok
+test release::tests::says_which_can_update_themselves ... ok
+test release::tests::tells_how_it_was_installed ... ok
+test db::tests::settings_storage_and_files ... ok
+test remote::tests::a_goodbye_or_eof_explains_itself_with_transport_diagnostics ... ok
+test cli::tests::lists_and_profiles_runs_in_the_open_app ... ok
+test remote::tests::a_hung_target_blocks_nothing_else ... ok
+test remote::tests::a_handshake_failure_is_failure_not_a_hang ... ok
+test remote::tests::a_first_failure_is_reported_and_not_retried_forever ... ok
+test remote::tests::a_protocol_mismatch_reads_in_the_collectors_own_words ... ok
+test remote::tests::a_reattached_launched_command_says_its_output_capture_ended ... ok
+test remote::tests::a_process_gone_after_reconnect_is_not_called_a_crash_or_given_an_exit_code ... ok
+test remote::tests::a_launched_command_stopped_by_the_contract_reads_as_ended_while_disconnected ... ok
+test remote::tests::a_replaced_target_stops_retrying ... ok
+test remote::tests::a_rebooted_target_is_named_as_such ... ok
+test remote::tests::a_transport_without_a_collector_explains_itself ... ok
+test remote::tests::a_sequence_gap_asks_for_a_replay_and_applies_frames_in_order_without_duplicates ... ok
+test remote::tests::a_reused_pid_does_not_inherit_the_run ... ok
+test remote::tests::attached_services_are_never_stopped_or_restarted_implicitly ... ok
+test remote::tests::bad_replies_are_errors_and_banners_are_tolerated ... ok
+test remote::tests::attaches_and_streams_through_drain_with_target_identity ... ok
+test remote::tests::connects_and_reports_state_and_capabilities ... ok
+test remote::tests::container_kinds_advertise_their_platform_capabilities ... ok
+test remote::tests::an_unreachable_target_keeps_retrying_and_keeps_its_runs ... ok
+test remote::tests::container_identity_is_part_of_a_run ... ok
+test remote::tests::duplicate_ticks_and_sequence_gaps_are_handled ... ok
+test remote::tests::disconnecting_leaves_attached_alone_and_runs_verified_later ... ok
+test remote::tests::frames_that_overtake_the_reply_naming_a_run_are_kept ... ok
+test remote::tests::disconnecting_on_purpose_ends_launched_commands_and_says_so ... ok
+test remote::tests::launches_stop_signal_and_restart_are_routed_to_the_target ... ok
+test remote::tests::sessions_remap_log_ids_and_clock_restarts_so_a_run_stays_increasing ... ok
+test remote::tests::losing_the_connection_is_not_a_workload_exit_and_reconnect_verifies_identity ... ok
+test remote::tests::specs_are_normalized_and_updatable ... ok
+test service::tests::a_reopened_launched_run_only_runs_again_on_its_own_target ... ok
+test service::tests::a_reopened_remote_run_is_handled_where_it_now_lives ... ok
+test remote::tests::silence_reads_as_stale_then_recovers_and_finally_counts_as_lost ... ok
+test service::tests::control_goes_the_way_of_the_buttons ... ok
+test service::tests::deletes_prunes_and_reports_storage ... ok
+test remote::tests::runtime_requests_go_to_the_target_and_land_on_the_run ... ok
+test service::tests::persists_runs_and_reopens_them ... ok
+test cli::tests::reports_an_app_that_stopped_answering ... ok
+test service::tests::profiles_real_bun_processes ... ok
+test service::tests::profiles_real_node_processes ... ok
+test service::tests::reopened_runs_are_marked_and_alerts_persist ... ok
+test service::tests::settings_are_sanitized_before_they_are_stored ... ok
+test service::tests::settings_round_trip_and_retention_ticks ... ok
+test service::tests::stores_artifacts_from_agents ... ok
+test service::tests::keeps_what_real_php_reports_at_exit ... ok
+test service::tests::the_test_connector_connects_to_nothing ... ok
+test transport::tests::collector_lookup_needs_nothing_beyond_the_app ... ok
+test service::tests::targets_persist_and_route_without_touching_local_runs ... ok
+test transport::tests::custom_collector_paths_and_default_locations ... ok
+test transport::tests::commands_time_out_and_missing_tools_are_named ... ok
+test transport::tests::docker_exec_selects_context_per_invocation_and_stays_off_the_tty ... ok
+test transport::tests::docker_install_uses_docker_cp_and_reports_read_only_images ... ok
+test transport::tests::docker_discovery_goes_through_the_cli ... ok
+test transport::tests::kubectl_exec_names_context_namespace_pod_and_container ... ok
+test transport::tests::installs_the_right_architecture_when_allowed ... ok
+test transport::tests::kubernetes_install_copies_then_makes_it_executable ... ok
+test transport::tests::kubernetes_discovery_goes_through_the_cli_and_handles_optional_services ... ok
+test service::tests::profiles_real_go_programs_through_the_bundled_sdk ... ok
+test transport::tests::parses_docker_output ... ok
+test transport::tests::parses_kubernetes_output ... ok
+test transport::tests::parses_sizes ... ok
+test transport::tests::prepared_targets_are_not_touched_without_permission ... ok
+test transport::tests::ssh_commands_use_no_tty_and_never_prompt ... ok
+test transport::tests::the_transport_s_own_words_are_kept_for_diagnostics ... ok
+test transport::tests::missing_or_broken_collectors_say_what_is_wrong ... ok
+test transport::tests::transport_failures_are_reported_as_such ... ok
+test transport::tests::kubernetes_install_explains_tar_and_a_replaced_pod_is_refused ... ok
+test service::tests::profiles_real_python_processes ... ok
+
+test result: ok. 109 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.25s
+
+     Running unittests src/main.rs (target/llvm-cov-target/debug/deps/peak-1e211da365347a0a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/peak-cli.rs (target/llvm-cov-target/debug/deps/peak_cli-e348149be009a4cd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/live_docker.rs (target/llvm-cov-target/debug/deps/live_docker-b02744d58724986e)
+
+running 4 tests
+test an_ordinary_build_connects_with_nothing_prepared ... ignored, needs a Docker daemon
+test minimal_and_locked_down_containers_fail_honestly ... ignored, needs a Docker daemon
+test observes_a_real_container ... ignored, needs a Docker daemon
+test works_through_an_ssh_docker_context ... ignored, needs a Docker daemon and sshd
+
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/live_headless_app.rs (target/llvm-cov-target/debug/deps/live_headless_app-342738b908f0efeb)
+
+running 1 test
+test serve ... ignored, runs until killed
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/live_kube.rs (target/llvm-cov-target/debug/deps/live_kube-173970844c55a284)
+
+running 1 test
+test observes_real_pods ... ignored, starts a disposable k3s cluster; needs Docker and kubectl
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/live_ssh.rs (target/llvm-cov-target/debug/deps/live_ssh-0dc46ee71fce7dd9)
+
+running 3 tests
+test a_black_holed_host_blocks_nothing ... ignored, needs sshd
+test failures_over_real_ssh_are_honest ... ignored, needs sshd
+test observes_and_controls_over_real_ssh ... ignored, needs sshd
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/platform.rs (target/llvm-cov-target/debug/deps/platform-3023e96a4fdd242f)
+
+running 6 tests
+test keeps_its_data_per_user ... ok
+test embeds_a_linux_collector ... ok
+test the_cli_reaches_a_published_app ... ok
+test a_finished_process_no_longer_counts_as_running ... ok
+test stops_a_real_command ... ok
+test monitors_a_real_command_to_its_exit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+     Running unittests src/main.rs (target/llvm-cov-target/debug/deps/peak_collector-5e1dcf9a2de15a91)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/llvm-cov-target/debug/deps/peak_core-2d06d5d875ba1ef6)
+
+running 85 tests
+test cgroup::tests::v1_reads_its_own_layout_and_treats_huge_as_unlimited ... ok
+test cgroup::tests::no_cgroups_reads_as_unknown ... ok
+test cgroup::tests::v2_takes_the_tightest_ancestor_and_understands_max ... ok
+test cgroup::tests::v2_unlimited_stays_unknown_and_tightest_wins_either_way ... ok
+test collector::tests::a_reused_pid_cannot_inherit_an_identity ... ok
+test collector::tests::a_blocked_transport_never_stalls_sampling_and_the_buffer_stays_bounded ... ok
+test collector::tests::handshake_reports_target_facts_and_rejects_other_versions ... ok
+test collector::tests::a_silent_desktop_ends_the_session ... ok
+test collector::tests::lists_attaches_and_streams_real_samples_in_sequence ... ok
+test collector::tests::launches_with_captured_output_and_exact_exit_status ... ok
+test collector::tests::oversized_frames_are_refused_not_buffered ... ok
+test collector::tests::ending_the_session_stops_what_it_launched ... ok
+test collector::tests::shutdown_is_acknowledged ... ok
+test collector::tests::resync_replays_recent_ticks_without_gaps ... ok
+test collector::tests::serve_skips_an_oversized_frame_and_carries_on ... ok
+test collector::tests::slow_requests_answer_honestly_without_an_agent ... ok
+test collector::tests::signals_are_routed_and_validated ... ok
+test collector::tests::unusable_data_dir_only_costs_runtime_agents_and_bad_frames_are_ignored ... ok
+test hub::tests::agents_say_what_they_can_do_and_it_stays_with_the_run ... ok
+test hub::tests::cli_registers_and_streams ... ok
+test hub::tests::control_actions ... ok
+test hub::tests::parses_inbound_messages ... ok
+test hub::tests::paths_and_agents ... ok
+test hub::tests::snapshot_payloads ... ok
+test model::tests::bounded_push_drops_oldest ... ok
+test model::tests::gc_runtimes ... ok
+test model::tests::infers_runtimes ... ok
+test model::tests::merges_deltas_without_duplicates ... ok
+test model::tests::optional_remote_fields_stay_out_of_local_records ... ok
+test model::tests::sanitizes_settings ... ok
+test model::tests::serializes_camel_case ... ok
+test monitor::tests::agent_env_vars ... ok
+test hub::tests::an_agent_that_arrives_before_its_run_is_kept ... ok
+test monitor::tests::attachable_skips_processes_without_cmdline ... ok
+test monitor::tests::agent_hooks_feed_the_profile ... ok
+test monitor::tests::average_cpu_covers_every_sample_not_the_bounded_window ... ok
+test monitor::tests::capture_errors ... ok
+test monitor::tests::attaches_and_detects_exit ... ok
+test monitor::tests::captures_output_and_exit ... ok
+test monitor::tests::external_processes_wait_for_reported_exit ... ok
+test monitor::tests::escalates_to_sigkill ... ok
+test monitor::tests::finds_listening_ports_and_child_names ... ok
+test monitor::tests::restart_remove_and_clear ... ok
+test monitor::tests::restores_historical_runs_and_profiles ... ok
+test monitor::tests::kills_attached_processes_that_ignore_sigterm ... ok
+test monitor::tests::shutdown_terminates_spawned_processes ... ok
+test monitor::tests::signals_refuse_a_pid_that_became_another_process ... ok
+test monitor::tests::stops_attached_processes ... ok
+test monitor::tests::the_clock_moves_forward_on_its_own_anchor ... ok
+test procfs::tests::classifies_fds_and_users ... ok
+test procfs::tests::finds_descendants ... ok
+test procfs::tests::missing_root_is_empty ... ok
+test procfs::tests::parses_io_and_cmdline_and_meminfo ... ok
+test procfs::tests::parses_network_and_system_files ... ok
+test procfs::tests::parses_stat_with_tricky_comm ... ok
+test procfs::tests::parses_status ... ok
+test procfs::tests::reads_fixture_tree ... ok
+test procfs::tests::reads_real_self ... ok
+test procfs::tests::rejects_bad_stat ... ok
+test protocol::tests::frames_have_a_stable_wire_format ... ok
+test protocol::tests::only_known_signals_are_accepted ... ok
+test protocol::tests::tick_frames_carry_full_deltas_through_the_tagged_enum ... ok
+test runner::tests::applies_the_fixes_to_a_command ... ok
+test runner::tests::classifies_exits ... ok
+test runner::tests::exit_info_from_status ... ok
+test runner::tests::expands_tilde ... ok
+test runner::tests::host_commands_run ... ok
+test runner::tests::host_vars_leave_out_what_an_appimage_set ... ok
+test runner::tests::names_signals ... ok
+test runner::tests::pumps_lines_lossily ... ok
+test collector::tests::runtime_agents_work_through_the_collector ... ok
+test runner::tests::signals_process_groups ... ok
+test runner::tests::spawn_fails_for_missing_cwd ... ok
+test runner::tests::spawns_and_captures_output ... ok
+test runner::tests::undoes_an_appimages_environment ... ok
+test sampler::tests::agent_heap_shapes_composition_and_alloc ... ok
+test sampler::tests::computes_rates_and_totals ... ok
+test sampler::tests::first_reading_is_a_baseline ... ok
+test sampler::tests::handles_empty_tree_and_zero_dt ... ok
+test sampler::tests::new_children_count_from_zero_and_exited_ones_drop_out ... ok
+test sampler::tests::records_resources_kids_and_loop_lag ... ok
+test sampler::tests::samples_the_system ... ok
+test runner::tests::resets_signals_and_children_get_sigint ... ok
+test monitor::tests::samples_a_running_tree ... ok
+test hub::tests::agents_stream_stats_and_answer_requests ... ok
+
+test result: ok. 85 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.20s
+
+Filename                       Regions    Missed Regions     Cover   Functions  Missed Functions  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+peak-core/src/cgroup.rs            288                 3    98.96%          18                 0   100.00%         104                 0   100.00%           0                 0         -
+peak-core/src/collector.rs        1383                32    97.69%          91                 5    94.51%         613                15    97.55%           0                 0         -
+peak-core/src/hub.rs              1408                28    98.01%          73                 4    94.52%         548                 4    99.27%           0                 0         -
+peak-core/src/model.rs             449                 0   100.00%          25                 0   100.00%         251                 0   100.00%           0                 0         -
+peak-core/src/monitor.rs          2345                28    98.81%         168                 5    97.02%        1094                 7    99.36%           0                 0         -
+peak-core/src/procfs.rs           1098                26    97.63%          94                 0   100.00%         481                 0   100.00%           0                 0         -
+peak-core/src/protocol.rs          161                 0   100.00%           4                 0   100.00%          48                 0   100.00%           0                 0         -
+peak-core/src/runner.rs            709                 6    99.15%          60                 0   100.00%         323                 0   100.00%           0                 0         -
+peak-core/src/sampler.rs           498                 0   100.00%          16                 0   100.00%         292                 0   100.00%           0                 0         -
+src/bundled.rs                     219                 8    96.35%          18                 1    94.44%          79                 1    98.73%           0                 0         -
+src/cli.rs                        1950                43    97.79%          87                 1    98.85%         759                 7    99.08%           0                 0         -
+src/db.rs                         1037                56    94.60%          56                 0   100.00%         425                 4    99.06%           0                 0         -
+src/discovery.rs                   908                 4    99.56%          60                 1    98.33%         382                 1    99.74%           0                 0         -
+src/release.rs                     267                 3    98.88%          19                 0   100.00%         124                 0   100.00%           0                 0         -
+src/remote.rs                     3776                47    98.76%         238                 6    97.48%        1665                13    99.22%           0                 0         -
+src/service.rs                    1519                28    98.16%          88                10    88.64%         565                14    97.52%           0                 0         -
+src/transport.rs                  2142                41    98.09%         118                 2    98.31%         962                 9    99.06%           0                 0         -
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                            20157               353    98.25%        1233                35    97.16%        8715                75    99.14%           0                 0         -

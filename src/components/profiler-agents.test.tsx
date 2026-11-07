@@ -69,7 +69,8 @@ describe("the Profiler with runtime agents", () => {
     expect(screen.getByRole("button", { name: /Take snapshot/ })).toBeDisabled()
     expect(screen.getByRole("button", { name: /Collect garbage/ })).toBeDisabled()
     expect(screen.getAllByText("PHP has no way to list memory.").length).toBeGreaterThan(0)
-    expect(screen.getByText("No heap snapshots here.")).toBeInTheDocument()
+    expect(screen.getByText("No heap snapshots.")).toBeInTheDocument()
+    expect(screen.getByText(/can't take them/)).toBeInTheDocument()
     expect(screen.queryByText(/Take a heap snapshot to see/)).not.toBeInTheDocument()
   })
 
@@ -88,13 +89,45 @@ describe("the Profiler with runtime agents", () => {
     expect(screen.getByRole("button", { name: /Take snapshot/ })).toBeDisabled()
   })
 
+  it("empty views don't invite what can't be done", async () => {
+    const user = userEvent.setup()
+    // No CPU profiles from this agent, ended or not.
+    const none = { ...PHP, capabilities: [] }
+    const { unmount } = render(<ProfilerTab proc={makeProc({ runtime: "php", agent: none, profiling: false, status: "exited" })} />)
+    expect(screen.getByText("No CPU profiles.")).toBeInTheDocument()
+    expect(screen.getByText(/can't record them/)).toBeInTheDocument()
+    expect(screen.queryByText(/Record a few seconds/)).not.toBeInTheDocument()
+    unmount()
+    // It could have, but the run is over.
+    render(<ProfilerTab proc={makeProc({ runtime: "go", agent: GO, profiling: false, status: "exited" })} />)
+    expect(screen.getByText("No heap snapshots.")).toBeInTheDocument()
+    expect(screen.getByText("None were taken while this run had an agent.")).toBeInTheDocument()
+    await user.click(screen.getByRole("radio", { name: "CPU" }))
+    expect(screen.getByText("None were recorded while this run had an agent.")).toBeInTheDocument()
+  })
+
+  it("while it can, the empty views say how", async () => {
+    const user = userEvent.setup()
+    render(<ProfilerTab proc={makeProc({ runtime: "go", agent: GO })} />)
+    expect(screen.getByText("No snapshot selected.")).toBeInTheDocument()
+    await user.click(screen.getByRole("radio", { name: "CPU" }))
+    expect(screen.getByText(/Record a few seconds/)).toBeInTheDocument()
+  })
+
   it("calls Go's snapshot entries functions, and uses the agent's explanation", async () => {
     render(<ProfilerTab proc={makeProc({ runtime: "go", agent: GO, snapshots: [snapshot()] })} />)
     expect(screen.getByText("Heap by allocating function.")).toBeInTheDocument()
     expect(screen.getByText("Sampled allocation sites.")).toBeInTheDocument()
     expect(screen.getByText("Function")).toBeInTheDocument()
-    expect(screen.getByText("1 functions")).toBeInTheDocument()
+    expect(screen.getByText("Objects, estimated")).toBeInTheDocument()
+    expect(screen.getByText("From 1 allocating functions")).toBeInTheDocument()
+    expect(screen.queryByText(/\d+ types/)).not.toBeInTheDocument()
     expect(screen.getByText("Allocation sites.")).toBeInTheDocument()
+  })
+
+  it("says what didn't grow in Go's terms", () => {
+    render(<ProfilerTab proc={makeProc({ runtime: "go", agent: GO, snapshots: [snapshot({ id: "s0", t: 1500 }), snapshot()] })} />)
+    expect(screen.getByText("No function grew more than 3% of heap")).toBeInTheDocument()
   })
 
   it("doesn't draw allocation sites an agent has none of", () => {
