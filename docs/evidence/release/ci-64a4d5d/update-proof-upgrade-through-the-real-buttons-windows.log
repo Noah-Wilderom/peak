@@ -1,0 +1,16 @@
+# commit 64a4d5d Update proof / Upgrade through the real buttons (windows): failure. job 128229068302
+if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then
+  PEAK_SMOKE_PLATFORM: windows
+  PEAK_PROOF_TARGET: x86_64-pc-windows-msvc
+ok   offline, a check says so in Settings and nothing interrupts 
+ok   no newer release: says it's the latest 
+ok   a tampered download is refused, with the reason, and the app carries on 
+ok   a new release is found by itself and nothing downloads until asked 
+ok   settings saved before the update 
+ok   a command captured in the app, to see a restart treat it fairly 
+ok   download shows progress, verifies, installs, and then waits 
+ok   a restart names what it would stop, and can be declined 
+ok   restart: the old app exits and the new version comes up 2840 -> 7432
+FAIL reopened: new version, with history and settings TypeError: Cannot read properties of null (reading 'innerText')
+PROBLEMS: 1
+##[error]Process completed with exit code 1.

@@ -1,4 +1,4 @@
-# final code. the update flow through the real window and buttons, packaged AppImages, Ubuntu 22.04 chroot, FUSE, Xvfb, throwaway key, localhost feed. recorded 2026-11-06T20:37:53Z
+# final harness. the update flow through the real window and buttons, packaged AppImages, Ubuntu 22.04 chroot, FUSE, Xvfb, throwaway key, localhost feed. recorded 2026-11-07T00:34:36Z
 ok   offline, a check says so in Settings and nothing interrupts 
 ok   no newer release: says it's the latest 
 ok   a tampered download is refused, with the reason, and the app carries on 
@@ -7,6 +7,6 @@ ok   settings saved before the update
 ok   a command captured in the app, to see a restart treat it fairly 
 ok   download shows progress, verifies, installs, and then waits 
 ok   a restart names what it would stop, and can be declined 
-ok   restart: the old app exits and the new version comes up 61264 -> 61344
+ok   restart: the old app exits and the new version comes up 77823 -> 77903
 ok   reopened: new version, with history and settings 
 ALL OK (linux)

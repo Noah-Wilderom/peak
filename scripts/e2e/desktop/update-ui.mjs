@@ -59,7 +59,8 @@ async function evaluate(script, args) {
   return r.result.value
 }
 const js = (script, args = []) => (IS_WINDOWS ? evaluate(script, args) : wd("POST", "/execute/sync", { script, args }))
-const text = () => js("return document.body.innerText")
+// The page can still be loading when a session starts, with no body yet.
+const text = () => js("return document.body ? document.body.innerText : ''")
 async function see(pattern, ms = 15000) {
   const end = Date.now() + ms
   while (Date.now() < end) {
@@ -125,7 +126,7 @@ async function step(name, fn) {
     await shot(`fail-${name.replace(/\W+/g, "-")}`).catch(() => {})
   }
 }
-const set = (pattern) => js(CLICK, [pattern])
+const alertsOff = async () => (await js(`const r = [...document.querySelectorAll('[role=radio]')].find((e) => e.getAttribute('aria-label') === 'Alerts off'); return r ? r.getAttribute('aria-checked') : null`)) === "true"
 
 let mode = "off"
 let hits = 0
@@ -215,7 +216,9 @@ try {
   })
   await step("settings saved before the update", async () => {
     await openSettings()
-    await set("^Alerts off$")
+    // These controls only appear once the saved settings have loaded.
+    await click("^Alerts off$")
+    await waitFor("the change to register", () => alertsOff(), 5000)
     await sleep(200)
     await click("^Save settings$")
     await see(/Settings saved/)
@@ -271,8 +274,9 @@ try {
     await openSettings()
     await see(new RegExp(`Peak ${NEXT.replace(/\./g, "\\.")}`))
     await see(/Alerts/)
-    const kept = await js(`const r = [...document.querySelectorAll('[role=radio]')].find((e) => e.getAttribute('aria-label') === 'Alerts off'); return r && r.getAttribute('aria-checked')`)
-    if (kept !== "true") throw new Error(`settings lost: ${kept}`)
+    await waitFor("the saved setting to show", () => alertsOff(), 10_000).catch(() => {
+      throw new Error("settings lost: Alerts isn't off")
+    })
     await shot("u8-after")
     await click("Close")
     await click("^History$")

@@ -3,8 +3,8 @@
 Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
-- **Last update:** 2026-11-07 00:02 UTC
-- **State:** first packaged release **in final validation**. On `110e1c4` every required native check passed. Validation then found one more real bug, fixed in the uncommitted tree, so a final CI run on that tree is needed before tagging. Nothing is published yet.
+- **Last update:** 2026-11-07 00:34 UTC
+- **State:** first packaged release **in final validation**. On `64a4d5d` the product passed everything it reached, but three jobs failed for test or runner reasons, which are fixed in the uncommitted tree. That tree needs a clean CI run before tagging. Nothing is published yet.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
@@ -12,9 +12,43 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Settled by the user:** the first release supports all three platforms, and it's published once verified, not left as a draft for review. PM publishes after acceptance.
 
-**Status: not complete. Remaining: one more CI run on the final tree, then publishing and checking the public release.**
+**Status: not complete. Remaining: a clean CI run on the final tree, publishing, then the public checks.**
 
-### Where it stands: `110e1c4`
+### Where it stands: `64a4d5d`
+
+Update proof 42316136032, Release 42316136210, Tests 42316136119. Summaries in `docs/evidence/release/ci-64a4d5d/`. This is the first run with the agent fix and the stricter agent check.
+
+| Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Production package, updater signature checked independently | **Pass** | **Pass** | **Pass** | **Fail: DMG step** |
+| Install, app, separate CLI, real samples, exit code | **Pass** | **Pass** | **Pass** | Not reached |
+| Node and Python agents, by loop lag, which only an agent sends | **Pass** | **Pass** | **Pass** | Not reached |
+| Real signed upgrade and relaunch; history kept; CLI workload survives | **Pass** | **Pass** | **Pass** | **Pass** |
+| Offline, no update, HTTP 500, malformed feed, missing, truncated, tampered, wrong key | **Pass** | **Pass** | **Pass** | **Pass** |
+| Real window flow | **Fail: test** | **Fail: test** | Not possible | Not possible |
+| Native core tests | Covered by **Tests** | **Pass** | **Pass** | **Pass** |
+
+**Tests** passes: backend gate at **99.12% lines** on CI (7957 lines, 70 uncovered, gate unchanged at 99), frontend at 100%, both agent versions.
+
+**The three failures, none yet confirmed fixed on CI:**
+- **macOS x64 package:** `hdiutil: couldn't eject "disk2" - Resource busy` while making the DMG. It's the runner, not the app, and the same step passed on four earlier runs. `scripts/release/tauri-build.sh` now retries it on macOS only.
+- **Linux window flow:** "never saw /Settings saved/", and then "settings lost". The harness clicked "Alerts off" once, without waiting for the controls to appear. Most likely the click found nothing, so there was nothing to save, and the second failure follows from that. The screenshot doesn't show that part of the page, so this is a reading, not an observation. It now retries and checks the change registered. Passed locally on the final harness, log 2.
+- **Windows window flow:** every step passed up to the restart; then "Cannot read properties of null (reading 'innerText')" when reopening, because the page had no body yet. The harness now allows for that. Settings and history after a Windows restart **aren't proven on this commit**; they were on `110e1c4`.
+
+The agent race regression test is in the backend suite, and that suite passes.
+
+### The real GitHub feed: how it gets proven
+
+**No second release and no test releases are needed.** `.github/workflows/public-delivery.yml` runs by itself when a release is published, needs no secrets and publishes nothing. On all four targets:
+- **Install:** downloads the artifact from the public URL anonymously, checks it against `SHA256SUMS`, then runs the full smoke test: app, separate CLI, samples, agents.
+- **Update:** `scripts/e2e/smoke/public-update-proof.mjs` builds an older copy at 0.0.9 with the real update URL and the real public key. It records a run, starts a `peak run` workload, and then finds the release through the real feed, downloads it from GitHub, verifies the production signature, installs and relaunches. Afterwards that machine is running the exact published release, with history and the workload intact.
+- **Verify:** `verify-published.mjs` checks the feed, every download, checksums and signatures anonymously.
+
+The older copy differs from a release in its version and in pressing the update buttons by itself after 25 seconds, so this isn't a person clicking through the production UI. That's covered on Linux and Windows by the window flow, against a localhost feed. On macOS nothing covers it beyond the timer and screenshots.
+
+Rehearsed on Linux against the real production-signed AppImage from CI, with a local server standing in for GitHub: **PUBLIC UPDATE OK** (log 12). The GitHub part can't run until a release exists, and it can fail. **If it fails after publishing, users already have that release,** so the fix goes out as a new version. Because the feed is what's under test, an installed copy that can't update would need reinstalling by hand.
+
+### The run before: `110e1c4`
 
 Update proof 42311128624, Release 42311128833, Tests 42311128677. Summaries in `docs/evidence/release/ci-110e1c4/`, Windows screens in `screens/`.
 
@@ -50,7 +84,7 @@ macOS has no WebDriver, so its upgrade is driven by a proof build that presses t
 
 **Limits that will still be true at release.**
 - **Delivery isn't proven until it happens.** The feed is a 404 until a release is published, and `verify-published.mjs` must run against the real URLs right after.
-- **A real update through GitHub can't be proven with one release.** Proofs use a localhost feed, and `v0.1.0` has nothing to update to. The first real test of GitHub's redirects and TLS in the updater comes with the next release, or a small `v0.1.1`. Until then installed copies should just report the latest version, which is worth checking once by hand after publishing.
+- **One upgrade path through GitHub has a stand-in:** the 0.0.9 copy above. A real user's first update through GitHub, between two production releases, happens at the next release.
 - **Remote targets from Windows and macOS** are built in but have never run: they need a real machine with a Linux target.
 - **Capabilities differ by platform.** The README's table is the reference. Handles, ports, memory composition and PSI are Linux-only, and shown as such.
 - **Stopping a windowless program on Windows** gives it no chance to clean up.
@@ -491,10 +525,10 @@ checkout; nothing was lost. No further limit since.
 ## Next action
 
 **PM:**
-1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-110e1c4/` and `scripts/release/verify-published.mjs`.
-2. Send me back here. Nothing of mine is running or waiting until then. I'll read **Update proof**, **Release** and **Tests** on that commit, and either fix what they find or confirm it's the candidate.
+1. Commit this tree on `release-validation/0.1.0` and push it, with no tag and no secret changes. It's every changed path except your `docs/PROJECT-MANAGEMENT.md`, including `docs/evidence/release/ci-64a4d5d/`, `.github/workflows/public-delivery.yml` and `scripts/release/tauri-build.sh`.
+2. Send me back here. Nothing of mine is running or waiting until then. I'll read **Update proof**, **Release** and **Tests** on that commit, then either fix what they find or confirm it's the candidate.
 
 **Then, once I've confirmed it:**
 3. Merge to `master`, then tag `v0.1.0` and push the tag. **Release** rebuilds, re-checks and makes a draft.
-4. Compare the draft's assets to `SHA256SUMS`, then publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`.
-5. Straight after: `node scripts/release/verify-published.mjs v0.1.0`. I can then install from the real URLs in a disposable environment.
+4. Compare the draft's assets to `SHA256SUMS`, then publish: `gh release edit v0.1.0 --repo Noah-Wilderom/peak --draft=false --latest`. That fires **Public delivery** by itself. A release published with `GITHUB_TOKEN` wouldn't, but `gh` with your own login does; if it doesn't appear, run it by hand with `gh workflow run public-delivery.yml --repo Noah-Wilderom/peak -f tag=v0.1.0`.
+5. Send me back here. I'll read that run, run `verify-published.mjs` myself, and install from the real URLs in a disposable environment.

@@ -1,0 +1,14 @@
+# rehearsal of public-update-proof.mjs: a 0.0.9 build with the production public key updates itself to the real production-signed v0.1.0 AppImage from CI run 42311128833. Only the feed's host differs: a local server, not GitHub. Ubuntu 22.04 chroot. recorded 2026-11-07T00:08:40Z
+ok   the feed announces the published version 0.1.0
+ok   the older build is installed peak 0.0.9 (AppImage, commit 159737d6d6195ab33937609b994cf7baf77cdc02)
+ok   a run recorded before the update 
+ok   the older app exited and a new one started 71576 -> 71705
+ok   this machine now runs the published version peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)
+ok   nothing failed on the way 
+ok   the workload from `peak run` survived the restart 
+ok   history survived samples 7
+ok   the published app monitors the CLI post-1794010349942-err
+ok   that workload finished with its own exit code exit 9
+PUBLIC UPDATE OK
+PIPE=0
+peak 0.1.0 (AppImage, commit 110e1c4129429a7260b9367b62a50ab73bd4e054)

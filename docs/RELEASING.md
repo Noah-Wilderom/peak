@@ -7,6 +7,7 @@
 - **Publish:** a tag also makes a **draft** GitHub release, with every artifact, `SHA256SUMS`, `install.sh` and `latest.json`.
 - **Update channel:** apps read `https://github.com/Noah-Wilderom/peak/releases/latest/download/latest.json`. GitHub's `latest` skips drafts and pre-releases, so **building and drafting can't reach users. Publishing the draft is the one act that advances the channel.**
 - **Windows:** the installer ends the running app, so it downloads and verifies first, and installs only when the user restarts.
+- **After publishing:** `.github/workflows/public-delivery.yml` checks the release from the outside.
 - **Proof:** `.github/workflows/update-proof.yml` upgrades between two real builds on each OS with a throwaway key and a localhost feed, so it needs no secrets and can't touch the channel. It runs on `release-validation/**` branches.
 
 ## Artifacts
@@ -31,22 +32,22 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 
 | Check | Linux x86_64 | Windows x64 | macOS arm64 | macOS x64 |
 |---|---|---|---|---|
-| Package builds and signs | CI | CI | CI | CI |
-| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | CI |
+| Package builds and signs | CI | CI | CI | Earlier runs; last run's DMG step hit a runner fault |
+| Install, GUI, separate CLI, real samples (`smoke.mjs`) | CI | CI | CI | Earlier runs |
 | Updater signature checked independently | CI | CI | CI | CI |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
-| Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
-| Runtime agents report from inside the program (`smoke.mjs`) | CI, weak check for Node; local with the stronger one | CI | CI | CI |
+| Update through real buttons (`update-ui.mjs`) | Earlier runs; last run hit a test race | Earlier runs; last run hit a test race | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |
+| Runtime agents report from inside the program (`smoke.mjs`) | CI | CI | CI | **Not yet on the stricter check** |
 | `install.sh` download route, publish verifier on all artifacts | Local, on real CI artifacts | Not applicable | Not applicable | Not applicable |
-| Real update through GitHub | **Needs a second release** | **Needs a second release** | **Needs a second release** | **Needs a second release** |
+| Real update through GitHub (`public-update-proof.mjs`) | **After publishing** | **After publishing** | **After publishing** | **After publishing** |
 | Native tests (`tests/platform.rs`, `native.rs`) | Linux tests in **Tests** | CI | CI | CI |
 | Remote targets from this OS | Yes, earlier live suites | **Not run: needs a real machine** | **Not run: needs a real machine** | **Not run: needs a real machine** |
 | OS code signing and notarization | Not applicable | None, by decision | Ad-hoc only, by decision | Ad-hoc only, by decision |
 
-"CI" means a native GitHub runner on `110e1c4`. Every later commit needs them again.
+"CI" means a native GitHub runner on `64a4d5d`, and "earlier runs" means `110e1c4`. Every later commit needs them again.
 
-Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/` and `ci-110e1c4/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
+Evidence so far: `docs/evidence/release/`, with CI summaries in `ci-187f415/`, `ci-03f6ccf/`, `ci-676efdc/`, `ci-ea3ebc1/`, `ci-110e1c4/` and `ci-64a4d5d/`. Remote targets on Windows and macOS can't run in the current workflows, because their CI runners have no Linux machine for a collector to run on.
 
 ## Secrets
 
@@ -80,6 +81,7 @@ Updates installed by the app work once it's installed. If this changes later: a 
 4. Check the draft's assets against `SHA256SUMS`.
 5. Publish: `gh release edit vX.Y.Z --draft=false --latest`. Installed copies see it within 6 hours, or on next start.
 6. Straight after: `node scripts/release/verify-published.mjs vX.Y.Z`. It uses anonymous requests only, and checks the feed, every download, checksums and signatures.
+7. **Public delivery** runs by itself on publishing, or by hand with `gh workflow run public-delivery.yml -f tag=vX.Y.Z`. On every OS it installs from the public URLs and smoke tests, then updates a 0.0.9 copy to the release through the real feed. It needs no secrets and publishes nothing.
 
 To roll back, publish a newer version with the fix. Unpublishing stops new updates, but copies that already updated stay put, and the updater won't move to a lower version.
 

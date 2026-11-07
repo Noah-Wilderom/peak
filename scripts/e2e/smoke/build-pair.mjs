@@ -23,7 +23,7 @@ export function buildPair({ work, BASE, NEXT, PORT, autoUpdate, windowArgs }) {
   const original = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8")).version
   const build = (version) => {
     sh(`node scripts/release/version.mjs set ${version}`)
-    sh(`bun run tauri build ${target ? `--target ${target}` : ""} --config "${overlayFile.replace(/\\/g, "/")}"`, {
+    sh(`sh scripts/release/tauri-build.sh ${target ? `--target ${target}` : ""} --config "${overlayFile.replace(/\\/g, "/")}"`, {
       TAURI_SIGNING_PRIVATE_KEY: readFileSync(keyFile, "utf8"),
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: password,
       PEAK_REQUIRE_COLLECTOR: "1",

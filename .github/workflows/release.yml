@@ -78,7 +78,7 @@ jobs:
           PEAK_REQUIRE_COLLECTOR: "1"
         run: |
           bun install --frozen-lockfile
-          bun run tauri build --target ${{ matrix.target }}
+          sh scripts/release/tauri-build.sh --target ${{ matrix.target }}
           node scripts/release/collect.mjs src-tauri/target/${{ matrix.target }}/release/bundle artifacts ${{ matrix.platform }}
       - name: Check the signatures, independently of Tauri
         shell: bash

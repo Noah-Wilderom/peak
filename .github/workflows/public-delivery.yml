@@ -1,0 +1,111 @@
+name: Public delivery
+
+# Checks a published release from the outside, on every OS, with anonymous downloads and no
+# secrets. It reads what's public and publishes nothing. It runs by itself when a release is
+# published, and by hand to repeat it: workflow_dispatch with the tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published tag, such as v0.1.0
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+
+jobs:
+  verify:
+    name: Feed, downloads, checksums, signatures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/release/verify-published.mjs "$TAG"
+
+  install:
+    name: Install from public URLs (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux }
+          - { os: windows-latest, platform: windows }
+          - { os: macos-latest, platform: darwin-aarch64 }
+          - { os: macos-15-intel, platform: darwin-x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Linux runtime libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 xvfb
+      - name: Fetch, install and use it
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+        run: |
+          node scripts/e2e/smoke/public-install.mjs "$TAG" public
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/smoke.mjs public output
+          else node scripts/e2e/smoke/smoke.mjs public output; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-install-${{ matrix.platform }}
+          path: output
+          if-no-files-found: warn
+
+  update:
+    name: Update through the real feed (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux, target: x86_64-unknown-linux-gnu }
+          - { os: windows-latest, platform: windows, target: x86_64-pc-windows-msvc }
+          - { os: macos-latest, platform: darwin-aarch64, target: aarch64-apple-darwin }
+          - { os: macos-15-intel, platform: darwin-x86_64, target: x86_64-apple-darwin }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}, x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: public-${{ matrix.target }}
+      - name: Linux system libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev build-essential xvfb libfuse2
+      - run: bun install --frozen-lockfile
+      - name: Build an older version, and let it update itself
+        shell: bash
+        env:
+          PEAK_SMOKE_PLATFORM: ${{ matrix.platform }}
+          PEAK_PROOF_TARGET: ${{ matrix.target }}
+        run: |
+          if [ "$PEAK_SMOKE_PLATFORM" = linux ]; then xvfb-run -a -s "-screen 0 1440x950x24" node scripts/e2e/smoke/public-update-proof.mjs "$TAG" output
+          else node scripts/e2e/smoke/public-update-proof.mjs "$TAG" output; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-update-${{ matrix.platform }}
+          path: output
+          if-no-files-found: warn

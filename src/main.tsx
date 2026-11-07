@@ -11,9 +11,9 @@ theme.init();
 if (import.meta.env.VITE_PEAK_E2E_AUTOUPDATE) {
   void import("@/lib/update-proof").then((m) => {
     m.recordProofFailures();
-    (function pass() {
-      void m.updateProofPass().finally(() => setTimeout(pass, 3000));
-    })();
+    const pass = () => void m.updateProofPass().finally(() => setTimeout(pass, 3000));
+    // The value is how long to wait first, so a harness can do something before the update.
+    setTimeout(pass, Number(import.meta.env.VITE_PEAK_E2E_AUTOUPDATE));
   });
 }
 
