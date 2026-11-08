@@ -4,13 +4,28 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `6679ba7`: Linux, Windows and macOS x64 pass everything, including the window proof. macOS arm64's window proof fails 2 checks, from the harness's scrolling and reading. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `1316d41`: Linux and Windows pass everything. Each Mac fails one window check, both from reading the screen. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Fourteenth native run: `1316d41`
+
+**Update proof 42437051095, including the `v0.1.0` rehearsal on all four, and Tests 42437051126 passed**, with the backend at 99.12% on CI (77 of 8715 lines uncovered; the gate is 99%). Release 42437051117 failed on one check on each Mac. Raw results: `docs/evidence/release/ci-candidate-1316d41/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `1316d41` | **153 / 0 / 0** | **132 / 0 / 0** | 159 / 1 / 0 of 160 | 159 / 1 / 0 of 160 |
+
+Go's reopened CPU profile now passes on arm64.
+
+**The two failures:**
+
+- **x64, Bun's explanation:** the screen read "Sampled by JavaScriptCare" for "JavaScriptCore". A capture shows the right text. The check now allows the last four letters to be misread.
+- **arm64, Go's estimate label, "neither read":** the record shows only the last read, which was scrolled down to the allocation sites. Whether the wrapped label was ever on screen and misread at the top isn't known. The sidebar's lines read in between the label's two lines, so the gap between "Objects," and "estimated" now allows up to a dozen words. The check now saves a capture of what was on screen when it decided.
 
 ### Thirteenth native run: `6679ba7`
 

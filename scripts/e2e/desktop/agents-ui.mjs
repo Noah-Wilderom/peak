@@ -154,8 +154,11 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
       // Only the label read counts: "N functions" beneath it, or no "types", isn't the label.
       // In a narrow card the label wraps, "Objects," over "estimated", and the screen reads the
       // cards' rows across, so a few words can come between the two.
-      const label = await see(/Objects\W+(?:\S+\s+){0,4}?estimated/, 8000)
+      // The sidebar's lines are read in between too, so up to a dozen words can separate them.
+      const label = await see(/Objects\W+(?:\S+\s+){0,12}?estimated\b/, 8000)
       const text = (await look()).text
+      // What was on screen when it was decided, either way.
+      await shot("go-estimate-label")
       check(t("Go's objects are labelled estimated, by allocating function, not types"), label && /\b\d+ functions\b/.test(text) && !/\d+ types/.test(text), label ? "label read" : /\b\d+ functions\b/.test(text) ? "only the count was read, not the label" : "neither read")
     }
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
@@ -196,7 +199,7 @@ const number = "\\d+\\.\\d+"
 
 await runtimeInWindow({ name: "node", label: "Node\\.js", versionShape: number, program: programs.node(SECONDS), cpu: /Sampled by V8/, snapshot: /SmokeThing/, gc: true, missing: [] })
 await runtimeInWindow({ name: "python", label: "Python", versionShape: number, program: programs.python(SECONDS), cpu: /Python stack sampled/, snapshot: /SmokeThing/, gc: true, missing: [["live heap", WHY.pyHeap]] })
-await runtimeInWindow({ name: "bun", label: "Bun", versionShape: number, program: programs.bun(SECONDS), cpu: /Sampled by JavaScriptCore/, snapshot: /SmokeThing/, gc: true, missing: [["collections", WHY.bunGc]] })
+await runtimeInWindow({ name: "bun", label: "Bun", versionShape: number, program: programs.bun(SECONDS), cpu: /Sampled by JavaScript\w{4}\b/, snapshot: /SmokeThing/, gc: true, missing: [["collections", WHY.bunGc]] })
 const excimer = phpHasExcimer()
 if (excimer) await runtimeInWindow({ name: "php", label: "PHP", versionShape: number, program: programs.php(SECONDS), cpu: /sampled by Excimer/, snapshot: null, gc: true, missing: [["delay", WHY.lag], ["snapshots", WHY.list]] })
 else check("php with Excimer isn't claimed here", IS_WINDOWS, "no Excimer")
