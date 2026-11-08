@@ -1,0 +1,13 @@
+{
+  "version": "0.1.1",
+  "platform": "linux",
+  "commit": "fbeec3256f733bf099f5d63fae4091c8c753a0ae",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "node": "v22.23.4",
+  "runner": "ubuntu22",
+  "run": "42449304212",
+  "artifacts": [
+    "peak_0.1.1_amd64.AppImage",
+    "peak_0.1.1_amd64.deb"
+  ]
+}

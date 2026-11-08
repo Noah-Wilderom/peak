@@ -4,13 +4,32 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `fbeec32` passes every native check on all four targets.** Ready for PM's merge, both tags, the tag build, the draft review and publication. Public verification follows.
+- **State:** **`v0.1.1` is tagged on `fbeec32`, its tag build passes on all four targets, and the draft checks out. Waiting for PM to publish.** Public verification follows.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### The `v0.1.1` tag build and its draft
+
+PM merged `fbeec32` into `master`, tagged `v0.1.1` and `sdk/go/v0.1.1` on it, and recorded the acceptance in a separate docs commit, `ec5fb1c`. Release 42449304212, run on the tag, passed all five jobs, and its Draft release job made the draft. Tests 42449304773 on `master` passed. Evidence: `docs/evidence/release/tag-v0.1.1-draft/`.
+
+- **Tag build:**
+  - The installed copies on all four targets say `peak 0.1.1 … commit fbeec3256f733bf099f5d63fae4091c8c753a0ae`.
+  - Smoke passes 136, 116, 136 and 136 checks.
+  - The window proof passes 153, 132, 160 and 160, with none failed or unobserved.
+  - Each target's signature is checked independently before its smoke test.
+- **Master gates:** frontend 316 tests at 100%, backend 99.16%.
+- **Draft:**
+  - Release 438073841, `v0.1.1`, a draft, not a prerelease. GitHub dates it 03:34:03Z, the commit's time; its 18 assets were uploaded by the tag build at 06:25.
+  - Every asset matches `SHA256SUMS`. Each `BUILD-INFO` names version 0.1.1, commit `fbeec32` and run 42449304212.
+  - `latest.json` names version 0.1.1 and the four platform keys. Each URL is under `releases/download/v0.1.1/`, and each signature equals its `.sig` file.
+- **Signatures:**
+  - All four verify against the production public key as `v0.1.0` has it, key ID `3A804E7E2A33ED5F`, unchanged at `v0.1.1`. Each names version 0.1.1.
+  - The macOS ones name `peak.app.tar.gz`, the name inside the bundle, as `v0.1.0`'s did.
+- **Public feed:** it still says 0.1.0, and `v0.1.0`'s tag is unchanged at `9e60f67`.
 
 ### Candidate `fbeec32`: every native check passes
 
@@ -969,7 +988,7 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** merge `release-validation/0.1.1` at `fbeec32` into `master` normally. Tag `v0.1.1` and `sdk/go/v0.1.1` on that commit, and push them. The tag's Release build makes the draft. Review its assets, `SHA256SUMS`, signatures and `latest.json`, then publish.
+**PM:** review the draft, then publish it.
 
 **Then me:** read Public delivery's results: downloads, installs, the new agents, `go get`, and the real `v0.1.0` to `v0.1.1` update on all four. I'll fix anything they find.
 

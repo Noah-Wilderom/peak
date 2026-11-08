@@ -1,0 +1,21 @@
+BUILD-INFO-darwin-aarch64.json: OK
+BUILD-INFO-darwin-x86_64.json: OK
+BUILD-INFO-linux.json: OK
+BUILD-INFO-windows.json: OK
+install.sh: OK
+latest.json: OK
+peak_0.1.1_aarch64.app.tar.gz: OK
+peak_0.1.1_aarch64.app.tar.gz.sig: OK
+peak_0.1.1_aarch64.dmg: OK
+peak_0.1.1_amd64.AppImage: OK
+peak_0.1.1_amd64.AppImage.sig: OK
+peak_0.1.1_amd64.deb: OK
+peak_0.1.1_x64-setup.exe: OK
+peak_0.1.1_x64-setup.exe.sig: OK
+peak_0.1.1_x64.app.tar.gz: OK
+peak_0.1.1_x64.app.tar.gz.sig: OK
+peak_0.1.1_x64.dmg: OK
+signature ok: timestamp:1794114777	file:peak_0.1.1_amd64.AppImage	version:0.1.1
+signature ok: timestamp:1794114799	file:peak_0.1.1_x64-setup.exe	version:0.1.1
+signature ok: timestamp:1794114752	file:peak.app.tar.gz	version:0.1.1
+signature ok: timestamp:1794115111	file:peak.app.tar.gz	version:0.1.1

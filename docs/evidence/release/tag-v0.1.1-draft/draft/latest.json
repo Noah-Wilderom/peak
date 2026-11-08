@@ -1,0 +1,23 @@
+{
+  "version": "0.1.1",
+  "notes": "Profile Go, Bun and PHP programs from the inside, alongside Node.js and Python.\n\n- **Go:** add one import, `github.com/Noah-Wilderom/peak/sdk/go/auto`, for heap, garbage collections, scheduler latency, CPU profiles and allocation profiles. It does nothing outside Peak.\n- **Bun:** nothing to set up, on Bun 1.2.15 or newer. Heap, timer delay and heap snapshots, and CPU profiles from Bun 1.3.7.\n- **PHP:** nothing to set up for figures at exit. Install the Excimer extension for live memory, collections and CPU profiles. Excimer has no Windows build, so Windows gets figures at exit.\n- **The Profiler says what it's looking at:** the runtime and agent versions, what they measure, what they can't and why.\n- **New commands:** `peak ps`, `peak profile`, `peak open` and `peak agents`.\n- **Fixed:** `peak run` no longer replaces your own `NODE_OPTIONS` and `PYTHONPATH`, and `install.sh` names any desktop libraries a Linux machine is missing.\n\nThe README has the full table of what each runtime offers. Attaching to a running process still gives its OS-level monitoring: memory, CPU and I/O. Reading a runtime from the inside takes starting the program through Peak, and for Go, building it with the import.",
+  "pub_date": "2026-11-08T06:25:34Z",
+  "platforms": {
+    "linux-x86_64-appimage": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSZjdUTXFmazZBT3NDOHN4UlZaVXFuZjA0MGk1TjhEYWo1Mjk4REJVdEZqT0tBY0w0OG00Wm1xc20xclZEQmlIeEFuU2hVTERoOG0xbzcrOXdFb2FaQjFmMisybnkzQXdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MTE0Nzc3CWZpbGU6cGVha18wLjEuMV9hbWQ2NC5BcHBJbWFnZQl2ZXJzaW9uOjAuMS4xClFCV3BjN3BHS2I4cTRxMzMvemxjSjI4TEJxam1yenBvZWFIQm9vWmoyanZPMmJzemlFQzYxTU1oVGpLUjl6TUIvVWxReEFUalIzTnR6NG0zQUhSaUN3PT0K",
+      "url": "https://github.com/Noah-Wilderom/peak/releases/download/v0.1.1/peak_0.1.1_amd64.AppImage"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSZjdUTXFmazZBT2hFT0h0cFJBNTVOeFFDbmJKTlhTMksvY0tTU2piTUhWRkdjN3QzRi83MjIwSFBEUjZ0VkMvbzkwdHJKb1FscnpZS3lNNGRhcVB2dGtldTlEQTNvMWdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MTE0Nzk5CWZpbGU6cGVha18wLjEuMV94NjQtc2V0dXAuZXhlCXZlcnNpb246MC4xLjEKbXh6NFA5Y090bC90S0lENXhsc1lvOGloYUd4UE5ockFJM01yaWo3Ri9OVmUvZWlzTWZWNjNFTTlTVStDdTVFMnozT1VJR1pVZHBpUkxBOTJpZ2RlRGc9PQo=",
+      "url": "https://github.com/Noah-Wilderom/peak/releases/download/v0.1.1/peak_0.1.1_x64-setup.exe"
+    },
+    "darwin-aarch64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSZjdUTXFmazZBT3JOV243UmR4QXFuYVVGdm1DZGRpazZZcUJ3d2pDNDQ5NWdoRXRxdmZLV0NlQ3ZVUks0YmRMejdvU0dRQnZxN09ySUg3K1plbUtFRURRZSsxVC9IR0FZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MTE0NzUyCWZpbGU6cGVhay5hcHAudGFyLmd6CXZlcnNpb246MC4xLjEKRThjWnJFOWdnY2Rld1h3UnZoYnZiOGZCTGFSQnF1VVlZbW5qaTVWQnA2V0l5TXZReGFiRWl6VzJidWFveVpJd21VWkFORTQwVjhHR01SQXAzdlhvRFE9PQo=",
+      "url": "https://github.com/Noah-Wilderom/peak/releases/download/v0.1.1/peak_0.1.1_aarch64.app.tar.gz"
+    },
+    "darwin-x86_64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSZjdUTXFmazZBT3BBY1dqdXZBcDl5VDVxL0RST1NrTVE3RDNESEtvd05ZbXMrZ1NCS0puaHpoWi95TUhKZmoraUJTSXpZNkdoYytLSW9tMWV6Uyt4QWZXazZSWjgvRndzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MTE1MTExCWZpbGU6cGVhay5hcHAudGFyLmd6CXZlcnNpb246MC4xLjEKQzdkRDdTU1pTVkVCWkRheFZrQWMzN3ZTT0xwbDZxSE4vVTQ1b0xNYXhNUVJKODVKWk0xaHJ3bUhuK2duTEcrOUZRTXNJbmFJbk5Ja1JTcDAyMHozQUE9PQo=",
+      "url": "https://github.com/Noah-Wilderom/peak/releases/download/v0.1.1/peak_0.1.1_x64.app.tar.gz"
+    }
+  }
+}
