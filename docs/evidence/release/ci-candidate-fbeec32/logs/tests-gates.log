@@ -1,0 +1,6 @@
+##[group]Run cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+cargo llvm-cov --workspace --ignore-filename-regex '(lib|main|peak-cli|live_\w+)\.rs$' --fail-under-lines 99 --lcov --output-path lcov.info
+TOTAL                            20157               353    98.25%        1233                35    97.16%        8715                75    99.14%           0            
+ Test Files  34 passed (34)
+      Tests  316 passed (316)
+All files          |     100 |      100 |     100 |     100 |                   

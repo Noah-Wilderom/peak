@@ -1,0 +1,2 @@
+  node scripts/release/verify-signature.mjs "${sig%.sig}" "$sig" "$PUB" | grep '^signature ok'
+signature ok: timestamp:1794109185	file:peak_0.1.1_amd64.AppImage	version:0.1.1

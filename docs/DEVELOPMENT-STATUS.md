@@ -4,13 +4,45 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `1316d41`: Linux and Windows pass everything. Each Mac fails one window check, both from reading the screen. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `fbeec32` passes every native check on all four targets.** Ready for PM's merge, both tags, the tag build, the draft review and publication. Public verification follows.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Candidate `fbeec32`: every native check passes
+
+**Release 42443270169, Update proof 42443270161 and Tests 42443270212 all passed** on `fbeec3256f733bf099f5d63fae4091c8c753a0ae`. The Draft release job was skipped, as it only runs for a tag. Raw results: `docs/evidence/release/ci-candidate-fbeec32/`.
+
+| On the production packages | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Installed copy says | `peak 0.1.1 (AppImage, commit fbeec32…)` | `peak 0.1.1 (Windows installer, commit fbeec32…)` | `peak 0.1.1 (macOS app, commit fbeec32…)` | same |
+| Updater signature, checked independently of Tauri | ok, `version:0.1.1` | ok | ok | ok |
+| Bundled collector | 0.1.1, protocol 1 | yes, for Linux targets | yes | yes |
+| Smoke, all checks | 136 of 136 | 116 of 116 | 136 of 136 | 136 of 136 |
+| Agents, identity | Node, Python, Bun, PHP, PHP alone, Go: all `agent 0.1.1` | the same, without PHP with Excimer | the same as Linux | the same as Linux |
+| Window proof (pass / fail / unobserved) | **153 / 0 / 0** | **132 / 0 / 0** | **160 / 0 / 0** | **160 / 0 / 0** |
+| Disabled controls | read as attributes | read as attributes | 4 by pressing, with no effect | 4 by pressing, with no effect |
+| Go's "Objects, estimated" label | read | read | read, capture saved | read |
+| Unmodified public `v0.1.0`: Settings, Check for updates, its answer | pass | pass | pass | pass |
+
+**Gates on CI:** frontend 316 tests in 34 files at 100%. Backend 99.14% lines, 75 of 8,715 uncovered, against the unchanged 99% gate and exclusions. Agents on PHP 8.1, 8.3 and 8.4 and Bun 1.2.15, Go SDK on 1.21 and stable: pass.
+
+**What's left, after publication:**
+
+- Public downloads, anonymous installs and the new agents on all four.
+- The real update from the published, unmodified `v0.1.0` to the published `v0.1.1`, through GitHub, signed, on all four, with history, settings, and an independent CLI workload that lives through it and exits with its own code.
+
+`public-delivery.yml` runs all of that when the release is published.
+
+**Limits that stay:**
+
+- macOS window evidence comes from reading the screen, as the runner's accessibility tree is empty. Its 4 disabled checks are semantic: pressed, and nothing happened. Pressing a control isn't reading its disabled attribute, and the record says which.
+- Excimer has no Windows build, so PHP there reports only at exit.
+- CPU profiles need Bun 1.3.7 or newer.
+- Flutter is deferred.
 
 ### Fourteenth native run: `1316d41`
 
@@ -937,8 +969,8 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** commit and push the paths in my latest handoff to `release-validation/0.1.1`. It runs Update proof, with the rehearsal, Release, with the window proof, and Tests.
+**PM:** merge `release-validation/0.1.1` at `fbeec32` into `master` normally. Tag `v0.1.1` and `sdk/go/v0.1.1` on that commit, and push them. The tag's Release build makes the draft. Review its assets, `SHA256SUMS`, signatures and `latest.json`, then publish.
 
-**Then:** I read native results and fix what they find. Once they pass: PM tags `v0.1.1` and `sdk/go/v0.1.1`, reviews the draft and publishes. Then I verify from the public side, including the real `v0.1.0` to `v0.1.1` update on all four targets.
+**Then me:** read Public delivery's results: downloads, installs, the new agents, `go get`, and the real `v0.1.0` to `v0.1.1` update on all four. I'll fix anything they find.
 
 **Separately:** the updater key and its paired password still need an off-server backup.
