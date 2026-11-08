@@ -4,13 +4,32 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `25e74b1`: everything passes except macOS's window proof, at 3 failing checks on arm64 and 12 on x64. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `6679ba7`: Linux, Windows and macOS x64 pass everything, including the window proof. macOS arm64's window proof fails 2 checks, from the harness's scrolling and reading. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Thirteenth native run: `6679ba7`
+
+**Update proof 42429652747, including the `v0.1.0` rehearsal on all four, and Tests 42429652728 passed**, with the backend at 99.16% on CI. Release 42429652712 failed on one Mac's window proof only. Raw results: `docs/evidence/release/ci-candidate-6679ba7/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `6679ba7` | **153 / 0 / 0** | **132 / 0 / 0** | 158 / 2 / 0 of 160 | **160 / 0 / 0** |
+
+**macOS x64 passes the whole window proof**, with:
+
+- Capture: command entered, run started, agent 0.1.1, runtime named, its own exit code 0, found and reopened.
+- Go's "Objects, estimated" label read.
+- 4 disabled controls proved by pressing with no effect: semantic, not an attribute read, as the record says.
+
+**The two on arm64, from its log and captures:**
+
+- **Go's estimate label, "neither read":** after the table further down was read, the page didn't come back up. The capture shows it still scrolled to the allocation sites. Going down works in 500-pixel wheel steps, and scrolling up was one 2000-pixel step at a time, which this suggests doesn't. Up is now ten 500-pixel steps, over the left column rather than the graphs. The label is now checked where the snapshot first appears, at the top, before anything scrolls.
+- **Go's reopened CPU profile:** the list was on screen and read as "Profite 1 10.14s" and "Profile 2 916ms". The check now allows two misread letters in "Profile" ("Profiler" itself doesn't match).
 
 ### Twelfth native run: `25e74b1`
 

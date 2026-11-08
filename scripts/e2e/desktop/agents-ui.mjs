@@ -149,7 +149,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
   if (snapshot) {
     check(t("Take snapshot can be pressed"), await pressMatching(/^Take snapshot$/))
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
-    check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
+    // Read where the snapshot first appears, at the top: the table below takes scrolling to.
     if (name === "go") {
       // Only the label read counts: "N functions" beneath it, or no "types", isn't the label.
       // In a narrow card the label wraps, "Objects," over "estimated", and the screen reads the
@@ -158,6 +158,7 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
       const text = (await look()).text
       check(t("Go's objects are labelled estimated, by allocating function, not types"), label && /\b\d+ functions\b/.test(text) && !/\d+ types/.test(text), label ? "label read" : /\b\d+ functions\b/.test(text) ? "only the count was read, not the label" : "neither read")
     }
+    check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
     await shot(`${name}-heap`)
   } else {
     await checkDisabled(t("taking a snapshot is disabled"), "Take snapshot", run.id)
@@ -301,7 +302,7 @@ for (const run of kept) {
   if (run.cpu) {
     await pressMatching(/^CPU$/, 5000)
     // A profile listed, or the one selected: which of the two is on screen depends on the scroll.
-    check(t("the CPU profile is there"), await see(/Profile\s+1|CPU profile\.(?:\s+\S+){0,6}?\s+\d[\d.]*\s*m?s\s+recorded/, 15_000))
+    check(t("the CPU profile is there"), await see(/Prof\w{2}e\s+\d+\b|CPU profile\.(?:\s+\S+){0,6}?\s+\d[\d.]*\s*m?s\s+recorded/, 15_000))
   }
   await shot(`${run.name}-reopened`)
 }

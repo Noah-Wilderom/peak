@@ -228,7 +228,8 @@ function paneCentre() {
     // A tab shares its line with the others, so it's looked for in the line.
     const [tab] = locateAll("Overview", { inLine: true })
     if (!tab) return null
-    pane = { x: tab.x + 300, y: tab.y + 320 }
+    // Over the left column, under the Overview tab, where there's nothing to zoom or hover.
+    pane = { x: tab.x, y: tab.y + 320 }
   }
   return pane
 }
@@ -252,7 +253,9 @@ export function scrollDown() {
 /** Back to the top of the main pane. */
 export function scrollToTop() {
   if (!IS_MAC || macTree()) return
-  for (let i = 0; i < 4; i++) scrollBy(2000)
+  // In steps the size that's seen to work going down: whether one 2000-pixel step works isn't known,
+  // and a capture shows the page still scrolled down after it.
+  for (let i = 0; i < 10; i++) scrollBy(500)
 }
 
 /**
