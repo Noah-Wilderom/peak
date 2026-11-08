@@ -151,11 +151,12 @@ async function runtimeInWindow({ name, label, versionShape, program, cpu, snapsh
     check(t("the snapshot appears"), await see(/Snapshot\s+1/, 60_000))
     check(t("and shows what the program holds"), await see(snapshot, 10_000), String(snapshot))
     if (name === "go") {
-      // The card's label is small and grey; its count, "N functions", is the other half of the wording.
-      const label = await see(/Objects\W+estimated|\b\d+ functions\b/, 8000)
+      // Only the label read counts: "N functions" beneath it, or no "types", isn't the label.
+      // In a narrow card the label wraps, "Objects," over "estimated", and the screen reads the
+      // cards' rows across, so a few words can come between the two.
+      const label = await see(/Objects\W+(?:\S+\s+){0,4}?estimated/, 8000)
       const text = (await look()).text
-      const which = [/Objects\W+estimated/.test(text) && "label read", /\b\d+ functions\b/.test(text) && "count read"].filter(Boolean).join(", ")
-      check(t("Go's objects are estimates from allocating functions, not types"), label && !/\d+ types/.test(text), which || "neither read")
+      check(t("Go's objects are labelled estimated, by allocating function, not types"), label && /\b\d+ functions\b/.test(text) && !/\d+ types/.test(text), label ? "label read" : /\b\d+ functions\b/.test(text) ? "only the count was read, not the label" : "neither read")
     }
     await shot(`${name}-heap`)
   } else {
@@ -287,7 +288,8 @@ for (const run of kept) {
   } else {
     // A row can't be told by its hidden label here, or reached if it's off-screen. Searching leaves
     // only this one, wherever it was.
-    check(t("searching finds the run"), await typeInto("Search", leaf))
+    // Entering the search proves only that: finding the run is the next check, by opening it.
+    check(t("the search is entered"), await typeInto("Search", leaf))
     await sleep(1500)
     check(t("the run is listed and opens"), await pressMatching(/^Open$/))
   }
@@ -299,7 +301,7 @@ for (const run of kept) {
   if (run.cpu) {
     await pressMatching(/^CPU$/, 5000)
     // A profile listed, or the one selected: which of the two is on screen depends on the scroll.
-    check(t("the CPU profile is there"), await see(/Profile\s+1|CPU profile\.\s+\S+\s+recorded/, 15_000))
+    check(t("the CPU profile is there"), await see(/Profile\s+1|CPU profile\.(?:\s+\S+){0,6}?\s+\d[\d.]*\s*m?s\s+recorded/, 15_000))
   }
   await shot(`${run.name}-reopened`)
 }

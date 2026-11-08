@@ -345,26 +345,28 @@ export async function typeInto(field, text) {
   }
   if (IS_MAC) {
     // Where the field has a placeholder to find by, otherwise it's focused on arrival.
-    // The placeholder is "Search by command", so "Search" is part of a line.
-    if (field === "Search" && !bySight("Search", true, { inLine: true })) {
+    // The field has to have the keyboard, or Paste is greyed out. The search box is clicked by its
+    // placeholder; the command field by its label, which focuses it. Its placeholder, "bun run
+    // build", is also a suggestion below it, which would fill the field in.
+    const placeholder = field === "Search" ? "Search" : "Command"
+    if (!bySight(placeholder, true, { inLine: true }) && field === "Search") {
       log("paste: no search box on screen")
       return false
     }
-    // Pasted, not typed: typed keys can land in macOS's own shortcuts, which once opened the
-    // character viewer over the window and took the rest of the text.
-    // And by the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.
     spawnSync("pbcopy", [], { input: text })
-    if (!bySight("Edit", true, { whole: true, inLine: true })) {
-      log("paste: no Edit menu on screen")
-      return false
-    }
-    await sleep(800)
-    if (!bySight("Paste", true, { whole: true, inLine: true })) {
+    // Through the Edit menu: cliclick's simulated Command-V didn't reach the field on the runner.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (!bySight("Edit", true, { whole: true, inLine: true })) {
+        log("paste: no Edit menu on screen")
+        continue
+      }
+      await sleep(1200)
+      if (bySight("Paste", true, { whole: true, inLine: true })) return true
       log("paste: the Edit menu has no Paste on screen")
       run("cliclick", ["kp:esc"])
-      return false
+      bySight(placeholder, true, { inLine: true })
     }
-    return true
+    return false
   }
   const ps = `
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes

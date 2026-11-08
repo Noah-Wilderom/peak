@@ -4,13 +4,33 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` candidate `f3beba1`: everything passes except macOS's window proof. Both Macs now pass every runtime check in the window, and fail the same 33, on the Capture button and reopened runs' Profiler tab. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
+- **State:** **`v0.1.1` candidate `25e74b1`: everything passes except macOS's window proof, at 3 failing checks on arm64 and 12 on x64. Fixes are in the working tree, awaiting a native run.** Not ready to tag.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### Twelfth native run: `25e74b1`
+
+**Update proof 42421534197, including the `v0.1.0` rehearsal on all four, and Tests 42421534501 passed**, with the backend at 99.15% on CI. Release 42421534428 failed on macOS's window proof only. Raw results: `docs/evidence/release/ci-candidate-25e74b1/`.
+
+| Window proof (pass / fail / unobserved) | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| `25e74b1` | **153 / 0 / 0** | **132 / 0 / 0** | 157 / 3 / 0 of 160 | 148 / 12 / 0 of 160 |
+
+**Newly observed on macOS:**
+
+- Reopened runs' Profiler tab, identity, and "Agent has disconnected" on both Macs.
+- On arm64, the whole Capture path: the command was entered, the run started, its agent connected, it named its runtime, it ended with its own exit code, and it was found and reopened.
+
+**Failing:**
+
+- **The reopened CPU profile, 3 runs on arm64 and 4 on x64.** The screen reads the two columns across, giving "CPU profile. © Record 10s 827ms recorded" for "CPU profile." above "827ms recorded". The check now allows a few words between them.
+- **Capture on x64, and with it the captured run's reopening (8 checks):** "the Edit menu has no Paste on screen". The likely reason, not observed: the command field didn't have the keyboard, so Paste was greyed out. The field is now clicked by its "Command" label before pasting, with one retry. Its placeholder, "bun run build", is also a suggestion below it, which would fill the field in. Locally, against a real Capture-page capture, the label is clicked at the right place.
+
+**Go's estimate label, corrected:** this run's arm64 record passes that check on "count read" only, which is not the label. **On arm64 the label is unobserved by the harness on this run**, though the saved capture shows "Objects," over "estimated" wrapped in the card, with "7 functions" beneath. On x64 the label was read. The check now passes only on the label, allowing for that wrap, and records when only the count was read. Locally it reads the wrapped label in that capture. The History search check is now called "the search is entered", as finding the run is proved by opening it.
 
 ### Eleventh native run: `f3beba1`
 
@@ -22,12 +42,12 @@ Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 **Newly observed on macOS:**
 
-- Both Macs now pass every runtime check in the window: Record, Take snapshot, Collect garbage, CPU and heap results, the snapshot tables, PHP's refusals and reasons, terminal results, the non-selected run, and the no-agent screen.
+- Both Macs pass Record, Take snapshot, Collect garbage, CPU and heap results, the snapshot tables, PHP's refusals and reasons, terminal results, the non-selected run, and the no-agent screen. Their failed sets differ: arm64 failed Go's caption, x64 failed Capture's command entry.
 - The Swift mouse wheel scrolls ("mouse wheel: built"; a capture shows the page scrolled).
 - x64 reached its snapshot in about 2.5 minutes, against over 7 before, after the change to one reading pass per screen.
-- History search now finds and opens every run.
+- History search opens the six runtime runs. The captured Bun run's search passed but opening it failed, so that run's search and reopening aren't verified.
 
-**Failing on both Macs, the same 33 checks, for two reasons:**
+**Failing: 33 checks on each Mac, not the same ones, mostly for two reasons:**
 
 - **The Profiler tab of a reopened run:** a tab shares its line with the others ("Overview Memory Profiler 2 Stats"), and the one-word rule set it aside. Tabs are now looked for within their line.
 - **The Capture button:** it read as "iG Capture |", from the rounded edges of the inverted button, so it wasn't alone on its line. Each inverted area now stops short of the button's edge, and two-character scraps no longer count as other words. Locally, against this run's capture, Capture and Profiler are clicked at the right places. Capture's failure took its own checks and the captured run's reopening with it.
