@@ -39,7 +39,7 @@ Updated as evidence comes in. "Type-checked" means compiled for that OS from Lin
 | Go, Bun, PHP agents through the installed app and CLI (`probes.mjs`), candidate `fbeec32` | CI | CI, PHP without Excimer | CI | CI |
 | The agents in the installed window (`agents-ui.mjs`), candidate `fbeec32` | CI | CI | CI, by reading the screen | CI, by reading the screen |
 | Pressing the published `v0.1.0`'s own buttons (`release-upgrade.mjs --rehearse`), `fbeec32` | CI | CI | CI, by reading the screen | CI, by reading the screen |
-| The previous release's own update to this one (`release-upgrade.mjs`) | After publication | After publication | After publication | After publication |
+| The previous release's own update to this one (`release-upgrade.mjs`), `v0.1.0` to `v0.1.1` | CI, public | CI, public | CI, public | CI, public |
 | Two-version signed update (`update-proof.mjs`) | CI | CI | CI | CI |
 | Failure cases in that proof | CI | CI | CI | CI |
 | Update through real buttons (`update-ui.mjs`) | CI | CI | Not possible: no WebDriver for macOS webviews, so screenshots and timed presses only | Not possible |

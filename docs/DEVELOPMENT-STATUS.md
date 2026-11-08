@@ -4,13 +4,46 @@ Durable handover for PM checkpoints. Acceptance criteria: `docs/ACCEPTANCE.md`.
 Remote evidence and open gaps: `docs/REMOTE-VALIDATION.md`.
 
 - **Last update:** 2026-11-07 UTC
-- **State:** **`v0.1.1` is tagged on `fbeec32`, its tag build passes on all four targets, and the draft checks out. Waiting for PM to publish.** Public verification follows.
+- **State:** **`v0.1.1` is published and verified from the public side on all four targets**, including the published `v0.1.0` updating itself to it. Go, Bun and PHP profiling is delivered; Flutter is deferred.
 - **PM delivery update:** 2026-11-06 14:56:54 UTC. CLI fix: `a1defaa786fc1d1a1e3da836540368a1ddc78eda` on `origin/master`; remote SHA verified and checkpoints disabled.
 - **Commits:** the original delivery is committed and pushed: `origin/master` at `dfa4dd3befcdfc67a5131ce55ce3b67ce78a5876`. The collector fix is committed and pushed as `e7131b71298a07d5f51b3d40eb2e1b5b9aa5a047`.
 
 ## Current scope: Go, Bun and PHP profiling agents, released as `v0.1.1`
 
 **Asked for by the user:** "go bun php and maybe flutter? if flutter difficult then not now", and "please when done release v0.1.1". Requirements are in `docs/PROJECT-MANAGEMENT.md`.
+
+### `v0.1.1` published and verified from the public side
+
+PM published release 438073841 at 2026-11-08T06:33:46Z. **Public delivery 42455261802, on the release event for `v0.1.1` at `fbeec32`, passed all 13 jobs.** Tests 42455273783 on `master` `a442b74` passed. Evidence: `docs/evidence/release/ci-public-v0.1.1/`.
+
+| From the public release | Linux | Windows | macOS arm64 | macOS x64 |
+|---|---|---|---|---|
+| Anonymous download, checksum, install | AppImage `db5d67e9…` | setup `16206720…` | DMG `ba1458a9…` | DMG `cbc7fb48…` |
+| Installed copy says | `peak 0.1.1 (AppImage, commit fbeec32…)` | `(Windows installer, fbeec32…)` | `(macOS app, fbeec32…)` | same |
+| Smoke, with every runtime and the bundled collector | 130 checks, 0 failed | 111, 0 | 130, 0 | 130, 0 |
+| **The published `v0.1.0`, unmodified, updates itself to `v0.1.1`** | **pass** | **pass** | **pass** | **pass** |
+
+The update on each target:
+
+- It starts from `v0.1.0` installed from its own public files: `peak 0.1.0 … commit 9e60f67`.
+- `v0.1.0`'s own buttons are pressed: Download and install, then Restart now. Its own updater downloads from GitHub's feed and checks the production signature. The old app exits, a new one starts, and that machine then reports `peak 0.1.1 … commit fbeec32`.
+- Kept through it:
+  - The run recorded before.
+  - The settings written before, all eight values.
+  - A workload started with `peak run` before the update, which survived the restart and ended with its own exit code, 9.
+- After it: the new app monitors the CLI, and every runtime's agent works, Node, Python, Bun, PHP, PHP alone and Go, each reporting agent 0.1.1.
+
+Also passing, from the public release:
+
+- **Release files:** the feed, downloads, checksums and signatures, checked anonymously.
+- **Go SDK:** `go get github.com/Noah-Wilderom/peak/sdk/go@v0.1.1` built.
+- **Each runtime's agent, on its own platform:**
+  - A user's own `NODE_OPTIONS`, `PYTHONPATH`, `BUN_OPTIONS` and `auto_prepend_file` still apply, and PHP's exit code is its own.
+  - A Go program built against the installed SDK reports agent 0.1.1.
+  - Without the import, a Go program has no agent, and that's what's reported.
+- **The 0.0.9 stand-in update proof:** kept as before.
+
+Locally, too: `verify-published.mjs v0.1.1` ends ALL OK. `go get …/sdk/go@v0.1.1` from the public module proxy built and ran, with `Version` "0.1.1", and `go mod verify` passed.
 
 ### The `v0.1.1` tag build and its draft
 
@@ -988,8 +1021,6 @@ checkout; nothing was lost. No further limit since.
 
 ## Next action
 
-**PM:** review the draft, then publish it.
-
-**Then me:** read Public delivery's results: downloads, installs, the new agents, `go get`, and the real `v0.1.0` to `v0.1.1` update on all four. I'll fix anything they find.
+**PM:** accept public delivery of `v0.1.1`, and commit `docs/evidence/release/ci-public-v0.1.1/` with this file.
 
 **Separately:** the updater key and its paired password still need an off-server backup.

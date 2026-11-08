@@ -1,0 +1,58 @@
+{
+  "tag": "v0.1.1",
+  "feed": "https://github.com/Noah-Wilderom/peak/releases/latest/download/latest.json",
+  "record": [
+    {
+      "name": "the feed announces the published version",
+      "ok": true,
+      "detail": "0.1.1"
+    },
+    {
+      "name": "the older build is installed",
+      "ok": true,
+      "detail": "peak 0.0.9 (AppImage, commit fbeec3256f733bf099f5d63fae4091c8c753a0ae)"
+    },
+    {
+      "name": "a run recorded before the update",
+      "ok": true
+    },
+    {
+      "name": "the older app exited and a new one started",
+      "ok": true,
+      "detail": "13815 -> 13961"
+    },
+    {
+      "name": "this machine now runs the published version",
+      "ok": true,
+      "detail": "peak 0.1.1 (AppImage, commit fbeec3256f733bf099f5d63fae4091c8c753a0ae)"
+    },
+    {
+      "name": "nothing failed on the way",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the workload from `peak run` survived the restart",
+      "ok": true
+    },
+    {
+      "name": "history survived",
+      "ok": true,
+      "detail": "samples 7"
+    },
+    {
+      "name": "the published app monitors the CLI",
+      "ok": true,
+      "detail": "post-1794120241837-err"
+    },
+    {
+      "name": "that workload finished with its own exit code",
+      "ok": true,
+      "detail": "exit 9"
+    }
+  ],
+  "paths": {
+    "gui": "/home/runner/.local/bin/peak",
+    "cli": "/home/runner/.local/bin/peak"
+  }
+}
